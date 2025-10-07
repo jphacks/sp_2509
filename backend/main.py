@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime, timezone, timedelta
 
 app = FastAPI()
 
@@ -14,4 +15,6 @@ app.add_middleware(
 
 @app.get("/api/message")
 def read_message():
-    return {"message": "Hello, World!"}
+    jst = timezone(timedelta(hours=+9), 'JST')
+    now = datetime.now(jst).strftime('%Y-%m-%d %H:%M:%S')
+    return {"message": f"Hello, World!  {now}"}
