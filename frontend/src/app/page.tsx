@@ -42,7 +42,7 @@ export default function Home() {
             disabled={isLoading}
             className="mt-8 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 disabled:bg-gray-400 w-[250px]"
           >
-            {isLoading ? 'Loading...' : 'Get Message from Backend'}
+            {isLoading ? 'Loading...' : 'Get Response from Backend'}
           </button>
 
           <div className="mt-6 min-h-[60px]">
@@ -50,7 +50,7 @@ export default function Home() {
             {message && (
               <div>
                 <p className="mt-4 text-lg">
-                  Message from backend:
+                  Response from backend:
                 </p>
                 <p className="mt-2 text-2xl font-semibold text-green-500">{message}</p>
               </div>
