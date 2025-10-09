@@ -38,6 +38,9 @@ Windowsでは、以下の手順で手動セットアップを行ってくださ�
     # Python仮想環境の作成
     python -m venv backend\.venv
 
+    #ポリシーの設定
+    Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+
     # 仮想環境の有効化
     .\backend\.venv\Scripts\activate
 
@@ -55,7 +58,7 @@ Windowsでは、以下の手順で手動セットアップを行ってくださ�
 
     # huskyのセットアップ
     npx husky init
-    echo npx lint-staged > frontend\.husky\pre-commit
+    echo "npx lint-staged" > .husky/pre-commit
 
     # ルートディレクトリに戻る
     cd ..
