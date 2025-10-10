@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { LatLngExpression } from 'leaflet';
 
 // クライアントサイドでMapコンポーネントを読み込む
-const Map = dynamic(() => import('../components/Map'), { ssr: false });
+const RouteMap = dynamic(() => import('../components/RouteMap'), { ssr: false });
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 export default function Home() {
@@ -18,6 +18,14 @@ export default function Home() {
     [35.6895, 139.6917], // 東京駅
     [35.6812, 139.7671], // 皇居
     [35.6586, 139.7454]  // 東京タワー
+  ];
+
+    // 指で書いた線のモック
+  const drawnLinePositions: LatLngExpression[] = [
+    [35.6985, 139.7017],
+    [35.6995, 139.7117],
+    [35.6905, 139.7217],
+    [35.6885, 139.7317],
   ];
 
   const fetchMessage = async () => {
@@ -49,7 +57,7 @@ export default function Home() {
           <h1 className="text-4xl font-bold">Sample App</h1>
 
           <div className='my-8'>
-            <Map positions={routePositions} />
+            <RouteMap positions={routePositions} drawnLine={drawnLinePositions} />
           </div>
 
 
