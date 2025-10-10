@@ -1,13 +1,24 @@
 "use client";
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
+import { LatLngExpression } from 'leaflet';
 
+// クライアントサイドでMapコンポーネントを読み込む
+const Map = dynamic(() => import('../components/Map'), { ssr: false });
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 export default function Home() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+    // モックのルートデータ
+  const routePositions: LatLngExpression[] = [
+    [35.6895, 139.6917], // 東京駅
+    [35.6812, 139.7671], // 皇居
+    [35.6586, 139.7454]  // 東京タワー
+  ];
 
   const fetchMessage = async () => {
     setIsLoading(true);
@@ -36,6 +47,12 @@ export default function Home() {
       <div className="z-10 w-full max-w-5xl items-center justify-center font-mono text-sm lg:flex">
         <div className="text-center">
           <h1 className="text-4xl font-bold">Sample App</h1>
+
+          <div className='my-8'>
+            <Map positions={routePositions} />
+          </div>
+
+
 
           <button
             onClick={fetchMessage}
