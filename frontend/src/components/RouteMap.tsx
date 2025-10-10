@@ -10,9 +10,6 @@ interface RouteMapProps {
 }
 
 const RouteMap = ({ positions, drawnLine }: RouteMapProps) => {
-  if (!positions || positions.length === 0) {
-    return <div>位置情報がありません。</div>;
-  }
 
     // "S"の文字を持つカスタムスタートピンを作成
   const startIcon = divIcon({
@@ -22,9 +19,16 @@ const RouteMap = ({ positions, drawnLine }: RouteMapProps) => {
     iconAnchor: [15, 15], // アイコンの中心がマーカー位置になるように調整
   });
 
+  // positionsが未定義または空配列の場合に備えた安全な中心点
+  const center: LatLngExpression = positions && positions.length > 0
+    ? positions[0]
+    : drawnLine && drawnLine.length > 0
+    ? drawnLine[0]
+    : [35.681236, 139.767125];
+
   return (
     <MapContainer
-      center={positions[0]}
+      center={center}
       zoom={13}
       style={{ height: "400px", width: "100%" }}
     >
@@ -44,8 +48,6 @@ const RouteMap = ({ positions, drawnLine }: RouteMapProps) => {
       {drawnLine && drawnLine.length > 0 && (
         <Polyline positions={drawnLine} color="blue" dashArray="5, 10" />
       )}
-
-
     </MapContainer>
   );
 };
