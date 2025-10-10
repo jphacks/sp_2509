@@ -1,6 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation'; // useRouterをインポート
-import Carousel from '../components/Carousel'; // Carouselコンポーネントをインポート
+import Carousel from '../../components/Carousel'; // Carouselコンポーネントをインポート
 
 export default function Home() {
 
@@ -24,9 +24,6 @@ export default function Home() {
       <div className="z-10 w-full max-w-5xl items-center justify-center font-mono text-sm lg:flex">
         <div className="text-center">
           <h1 className="text-4xl font-bold">Home Page</h1>
-          <p className="mt-4 text-lg">
-            This is Homepage.
-          </p>
 
           <Carousel images={carouselImages} />
 
@@ -36,8 +33,7 @@ export default function Home() {
             onClick={navigateToDraw}
             className="mt-4 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-semibold rounded-lg shadow-md hover:bg-zinc-700 focus:outline-gray-600 focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75"
           >
-            	
-            新しいルートを作る (Button)
+            新しいルートを作る
           </button>
 
         </div>

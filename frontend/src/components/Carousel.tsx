@@ -15,7 +15,6 @@ export default function Carousel({ images }: CarouselProps) {
     const newIndex = isFirstImage ? images.length - 1 : currentIndex - 1;
     setCurrentIndex(newIndex);
   };
-5
   const goToNext = () => {
     const isLastImage = currentIndex === images.length - 1;
     const newIndex = isLastImage ? 0 : currentIndex + 1;

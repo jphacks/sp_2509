@@ -7,7 +7,7 @@ export default function Draw() {
     const router = useRouter(); // useRouterを初期化
 
 
-    // Aboutページに遷移する関数
+    // 遷移関数
     const navigateToCondition = () => {
     router.push('/condition');
     };

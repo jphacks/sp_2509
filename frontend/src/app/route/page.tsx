@@ -5,8 +5,8 @@ export default function Route() {
 
     const router = useRouter(); // useRouterを初期化
 
+    //遷移関数
 
-    // Aboutページに遷移する関数
     const navigateToHome = () => {
     router.push('/home');
     }
