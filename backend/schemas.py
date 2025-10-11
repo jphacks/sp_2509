@@ -1,7 +1,5 @@
 from pydantic import BaseModel
 from datetime import datetime
-import uuid
-
 class UserResponse(BaseModel):
     user_id: str
 
