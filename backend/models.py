@@ -9,7 +9,7 @@ from sqlalchemy import (
     JSON,
     func
 )
-from sqlalchemy.orm import declarative_base
+from .database import Base
 from sqlalchemy.types import TypeDecorator, CHAR
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 
@@ -44,8 +44,6 @@ class UUID(TypeDecorator):
             return uuid.UUID(value)
         
         return value
-
-Base = declarative_base()
 
 class User(Base):
     __tablename__ = "users"

@@ -5,4 +5,5 @@ GitHub Copilot は必ず日本語でレビューしてください。
 I want GitHub Copilot to review in Japanese.
 
 今回はハッカソンですので、nitレベルの細かい指摘は不要です。
+バックエンドに限り、相対インポートは許容してください。
 コードに問題がない場合は、LGTM!と伝えてください。
