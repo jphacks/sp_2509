@@ -1,6 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime, timezone, timedelta
+from .database import engine
+from . import models
+
+# DBテーブルの作成
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
