@@ -1,11 +1,18 @@
 import uuid
-from sqlalchemy import Column, DateTime, Float, Boolean, ForeignKey
+from sqlalchemy import (
+    create_engine,
+    Column,
+    ForeignKey,
+    DateTime,
+    Float,
+    Boolean,
+    JSON,
+    func
+)
+from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.types import TypeDecorator, CHAR
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from sqlalchemy.types import TypeDecorator, CHAR, JSON
-from sqlalchemy.sql import func
-from .database import Base
 
-# PostgreSQL と SQLite の両方で UUID をサポートするための型
 class UUID(TypeDecorator):
     impl = CHAR
     cache_ok = True
@@ -19,21 +26,26 @@ class UUID(TypeDecorator):
     def process_bind_param(self, value, dialect):
         if value is None:
             return value
-        elif dialect.name == 'postgresql':
+        
+        # Ensure value is a UUID object before processing
+        if not isinstance(value, uuid.UUID):
+            value = uuid.UUID(value)
+            
+        if dialect.name == 'postgresql':
             return str(value)
         else:
-            return str(value)
+            return value.hex
 
     def process_result_value(self, value, dialect):
         if value is None:
             return value
-        else:
-            if not isinstance(value, uuid.UUID):
-                if dialect.name == 'postgresql':
-                    value = uuid.UUID(value)
-                else:
-                    value = uuid.UUID(hex=value)
-            return value
+        
+        if not isinstance(value, uuid.UUID):
+            return uuid.UUID(value)
+        
+        return value
+
+Base = declarative_base()
 
 class User(Base):
     __tablename__ = "users"
