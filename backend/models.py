@@ -8,6 +8,7 @@ from .database import Base
 # PostgreSQL と SQLite の両方で UUID をサポートするための型
 class UUID(TypeDecorator):
     impl = CHAR
+    cache_ok = True
 
     def load_dialect_impl(self, dialect):
         if dialect.name == 'postgresql':
