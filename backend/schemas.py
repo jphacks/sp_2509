@@ -46,3 +46,8 @@ class CourseSummary(BaseModel):
     route_points: list[LatLng]
     # 一覧では返さないため null 固定
     drawing_points: Optional[list[LatLng]] = None
+
+class CourseCreateRequest(BaseModel):
+    total_distance_km: float
+    route_points: list[LatLng]
+    drawing_points: list[LatLng]

@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime, timezone, timedelta
 from sqlalchemy.orm import Session
 import uuid
+from fastapi import Response, status
 from typing import Optional
 from .database import engine, get_db
 from . import models, schemas
@@ -178,4 +179,22 @@ def get_user_course(
             schemas.LatLng(lat=35.135, lng=139.468),
             schemas.LatLng(lat=35.145, lng=139.458),
         ],
+    )
+
+@app.post("/users/{user_id}/courses", status_code=201)
+def create_course_for_user(
+    user_id: str,
+    payload: schemas.CourseCreateRequest,
+):
+    """
+    完全ダミー:
+    - DBへは保存しない
+    - UUID形式の検証もしない
+    - 201 Created を返し、Location ヘッダーで擬似IDを通知
+    - レスポンスボディはなし
+    """
+    fake_course_id = str(uuid.uuid4())
+    return Response(
+        status_code=status.HTTP_201_CREATED,
+        headers={"Location": f"/users/{user_id}/courses/{fake_course_id}"}
     )
