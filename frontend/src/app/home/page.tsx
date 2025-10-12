@@ -25,7 +25,11 @@ export default function Home() {
         <div className="text-center">
           <h1 className="text-4xl font-bold mb-8">How to Use</h1>
 
-          <Carousel items={carouselItems} />
+          <Carousel
+            items={carouselItems}
+            imageBorderRadius="rounded-2xl"
+            descriptionClassName="text-sm text-white"
+          />
 
 
           {/* ボタンによるページ遷移 */}
