@@ -198,3 +198,13 @@ def create_course_for_user(
         status_code=status.HTTP_201_CREATED,
         headers={"Location": f"/users/{user_id}/courses/{fake_course_id}"}
     )
+
+@app.delete("/users/{user_id}/courses/{course_id}", status_code=204)
+def delete_user_course(
+    user_id: str,
+    course_id: str,
+):
+    """
+    完全ダミー: 実際には削除せず、常に 204 No Content を返す。
+    """
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
