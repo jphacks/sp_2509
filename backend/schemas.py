@@ -1,5 +1,8 @@
 from pydantic import BaseModel
+from typing import Optional
+from uuid import UUID
 from datetime import datetime
+
 class UserResponse(BaseModel):
     user_id: str
 
@@ -33,3 +36,13 @@ class RouteCalculateResponse(BaseModel):
     total_distance_km: float
     route_points: list[LatLng]
     drawing_points: list[LatLng]
+
+class CourseSummary(BaseModel):
+    id: UUID
+    total_distance_km: float
+    distance_to_start_km: float
+    is_favorite: bool
+    created_at: datetime
+    route_points: list[LatLng]
+    # 一覧では返さないため null 固定
+    drawing_points: Optional[list[LatLng]] = None
