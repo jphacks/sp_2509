@@ -208,3 +208,20 @@ def delete_user_course(
     完全ダミー: 実際には削除せず、常に 204 No Content を返す。
     """
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+@app.post("/users/{user_id}/courses/{course_id}/toggle_favorite", response_model=schemas.ToggleFavoriteResponse)
+def toggle_course_favorite(
+    user_id: str,
+    course_id: str,
+):
+    """
+    完全ダミー:
+    - DBへは保存しない
+    - UUID形式の検証はしない（非UUIDは UUIDv5 で正規化）
+    - 擬似的に現在値を推定して反転した is_favorite を返す
+    """
+    cid="cb657453-7ccf-41c6-a496-121b1a1469e8"
+
+    toggled = True
+
+    return schemas.ToggleFavoriteResponse(id=cid, is_favorite=toggled)

@@ -51,3 +51,8 @@ class CourseCreateRequest(BaseModel):
     total_distance_km: float
     route_points: list[LatLng]
     drawing_points: list[LatLng]
+
+    # 1件の「お気に入り状態」だけ返すシンプルなレスポンス
+class ToggleFavoriteResponse(BaseModel):
+    id: UUID
+    is_favorite: bool
