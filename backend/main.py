@@ -55,3 +55,31 @@ def get_all_users(db: Session = Depends(get_db)):
         )
         for user in users
     ]
+
+
+# ------------------------------------------------------------
+# Routes: Calculate API (dummy)
+# ------------------------------------------------------------
+@app.post("/routes/calculate", response_model=schemas.RouteCalculateResponse)
+def calculate_route(payload: schemas.RouteCalculateRequest):
+    """
+    図形のディスプレイ座標、開始位置、目標距離(km)を受け取り、
+    ダミーの経路計算結果を返す。
+
+    現状は固定値のダミーデータを返すのみ。
+    """
+
+    # ダミー応答データ（指定フォーマットに合わせる）
+    return schemas.RouteCalculateResponse(
+        total_distance_km=10.5,
+        route_points=[
+            schemas.LatLng(lat=12.123, lng=139.456),
+            schemas.LatLng(lat=34.133, lng=139.466),
+            schemas.LatLng(lat=56.143, lng=139.456),
+        ],
+        drawing_points=[
+            schemas.LatLng(lat=98.125, lng=139.458),
+            schemas.LatLng(lat=76.135, lng=139.468),
+            schemas.LatLng(lat=54.145, lng=139.458),
+        ],
+    )
