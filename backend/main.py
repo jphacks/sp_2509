@@ -138,3 +138,44 @@ def list_user_courses(
         items.sort(key=lambda x: x.distance_to_start_km)
 
     return items
+
+@app.get("/users/{user_id}/courses/{course_id}", response_model=schemas.CourseSummary)
+def get_user_course(
+    user_id: str,
+    course_id: str,
+    current_lat: Optional[float] = None,
+    current_lng: Optional[float] = None,
+):
+    """
+    特定のコース1件の詳細（ダミー）を返す。
+    """
+    # 以下はコースidの例　本番は消す
+    course_id = "cb657453-7ccf-41c6-a496-121b1a1469e8" 
+    # ↑消す
+
+    # course_id の形式チェック（UUIDでない場合は 400）
+    try:
+        course_uuid = uuid.UUID(course_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid course_id format. Must be UUID.")
+
+    jst = timezone(timedelta(hours=+9), 'JST')
+    created = datetime(2025, 10, 26, 10, 0, 0, tzinfo=jst)
+
+    return schemas.CourseSummary(
+        id=course_uuid,
+        total_distance_km=10.5,
+        distance_to_start_km=1.2,
+        is_favorite=False,
+        created_at=created,
+        route_points=[
+            schemas.LatLng(lat=35.123, lng=139.456),
+            schemas.LatLng(lat=35.133, lng=139.466),
+            schemas.LatLng(lat=35.143, lng=139.456),
+        ],
+        drawing_points=[
+            schemas.LatLng(lat=35.125, lng=139.458),
+            schemas.LatLng(lat=35.135, lng=139.468),
+            schemas.LatLng(lat=35.145, lng=139.458),
+        ],
+    )
