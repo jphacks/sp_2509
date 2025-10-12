@@ -6,12 +6,12 @@ export default function Home() {
 
     const router = useRouter(); // useRouterを初期化
 
-      // カルーセルで表示する画像のリスト
-    const carouselImages = [
-        '/images/testImage.png',
-        '/images/testImage.png',
-        '/images/testImage.png',
-        '/images/testImage.png',
+      // カルーセルで表示するアイテムのリスト
+    const carouselItems = [
+        { src: '/images/sample4.png', alt: 'Slide 1', description: '走りたいルートの形を書く' },
+        { src: '/images/sample4.png', alt: 'Slide 2', description: '走り始める場所とおおよその長さを決める' },
+        { src: '/images/sample4.png', alt: 'Slide 3', description: '説明文3' },
+        { src: '/images/sample4.png', alt: 'Slide 4', description: '説明文4' },
     ];
 
     // Aboutページに遷移する関数
@@ -20,12 +20,12 @@ export default function Home() {
     };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-center font-mono text-sm lg:flex">
+    <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-8">
+      <div className="z-10 w-full max-w-5xl items-center justify-center font-mono text-sm">
         <div className="text-center">
-          <h1 className="text-4xl font-bold">Home Page</h1>
+          <h1 className="text-4xl font-bold mb-8">How to Use</h1>
 
-          <Carousel images={carouselImages} />
+          <Carousel items={carouselItems} />
 
 
           {/* ボタンによるページ遷移 */}
