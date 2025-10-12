@@ -9,7 +9,7 @@ export default function Home() {
       // カルーセルで表示するアイテムのリスト
     const carouselItems = [
         { src: '/images/sample4.png', alt: 'Slide 1', description: '走りたいルートの形を書く' },
-        { src: '/images/sample4.png', alt: 'Slide 2', description: '走り始める場所とおおよその長さを決める' },
+        { src: '/images/whiteblue.png', alt: 'Slide 2', description: '走り始める場所とおおよその長さを決める' },
         { src: '/images/sample4.png', alt: 'Slide 3', description: '説明文3' },
         { src: '/images/sample4.png', alt: 'Slide 4', description: '説明文4' },
     ];
@@ -28,7 +28,7 @@ export default function Home() {
           <Carousel
             items={carouselItems}
             imageBorderRadius="rounded-2xl"
-            descriptionClassName="text-sm text-white"
+            textClassName="text-white"
           />
 
 

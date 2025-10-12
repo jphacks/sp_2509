@@ -12,7 +12,7 @@ type CarouselItem = {
 type CarouselProps = {
   items: CarouselItem[];
   imageBorderRadius?: string;
-  descriptionClassName?: string;
+  textClassName?: string;
 };
 
 const imageWidth = 200;
@@ -24,9 +24,9 @@ export default function Carousel({
   // 画像の角丸
   // 例: 'rounded-md', 'rounded-xl', 'rounded-2xl', 'rounded-full'
   imageBorderRadius = 'rounded-lg',
-  // 説明文のスタイル (Tailwind CSSクラス)
-  // 例: 'font-bold text-lg text-yellow-300'
-  descriptionClassName = 'text-sm text-white',
+  // テキスト全体のスタイル (Tailwind CSSクラス)
+  // 例: 'font-sans text-yellow-300'
+  textClassName = 'text-white',
 }: CarouselProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -82,9 +82,9 @@ export default function Carousel({
               className="w-full h-full object-cover"
             />
             <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/70 to-transparent" />
-            <div className="absolute bottom-0 left-0 w-full p-2 text-left">
-              <p className="font-bold text-lg text-white">{index + 1}</p>
-              <p className={descriptionClassName}>{item.description}</p>
+            <div className={`absolute bottom-0 left-0 w-full p-2 text-left ${textClassName}`}>
+              <p className="font-bold text-lg">{index + 1}</p> {/* 画像の番号. font-bold text-lgで少し大きく */}
+              <p className="text-sm">{item.description}</p> {/* 画像の説明文. text-smで少し小さく */}
             </div>
           </div>
         ))}
