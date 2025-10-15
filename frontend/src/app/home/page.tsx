@@ -31,7 +31,6 @@ export default function Home() {
             textClassName="text-white"
           />
 
-
           {/* ボタンによるページ遷移 */}
           <button
             onClick={navigateToDraw}
