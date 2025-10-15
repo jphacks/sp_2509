@@ -1,6 +1,10 @@
 "use client";
 
 import { useState } from 'react';
+import  Header  from  "../component/Header";
+import Title from '../component/title';
+import RoutingButton from '../component/routingButton';
+import { FaArrowRight, FaBeer } from "react-icons/fa";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
@@ -36,7 +40,17 @@ export default function Home() {
       <div className="z-10 w-full max-w-5xl items-center justify-center font-mono text-sm lg:flex">
         <div className="text-center">
           <h1 className="text-4xl font-bold">Sample App</h1>
-
+          
+        
+          <Title title={'Title'}/>
+          <Header headerText = {"This is a header."}/>
+          <RoutingButton
+            buttonText="press"
+            to="/home"     // 遷移先ページ
+            icon={FaArrowRight}  // ← アイコンを付けたい場合
+          />
+          
+     
           <button
             onClick={fetchMessage}
             disabled={isLoading}
