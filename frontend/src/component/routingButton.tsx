@@ -31,15 +31,13 @@ export default function RoutingButton({ buttonText, to, icon: Icon }: RoutingBut
       onClick={handleClick}
       className={`
         flex items-center justify-center gap-2
-        w-[320px] md:w-[420px] lg:w-[480px]
-        px-8 py-4 text-lg font-semibold tracking-wide
+        w-full py-4 text-lg font-semibold tracking-wide
         rounded-2xl shadow-md hover:shadow-lg
         transition-all duration-200 ease-out
         select-none font-sans
-        ${
-          isActive
-            ? "bg-gray-500 text-black scale-[0.97]" // ← 灰色（やや押し込み）
-            : "bg-black text-white hover:brightness-105"
+        ${isActive
+          ? "bg-gray-500 text-black scale-[0.97]" // ← 灰色（やや押し込み）
+          : "bg-black text-white hover:brightness-105"
         }
       `}
     >
