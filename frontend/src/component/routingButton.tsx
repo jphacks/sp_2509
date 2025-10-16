@@ -13,30 +13,35 @@ export default function RoutingButton({ buttonText, to, icon: Icon }: RoutingBut
   const router = useRouter();
   const [isActive, setIsActive] = useState(false);
 
-  const handleClick = () => {
+  const handlePress = () => {
+    setIsActive(true);
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
       navigator.vibrate?.(20);
     }
+  };
 
-    // 一瞬灰色にしてから遷移
-    setIsActive(true);
+  const handleRelease = () => {
+    setIsActive(false);
     setTimeout(() => {
-      setIsActive(false);
       router.push(to);
-    }, 250); // ← 灰色で表示する時間（ms）
+    }, 100);
   };
 
   return (
     <button
-      onClick={handleClick}
+      onMouseDown={handlePress}
+      onMouseUp={handleRelease}
+      onTouchStart={handlePress}
+      onTouchEnd={handleRelease}
+      onMouseLeave={() => setIsActive(false)}
       className={`
         flex items-center justify-center gap-2
-        w-full py-4 text-lg font-semibold tracking-wide
+        w-full py-3 text-lg font-semibold tracking-wide
         rounded-2xl shadow-md hover:shadow-lg
         transition-all duration-200 ease-out
         select-none font-sans
         ${isActive
-          ? "bg-gray-500 text-black scale-[0.97]" // ← 灰色（やや押し込み）
+          ? "bg-gray-500 text-black scale-[0.97]"
           : "bg-black text-white hover:brightness-105"
         }
       `}
