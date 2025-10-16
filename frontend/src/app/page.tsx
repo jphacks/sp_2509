@@ -3,6 +3,10 @@
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { LatLngExpression } from 'leaflet';
+import  Header  from  "../component/Header";
+import Title from '../component/title';
+import RoutingButton from '../component/routingButton';
+import { FaArrowRight, FaBeer } from "react-icons/fa";
 
 // クライアントサイドでMapコンポーネントを読み込む
 const RouteMap = dynamic(() => import('../components/RouteMap'), { ssr: false });
@@ -67,8 +71,8 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-center font-mono text-sm lg:flex">
+    <main className="flex min-h-screen flex-col items-center justify-center p-4">
+      <div className="z-10 w-full max-w-5xl items-center justify-center text-sm">
         <div className="text-center">
           <h1 className="text-4xl font-bold">Sample App</h1>
 
@@ -83,6 +87,17 @@ export default function Home() {
             <button onClick={() => setActiveRoute([])} className="px-4 py-2 bg-red-200 rounded hover:bg-red-300">クリア</button>
           </div>
 
+          
+        
+          <Title title={'Title'}/>
+          <Header headerText = {"This is a header."}/>
+          <RoutingButton
+            buttonText="press"
+            to="/home"     // 遷移先ページ
+            icon={FaArrowRight}  // ← アイコンを付けたい場合
+          />
+          
+     
           <button
             onClick={fetchMessage}
             disabled={isLoading}
