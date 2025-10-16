@@ -32,21 +32,21 @@ export default function Route() {
           {/* ボタンによるページ遷移 */}
           <button
             onClick={navigateToHome}
-            className="mt-4 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-semibold rounded-lg shadow-md hover:bg-zinc-700 focus:outline-gray-600 focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75"
+            className="mt-4 px-6 py-3 bg-black text-white font-semibold rounded-lg shadow-md hover:bg-zinc-700 focus:outline-gray-600 focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75"
           >
             Go to Home Page (Button)
           </button>
 
           <button
             onClick={navigateToDraw}
-            className="mt-4 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-semibold rounded-lg shadow-md hover:bg-zinc-700 focus:outline-gray-600 focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75"
+            className="mt-4 px-6 py-3 bg-black text-white font-semibold rounded-lg shadow-md hover:bg-zinc-700 focus:outline-gray-600 focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75"
           >
             Go to Draw Page (Button)
           </button>
 
           <button
             onClick={navigateToCondition}
-            className="mt-4 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-semibold rounded-lg shadow-md hover:bg-zinc-700 focus:outline-gray-600 focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75"
+            className="mt-4 px-6 py-3 bg-black text-white font-semibold rounded-lg shadow-md hover:bg-zinc-700 focus:outline-gray-600 focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75"
           >
             Go to Route Condition (Button)
           </button>

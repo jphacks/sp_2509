@@ -36,7 +36,7 @@ export default function Home() {
           {/* ボタンによるページ遷移 */}
           <button
             onClick={navigateToDraw}
-            className="mt-4 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-semibold rounded-lg shadow-md hover:bg-zinc-700 focus:outline-gray-600 focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75"
+            className="mt-4 px-6 py-3 bg-black text-white font-semibold rounded-lg shadow-md hover:bg-zinc-700 focus:outline-gray-600 focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75"
           >
             新しいルートを作る
           </button>
