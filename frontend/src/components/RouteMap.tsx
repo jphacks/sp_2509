@@ -11,7 +11,7 @@ interface RouteMapProps {
 
 const RouteMap = ({ positions, drawnLine }: RouteMapProps) => {
 
-    // "S"の文字を持つカスタムスタートピンを作成
+  // "S"の文字を持つカスタムスタートピンを作成
   const startIcon = divIcon({
     html: `<div style="background-color: #4A90E2; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white;">S</div>`,
     className: "", // leaflet-div-iconのデフォルトスタイルを無効化
@@ -23,21 +23,22 @@ const RouteMap = ({ positions, drawnLine }: RouteMapProps) => {
   const center: LatLngExpression = positions && positions.length > 0
     ? positions[0]
     : drawnLine && drawnLine.length > 0
-    ? drawnLine[0]
-    : [35.681236, 139.767125];
+      ? drawnLine[0]
+      : [35.681236, 139.767125];
 
   return (
     <MapContainer
       center={center}
       zoom={13}
       style={{ height: "400px", width: "100%" }}
+      zoomControl={false}
     >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
 
-      {positions && positions.length > 0 &&(
+      {positions && positions.length > 0 && (
         <div>
           <Polyline positions={positions} color="red" />
           <Marker position={positions[0]} icon={startIcon} />
