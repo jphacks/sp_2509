@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from 'react';
-import Header from "../component/Header";
-import Title from '../component/title';
-import RoutingButton from '../component/routingButton';
-import { FaArrowRight, FaBeer } from "react-icons/fa";
+import Header from "../components/Header";
+import Title from '../components/title';
+import RoutingButton from '../components/routingButton';
+import { FaArrowRight } from "react-icons/fa";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
@@ -70,6 +70,8 @@ export default function Home() {
               </div>
             )}
           </div>
+          
+Zz
         </div>
       </div>
     </main>
