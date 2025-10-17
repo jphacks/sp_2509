@@ -3,10 +3,8 @@ import { useRouter } from 'next/navigation';
 import { useState, useCallback } from 'react'; // useCallback を追加
 import DrawingCanvas from '../../components/DrawingCanvas';
 import Title from '../../components/title';
-import Header from '../../components/Header';
-import RoutingButton from '../../components/routingButton';
 import ClearCanvasButton from '../../components/ClearCanvasButton'; // ★★★ 追加: クリアボタンをインポート
-import { FaRoute, FaHeart } from "react-icons/fa"; // FaHeart を追加 (例)
+import { FaHeart } from "react-icons/fa"; // FaHeart を追加 (例)
 
 interface Point {
     x: number;
@@ -31,7 +29,6 @@ export default function Draw() {
 
     // handleDrawEnd を useCallback でメモ化
   const handleDrawEnd = useCallback((points: Point[]) => {
-    console.log("Draw/Clear ended in parent:", points);
     setDrawingPoints(points);
     // クリアされた場合 (pointsが空配列) は選択された図形もリセット
     if (points.length === 0) {
@@ -40,14 +37,12 @@ export default function Draw() {
   }, []); // 依存配列は空
 
   const handleClear = () => {
-    console.log("Clear button clicked"); // デバッグ用
     setClearTrigger(prev => prev + 1); // トリガーの数値を変更してuseEffectを発火させる
     setDrawingPoints([]); // 親の座標データもクリア
   };
   
   // プリセット図形選択関数例（ハート型）
   const selectHeart = () => {
-    console.log("Selecting Heart shape");
 
     setSelectedShape(heartShape);
 
@@ -67,7 +62,7 @@ export default function Draw() {
                 <Title title="コースの形を描く" />
 
 
-                <div className="mt-10 flex justify-center">
+                <div className="w-full mt-10 flex justify-center">
                     <DrawingCanvas
                     width={600}
                     height={400}

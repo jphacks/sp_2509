@@ -186,20 +186,6 @@ useEffect(() => {
     }
   }, [isDrawing, onDrawEnd, points]); // setHasDrawn は不要
 
-  // クリアボタンの機能
-  const clearCanvas = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    if (ctx && canvas) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      setPoints([]);
-      setHasDrawn(false);
-
-      if (onDrawEnd) {
-        onDrawEnd([]);
-      }
-    }
-  };
 
   return (
     <div className="relative">
@@ -230,8 +216,7 @@ useEffect(() => {
         onTouchMove={draw}
         onTouchEnd={stopDrawing}
         onTouchCancel={stopDrawing}
-        className={`touch-none bg-white rounded-lg shadow-md ${hasDrawn ? 'cursor-not-allowed opacity-70' : 'cursor-crosshair'}`} // 描画済みならカーソル変更
-        style={{ width: `${width}px`, height: `${height}px` }}
+        className={`touch-none bg-white rounded-lg shadow-md ${hasDrawn ? 'cursor-not-allowed opacity-70' : 'cursor-crosshair'}${width ? ` w-[${width}px]` : ''}${height ? ` h-[${height}px]` : ''}`} // 描画済みならカーソル変更
       />
       
     </div>

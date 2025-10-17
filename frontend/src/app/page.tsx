@@ -70,8 +70,6 @@ export default function Home() {
               </div>
             )}
           </div>
-          
-Zz
         </div>
       </div>
     </main>
