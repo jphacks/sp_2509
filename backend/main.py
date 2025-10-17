@@ -6,7 +6,7 @@ import uuid
 from fastapi import Response, status
 from typing import Optional
 from .database import engine, get_db
-from . import models, schemas
+from . import models, schemas, utils
 
 # DBテーブルの作成
 models.Base.metadata.create_all(bind=engine)
@@ -27,6 +27,29 @@ def read_message():
     jst = timezone(timedelta(hours=+9), 'JST')
     now = datetime.now(jst).strftime('%Y-%m-%d %H:%M:%S')
     return {"message": f"Hello, World!  {now}"}
+
+@app.get("/api/copilot-demo")
+def copilot_demo():
+    """
+    GitHub Copilot の機能デモンストレーション
+    
+    このエンドポイントは、Copilot が自動生成したユーティリティ関数を実行し、
+    その結果を返します。これにより、Copilot がどのような機能を提供できるかを
+    実際に確認できます。
+    """
+    demo_results = utils.demonstrate_capabilities()
+    return {
+        "message": "GitHub Copilot によって生成されたユーティリティ関数のデモ",
+        "capabilities": [
+            "日時操作とフォーマット",
+            "地理座標の距離計算",
+            "ハッシュ生成",
+            "UUID検証",
+            "ページネーション",
+            "値の範囲制限"
+        ],
+        "demo_results": demo_results
+    }
 
 @app.post("/users", response_model=schemas.UserResponse, status_code=201)
 def create_user(db: Session = Depends(get_db)):
