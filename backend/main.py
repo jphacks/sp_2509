@@ -272,15 +272,35 @@ def delete_user_course(
 def toggle_course_favorite(
     user_id: str,
     course_id: str,
+    db: Session = Depends(get_db),
 ):
     """
-    完全ダミー:
-    - DBへは保存しない
-    - UUID形式の検証はしない（非UUIDは UUIDv5 で正規化）
-    - 擬似的に現在値を推定して反転した is_favorite を返す
+    指定ユーザーのコースのお気に入りフラグをトグルして返す。
+    - user_id, course_id は UUID 形式を検証（不正なら 400）
+    - コースが存在しない、またはユーザーのものではない場合は 404
     """
-    cid="cb657453-7ccf-41c6-a496-121b1a1469e8"
+    # UUID検証
+    try:
+        user_uuid = uuid.UUID(user_id)
+        course_uuid = uuid.UUID(course_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid id format. Must be UUID.")
 
-    toggled = True
+    # コース存在＆所有者確認
+    course = (
+        db.query(models.Course)
+        .filter(
+            models.Course.id == course_uuid,
+            models.Course.user_id == user_uuid,
+        )
+        .first()
+    )
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found.")
 
-    return schemas.ToggleFavoriteResponse(id=cid, is_favorite=toggled)
+    # トグルして保存
+    course.is_favorite = not bool(course.is_favorite)
+    db.commit()
+    db.refresh(course)
+
+    return schemas.ToggleFavoriteResponse(id=str(course.id), is_favorite=course.is_favorite)
