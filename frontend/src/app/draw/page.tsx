@@ -90,7 +90,7 @@ const navigateToCondition = () => {
                         />
                     </div>
 
-                    <div className ="mt-4 text-black">
+                    <div className="mt-4 text-black">
                         <Header headerText="おすすめから選ぶ" />
                     </div>
                     <div className="flex justify-center space-x-4 mt-4">
