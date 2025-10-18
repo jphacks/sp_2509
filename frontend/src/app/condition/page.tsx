@@ -1,5 +1,18 @@
 'use client';
 import { useRouter } from 'next/navigation'; // useRouterをインポート
+import  DrawnShapeImage  from '../../components/DrawnShapeImage';
+
+interface Point {
+    x: number;
+    y: number;
+}
+
+// 例: ハート型の座標配列 (ダミー)
+const heartShape: Point[] = [
+    { x: 175, y: 100 }, { x: 205, y: 70 }, { x: 235, y: 80 }, { x: 250, y: 110 },
+    { x: 235, y: 140 }, { x: 175, y: 210 }, { x: 115, y: 140 }, { x: 100, y: 110 },
+    { x: 115, y: 80 }, { x: 145, y: 70 }, { x: 175, y: 100 }
+].map(p => ({ x: p.x * 350 / 300, y: p.y * 350 / 300 })); // サイズに合わせて調整
 
 export default function Condition() {
 
@@ -20,6 +33,15 @@ export default function Condition() {
             条件設定
           </p>
 
+          <p className="mt-2 text-md">
+            あなたの書いたコース
+          </p>
+
+          <DrawnShapeImage
+            points={heartShape} // ダミーの座標データ
+            size={200}
+            strokeColor='red'
+          />
           
 
           {/* ボタンによるページ遷移 */}
