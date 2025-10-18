@@ -229,6 +229,7 @@ export default function MadeRoute({
                             padding={DEFAULT_PADDING}
                             maxZoom={DEFAULT_MAX_ZOOM}
                             interactive={false}
+                            showZoomControl={false}
                         />
                     </div>
                 </div>
