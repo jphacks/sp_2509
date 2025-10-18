@@ -1,10 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useId } from 'react';
-
-interface Point {
-  x: number;
-  y: number;
-}
+import type { Point } from '../types/types';
 
 type LoadingProps = {
   loadingText: string;

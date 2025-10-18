@@ -6,11 +6,7 @@ import Title from '../../components/Title';
 import BackButton from '../../components/BackButton';
 import ClearCanvasButton from '../../components/ClearCanvasButton'; // ★★★ 追加: クリアボタンをインポート
 import RecommendedShape from '../../components/RecommendedShape';
-
-interface Point {
-    x: number;
-    y: number;
-}
+import type { Point } from '../../types/types';
 
 // 例: ハート型の座標配列 (ダミー)
 const heartShape: Point[] = [

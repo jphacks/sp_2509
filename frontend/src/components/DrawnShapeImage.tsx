@@ -1,11 +1,7 @@
 'use client';
 
 import React, { useRef, useEffect } from 'react';
-
-interface Point {
-  x: number;
-  y: number;
-}
+import type { Point } from '../types/types';
 
 interface DrawnShapeImageProps {
   points: Point[];

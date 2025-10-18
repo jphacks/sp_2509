@@ -9,7 +9,7 @@ import { FaArrowRight } from "react-icons/fa";
 import MadeRoute from "../components/MadeRoute";
 import type { LatLngExpression } from "leaflet";
 import Loading from '../components/Loading';
-import type { Point } from "../components/DrawingCanvas";
+import type { Point } from "../types/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
