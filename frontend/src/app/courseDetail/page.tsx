@@ -15,15 +15,18 @@ function CourseDetailContent() {
     const start_distance = searchParams.get("start_distance");
     const created_at = searchParams.get("created_at");
     const isFavorite = searchParams.get("isFavorite") === "true";
+    const drawingPointsStr = searchParams.get("drawing_points");
 
     const positions = positionsStr ? JSON.parse(positionsStr) : [];
+    const drawingPoints = drawingPointsStr ? JSON.parse(drawingPointsStr) : positions;
 
-    const routePositionsTokyo: [number, number][] = [
-        [35.6895, 139.6917], // 新宿
-        [35.6812, 139.7671], // 東京駅
-        [35.6586, 139.7454], // 東京タワー
-    ];
-    const courseDistance = 10; // 仮のコース距離
+
+    const routeData = {
+        total_distance_km: course_distance ? parseFloat(course_distance) : 0,
+        route_points: positions.map((p: [number, number]) => ({ lat: p[0], lng: p[1] })),
+        drawing_points: drawingPoints.map((p: [number, number]) => ({ lat: p[0], lng: p[1] })),
+    };
+
 
     return (
         <div className="bg-gray-50 min-h-screen">
@@ -37,8 +40,7 @@ function CourseDetailContent() {
 
                 <div className="px-4"> {/* 左右に16pxの余白を追加 */}
                     <MadeRouteCard_Big
-                        positions={positions.length > 0 ? positions : routePositionsTokyo}
-                        course_distance={course_distance ?? courseDistance}
+                        routeData={routeData}
                     />
                 </div>
             </main>
