@@ -4,7 +4,6 @@ import { useState, useCallback } from 'react'; // useCallback を追加
 import DrawingCanvas from '../../components/DrawingCanvas';
 import Title from '../../components/Title';
 import ClearCanvasButton from '../../components/ClearCanvasButton'; // ★★★ 追加: クリアボタンをインポート
-import { FaHeart } from "react-icons/fa"; // FaHeart を追加 (例)
 import RecommendedShape from '@/components/RecommendedShape';
 
 interface Point {
