@@ -20,6 +20,8 @@ interface RouteMapProps {
   maxZoom?: number;      // default: 16
   /** 地図の操作（ズーム・ドラッグ）を許可するか */
   interactive?: boolean; // default: true
+  /** ズームコントロールボタンを表示するか */
+  showZoomControl?: boolean; // default: true
 }
 
 const FitBounds = ({
@@ -50,6 +52,7 @@ const RouteMap = ({
   padding = 5,
   maxZoom = 16,
   interactive = true,
+  showZoomControl = true,
 }: RouteMapProps) => {
   const h = typeof height === "number" ? `${height}px` : height;
   const w = typeof width === "number" ? `${width}px` : width;
@@ -66,7 +69,7 @@ const RouteMap = ({
     <MapContainer
       style={{ height: h, width: w }}
       attributionControl={false}
-      zoomControl={interactive}
+      zoomControl={showZoomControl} // ここを修正
       dragging={interactive}
       touchZoom={interactive}
       doubleClickZoom={interactive}
