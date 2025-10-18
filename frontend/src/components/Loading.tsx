@@ -62,7 +62,7 @@ export default function Loading({
   const pathRef = useRef<SVGPathElement>(null);
   const [pathLength, setPathLength] = useState<number>(0);
   const [pathData, setPathData] = useState<string>('');
-  const pathId = `loading-path-${useId()} `;
+  const pathId = "loading-path-" + Math.random().toString(36).substring(7);
 
   const totalDuration = animationDuration + pauseDuration;
   const activeEndKeyTime = (animationDuration / totalDuration).toFixed(3);
