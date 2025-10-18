@@ -1,32 +1,60 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import MadeRouteCard_Big from "@/components/MadeRouteCard_Big";
 import Title from "@/components/Title";
 import RoutingButton from "@/components/RoutingButton";
 import { FaPencilAlt, FaCog, FaSave } from "react-icons/fa";
 
+type RoutePoint = {
+  lat: number;
+  lng: number;
+};
+
+type ResponseData = {
+  total_distance_km: number;
+  route_points: RoutePoint[];
+  drawing_points: RoutePoint[];
+};
+
 export default function CourseDetailPage() {
-  const routePositionsTokyo: [number, number][] = [
-    [35.6895, 139.6917], // 新宿
-    [35.6812, 139.7671], // 東京駅
-    [35.6586, 139.7454], // 東京タワー
-  ];
+  const [routeData, setRouteData] = useState<ResponseData | null>(null);
 
-  const drawingPositionsTokyo: [number, number][] = [
-    [35.6895, 139.6917], // 新宿
-    [35.685, 139.71], // 中間地点1
-    [35.68, 139.73], // 中間地点2
-    [35.6812, 139.7671], // 東京駅
-    [35.675, 139.75], // 中間地点3
-    [35.6586, 139.7454], // 東京タワー
-  ];
+  useEffect(() => {
+    // ローカルストレージからデータを取得
+    const responsePointsData = localStorage.getItem("responsePointsData");
+    const drawingPointsData = localStorage.getItem("drawingPointsData");
 
-  // routeData 形式に変換
-  const routeData = {
-    total_distance_km: 10,
-    route_points: routePositionsTokyo.map(([lat, lng]) => ({ lat, lng })),
-    drawing_points: drawingPositionsTokyo.map(([lat, lng]) => ({ lat, lng })),
-  };
+    if (responsePointsData) {
+      try {
+        const parsedData = JSON.parse(responsePointsData);
+
+        // drawing_points がない場合は route_points をコピー
+        const finalData: ResponseData = {
+          total_distance_km: parsedData.total_distance_km || 0,
+          route_points: parsedData.route_points || [],
+          drawing_points:
+            parsedData.drawing_points || parsedData.route_points || [],
+        };
+
+        setRouteData(finalData);
+      } catch (error) {
+        console.error("ローカルストレージのデータ解析に失敗しました:", error);
+      }
+    }
+  }, []);
+
+  if (!routeData) {
+    return (
+      <div className="bg-gray-50 min-h-screen">
+        <main className="max-w-md mx-auto p-4">
+          <div className="text-center py-8">
+            <p className="text-gray-600">データを読み込んでいます...</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-50 min-h-screen">
