@@ -2,11 +2,7 @@
 'use client';
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { FaPencilAlt } from 'react-icons/fa';
-
-interface Point {
-  x: number;
-  y: number;
-}
+import type { Point } from '../types/types';
 
 interface DrawingCanvasProps {
   strokeColor?: string;

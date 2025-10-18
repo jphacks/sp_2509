@@ -9,10 +9,11 @@ import { FaArrowRight } from "react-icons/fa";
 import MadeRoute from "../components/MadeRoute";
 import type { LatLngExpression } from "leaflet";
 import Slider from "../components/Slider";
+import Loading from '../components/Loading';
+import type { Point } from "../types/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
-type Point = { x: number; y: number };
 
 // ダミーのハート座標
 function makeHeartPositions(): LatLngExpression[] {
@@ -36,6 +37,15 @@ function makeHeartPositions(): LatLngExpression[] {
     return [lat, lng] as [number, number];
   });
 }
+
+
+// ダミー座標データ
+const starShapePoints: Point[] = [
+  { x: 50, y: 5 },   { x: 61.8, y: 38.2 }, { x: 98, y: 38.2 },
+  { x: 68.2, y: 61.8 }, { x: 79, y: 95 },   { x: 50, y: 76 },
+  { x: 21, y: 95 },   { x: 31.8, y: 61.8 }, { x: 2, y: 38.2 },
+  { x: 38.2, y: 38.2 }, { x: 50, y: 5 } // 閉じる
+];
 
 export default function Home() {
   const [message, setMessage] = useState("");
@@ -142,6 +152,11 @@ export default function Home() {
                 </p>
               </div>
             )}
+          </div>
+
+
+          <div>
+            <Loading loadingText='読み込み中' points={starShapePoints}/>
           </div>
         </div>
       </div>
