@@ -7,6 +7,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 from backend.calculator.gps_art_generator import GPSArtGenerator
 import matplotlib.pyplot as plt
 import osmnx as ox
+from shapely.geometry import Point
 
 def create_sample_drawing_points():
     """
@@ -111,11 +112,9 @@ def visualize_result(result, generator):
         drawing_lngs = [p['lng'] for p in result['drawing_points']]
         
         # 緯度経度をUTM座標に変換してプロット
-        from osmnx import projection
-        from shapely.geometry import Point
         drawing_utm_coords = []
         for lng, lat in zip(drawing_lngs, drawing_lats):
-            point_proj, _ = projection.project_geometry(
+            point_proj, _ = ox.projection.project_geometry(
                 Point(lng, lat), 
                 crs=road_network_latlon.graph['crs'], 
                 to_crs=road_network.graph['crs']
@@ -141,7 +140,7 @@ def visualize_result(result, generator):
         
         for lng, lat in zip(route_lngs, route_lats):
             # 緯度経度をUTM座標に変換
-            point_proj, _ = projection.project_geometry(
+            point_proj, _ = ox.projection.project_geometry(
                 Point(lng, lat), 
                 crs=road_network_latlon.graph['crs'], 
                 to_crs=road_network.graph['crs']
