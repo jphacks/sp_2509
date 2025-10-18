@@ -172,7 +172,7 @@ def list_user_courses(
 @app.get("/users/{user_id}/courses/{course_id}", response_model=schemas.CourseSummary)
 def get_user_course(
     user_id: str,
-    course_id: uuid.UUID ,
+    course_id: uuid.UUID,
     db: Session = Depends(get_db),
     current_lat: Optional[float] = None,
     current_lng: Optional[float] = None,
@@ -262,7 +262,7 @@ def create_course_for_user(
 @app.delete("/users/{user_id}/courses/{course_id}", status_code=204)
 def delete_user_course(
     user_id: str,
-    course_id: str,
+    course_id: uuid.UUID,
     db: Session = Depends(get_db),
 ):
     """
@@ -270,18 +270,17 @@ def delete_user_course(
     - user_id, course_id は UUID 形式を検証（不正なら 400）
     - コースが存在しない、またはユーザーのものではない場合は 404
     """
-    # UUID 形式チェック
+    # user_id を UUID に変換してクエリする
     try:
         user_uuid = uuid.UUID(user_id)
-        course_uuid = uuid.UUID(course_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid id format. Must be UUID.")
+        raise HTTPException(status_code=400, detail="Invalid user_id format. Must be UUID.")
 
     # コース存在＆所有者確認
     course = (
         db.query(models.Course)
         .filter(
-            models.Course.id == course_uuid,
+            models.Course.id == course_id,
             models.Course.user_id == user_uuid,
         )
         .first()
@@ -298,7 +297,7 @@ def delete_user_course(
 @app.post("/users/{user_id}/courses/{course_id}/toggle_favorite", response_model=schemas.ToggleFavoriteResponse)
 def toggle_course_favorite(
     user_id: str,
-    course_id: str,
+    course_id: uuid.UUID,
     db: Session = Depends(get_db),
 ):
     """
@@ -306,18 +305,17 @@ def toggle_course_favorite(
     - user_id, course_id は UUID 形式を検証（不正なら 400）
     - コースが存在しない、またはユーザーのものではない場合は 404
     """
-    # UUID検証
+    # user_id を UUID に変換してクエリする
     try:
         user_uuid = uuid.UUID(user_id)
-        course_uuid = uuid.UUID(course_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid id format. Must be UUID.")
+        raise HTTPException(status_code=400, detail="Invalid user_id format. Must be UUID.")
 
     # コース存在＆所有者確認
     course = (
         db.query(models.Course)
         .filter(
-            models.Course.id == course_uuid,
+            models.Course.id == course_id,
             models.Course.user_id == user_uuid,
         )
         .first()
