@@ -5,6 +5,8 @@ databases[postgresql]
 sqlalchemy
 psycopg2-binary
 geopy
+pytest
+httpx
 osmnx
 scipy
 networkx
