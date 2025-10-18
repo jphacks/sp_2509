@@ -66,7 +66,7 @@ export default function Draw() {
                     <BackButton text="ホームに戻る" to="/home" />
                 </div>
 
-                <div className="w-full aspect-[1] mt-10 flex justify-center">
+                <div className="w-full aspect-[1] mt-4 flex justify-center">
                     <DrawingCanvas
                     strokeWidth = {6}
                     strokeColor = "#FF0000"

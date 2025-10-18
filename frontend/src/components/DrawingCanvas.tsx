@@ -1,6 +1,6 @@
 // frontend/src/components/DrawingCanvas.tsx
 'use client';
-import React, { useRef, useState, useEffect, useCallback, useLayoutEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { FaPencilAlt } from 'react-icons/fa';
 
 interface Point {
@@ -169,6 +169,20 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     if ('touches' in event) event.preventDefault();
   }, [strokeColor, strokeWidth, hasDrawn, performClear]);
 
+  const stopDrawing = useCallback(() => {
+    if (!isDrawing) return;
+    setIsDrawing(false);
+    const ctx = canvasRef.current?.getContext('2d');
+    if (ctx) ctx.closePath();
+
+    if (points.length > 1) {
+      setHasDrawn(true);
+      if (onDrawEnd) onDrawEnd(points);
+    } else {
+      performClear();
+    }
+  }, [isDrawing, onDrawEnd, points, performClear]);
+
   const draw = useCallback((event: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (!isDrawing || hasDrawn) return;
     if ('buttons' in event && event.buttons !== 1) {
@@ -185,21 +199,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       setPoints(prevPoints => [...prevPoints, coords]);
     }
     if ('touches' in event) event.preventDefault();
-  }, [isDrawing, hasDrawn]); // stopDrawingを依存配列に追加
-
-  const stopDrawing = useCallback(() => {
-    if (!isDrawing) return;
-    setIsDrawing(false);
-    const ctx = canvasRef.current?.getContext('2d');
-    if (ctx) ctx.closePath();
-
-    if (points.length > 1) {
-      setHasDrawn(true);
-      if (onDrawEnd) onDrawEnd(points);
-    } else {
-      performClear();
-    }
-  }, [isDrawing, onDrawEnd, points, performClear]);
+  }, [isDrawing, hasDrawn, stopDrawing]); // stopDrawingを依存配列に追加
 
   return (
     <div ref={containerRef} className="relative w-full h-full">
