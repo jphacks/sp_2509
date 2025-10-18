@@ -1,9 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import Carousel from '../../components/Carousel_iwai';
-import Title from '../../components/title';
-import RoutingButton from '../../components/routingButton';
+import Carousel from '../../components/Carousel';
+import Title from '../../components/Title';
+import RoutingButton from '../../components/RoutingButton';
 import mapIcon from './img/map_icon.png';
 
 export default function Home() {
