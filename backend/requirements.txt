@@ -4,3 +4,4 @@ databases[sqlite]
 databases[postgresql]
 sqlalchemy
 psycopg2-binary
+geopy
