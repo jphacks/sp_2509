@@ -12,7 +12,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 // ★★★ テストモード切り替え ★★★
 // テストデータを使用する場合は true に、APIから取得する場合は false にしてください。
-const isTestMode = true;
+const isTestMode = false;
 
 type Course = {
     id: string;
@@ -124,18 +124,57 @@ export default function Home() {
     // 表示するコースリストを決定
     const displayCourses = isTestMode ? testCourses : courses;
 
-    const handleDelete = (id: string) => {
-        // isTestModeでは何もしない
-        if (isTestMode) return;
-        setCourses(prev => prev.filter(course => course.id !== id));
+    const handleDelete = async (id: string) => {
+        if (isTestMode || !uuid) return;
+
+        try {
+            const res = await fetch(`${API_URL}/users/${uuid}/courses/${id}`, {
+                method: 'DELETE',
+            });
+
+            if (!res.ok) {
+                throw new Error('コースの削除に失敗しました。');
+            }
+
+            // API成功後にUIを更新
+            setCourses(prev => prev.filter(course => course.id !== id));
+
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "不明なエラーが発生しました。");
+        }
     };
 
-    const handleToggleFavorite = (newValue: boolean, id: string) => {
-        // isTestModeでは何もしない
-        if (isTestMode) return;
+    const handleToggleFavorite = async (newValue: boolean, id: string) => {
+        if (isTestMode || !uuid) return;
+
+        // UIを即時反映
         setCourses(prev => prev.map(course =>
             course.id === id ? { ...course, is_favorite: newValue } : course
         ));
+
+        try {
+            const res = await fetch(`${API_URL}/users/${uuid}/courses/${id}/toggle_favorite`, {
+                method: 'POST',
+            });
+
+            if (!res.ok) {
+                throw new Error('お気に入りの更新に失敗しました。');
+            }
+
+            const data = await res.json();
+
+            // APIからのレスポンスで再度状態を同期
+            setCourses(prev => prev.map(course =>
+                course.id === id ? { ...course, is_favorite: data.is_favorite } : course
+            ));
+
+        } catch (err) {
+            // エラーが発生した場合、UIを元に戻す
+            setCourses(prev => prev.map(course =>
+                course.id === id ? { ...course, is_favorite: !newValue } : course
+            ));
+            setError(err instanceof Error ? err.message : "不明なエラーが発生しました。");
+        }
     };
 
     const carouselItems = [
@@ -157,7 +196,7 @@ export default function Home() {
     };
 
     return (
-        <div className="text-black min-h-screen bg-[rgb(248,246,251)]">
+        <div className="text-black min-h-screen">
             <main className={`flex flex-col ${paddingTop} ${paddingBottom} max-w-md mx-auto min-h-screen`}>
                 <div className={`${paddingX} flex flex-col gap-y-10`}>
                     {/* Top Text */}
