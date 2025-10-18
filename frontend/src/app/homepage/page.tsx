@@ -64,7 +64,7 @@ export default function Home() {
                     <RoutingButton
                         buttonText="新しいルートを作る"
                         to="/draw"
-                        className="w-full !bg-black text-white !py-4 !text-lg !rounded-full"
+                        className="w-full !bg-black text-white !py-4 !text-base !rounded-full"
                     />
                 </div>
             </main>
