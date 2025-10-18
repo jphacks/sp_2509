@@ -159,11 +159,7 @@ def test_get_user_course_detail_invalid_uuid(client: TestClient, db_session: Ses
     invalid_course_id = "invalid-uuid-format"
 
     response = client.get(f"/users/{user_id}/courses/{invalid_course_id}")
-    assert response.status_code == 422 # <--- ★★★ 400 から 422 に変更 ★★★
-    # FastAPIが返すデフォルトのエラーメッセージを確認 (オプション)
-    # assert "value is not a valid uuid" in response.json()["detail"][0]["msg"]
-    # assert "Invalid course_id format" in response.json()["detail"] # <--- このアサーションは削除またはコメントアウト
-
+    assert response.status_code == 400
 
 def test_delete_user_course(client: TestClient, db_session: Session, setup_user_and_course):
     # コース削除APIが204を返し、実際にDBから削除されることを検証する
