@@ -3,10 +3,13 @@ import { useRouter } from 'next/navigation';
 import { useState, useCallback } from 'react'; // useCallback を追加
 import DrawingCanvas from '../../components/DrawingCanvas';
 import Title from '../../components/Title';
+import Header from '../../components/Header';
+import Loading from '../../components/Loading';
 import BackButton from '../../components/BackButton';
 import ClearCanvasButton from '../../components/ClearCanvasButton'; // ★★★ 追加: クリアボタンをインポート
 import RecommendedShape from '../../components/RecommendedShape';
 import type { Point } from '../../types/types';
+
 
 // 例: ハート型の座標配列 (ダミー)
 const heartShape: Point[] = [
@@ -47,10 +50,17 @@ export default function Draw() {
 
 
 
-    // 遷移関数
-    const navigateToCondition = () => {
-    router.push('/condition');
-    };
+const navigateToCondition = () => {
+    try {
+      // drawingPoints を JSON 文字列に変換して localStorage に保存
+      localStorage.setItem('drawingPointsData', JSON.stringify(drawingPoints));
+      router.push('/condition');
+    } catch (error) {
+      console.error("Failed to save drawing points to localStorage:", error);
+      // エラー処理 (例: アラート表示)
+      alert("コース形状の保存に失敗しました。");
+    }
+  };
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-center p-4">
@@ -80,6 +90,9 @@ export default function Draw() {
                         />
                     </div>
 
+                    <div className ="mt-4 text-black">
+                        <Header headerText="おすすめから選ぶ" />
+                    </div>
                     <div className="flex justify-center space-x-4 mt-4">
                         <button
                             onClick={selectHeart}
@@ -92,11 +105,13 @@ export default function Draw() {
                     {/* ボタンによるページ遷移 */}
                     <button
                         onClick={navigateToCondition}
+                        disabled={drawingPoints.length === 0}
                         className="mt-4 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75"
                     >
                         Go to Condition Page (Button)
                     </button>
 
+                    <Loading loadingText='読み込み中' points={drawingPoints}/>
 
             </div>
         </div>
