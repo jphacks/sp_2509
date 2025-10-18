@@ -70,15 +70,25 @@ Windowsでは、以下の手順で手動セットアップを行ってくださ�
 
 ### フロントエンド (Next.js)
 
-1. **開発サーバーの起動:**
+1. **(ライブラリを変更した場合のみ)依存関係のインストール:**
+
     ターミナルを開き、以下のコマンドを実行します。
+
+    ```bash
+    cd frontend
+    npm install
+    cd ..
+    ```
+
+2. **開発サーバーの起動:**
+    以下のコマンドを実行します。
 
     ```bash
     cd frontend
     npm run dev
     ```
 
-2. **アプリケーションの確認:**
+3. **アプリケーションの確認:**
     ブラウザで [http://localhost:3000](http://localhost:3000) にアクセスすると、アプリケーションが表示されます。
 
 注意点:
@@ -101,8 +111,21 @@ Windowsでは、以下の手順で手動セットアップを行ってくださ�
         ```powershell
         .\backend\.venv\Scripts\activate
         ```
+2. **(ライブラリを変更した場合のみ)依存関係のインストール:**
 
-2. **サーバーの起動:**
+    * **macOS / Linux:**
+
+    ```bash
+    pip install -r backend/requirements.txt
+    ```
+
+    * **Windows (PowerShell):**
+
+    ```powershell
+    pip install -r backend\requirements.txt
+    ```
+
+3. **サーバーの起動:**
 
     ```bash
     uvicorn backend.main:app --reload
