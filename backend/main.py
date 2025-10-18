@@ -127,7 +127,7 @@ def list_user_courses(
         distance_to_start_km = 0.0
         if current_lat is not None and current_lng is not None and course.route_points:
             start_point = course.route_points[0]
-            distance_to_start_km = calculate_distance_km(current_lat,current_lng,start_point.get("lat"),start_point.get("lng"))
+            distance_to_start_km = calculate_distance_km(current_lat, current_lng, start_point.get("lat"), start_point.get("lng"))
         response_courses.append(
             schemas.CourseSummary(
                 id=course.id,
