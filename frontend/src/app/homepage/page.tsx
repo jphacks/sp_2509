@@ -47,8 +47,8 @@ export default function Home() {
                     {/* Created Course Section */}
                     <div className="text-center flex flex-col items-center gap-y-4">
                         <h2 className="text-2xl font-bold">作成したコース</h2>
-                        <div className="p-8 bg-gray-100 rounded-full">
-                            <Image src={mapIcon} alt="Map Icon" width={80} height={80} />
+                        <div>
+                            <Image src={mapIcon} alt="Map Icon" width={96} height={96} />
                         </div>
                         <p className="text-gray-500">まだルートがありません</p>
                         <p className="text-gray-500">絵を描いて最初のルートを作りましょう</p>
