@@ -14,13 +14,29 @@ async function handler(req: NextRequest) {
   const headers = new Headers(req.headers);
   headers.delete('host'); // fetchが自動的に正しいHostヘッダーを設定するように削除
 
+  let body: BodyInit | null = null;
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
+    // リクエストボディを安全に処理
+    try {
+      const textBody = await req.text();
+      if (textBody) {
+        body = textBody;
+        // Content-Typeが設定されていない場合、jsonとして扱う
+        if (!headers.has('Content-Type')) {
+          headers.set('Content-Type', 'application/json');
+        }
+      }
+    } catch (e) {
+      // ボディの読み取りに失敗した場合は何もしない
+    }
+  }
+
   try {
     // バックエンドにリクエストを転送
     const response = await fetch(url, {
       method: req.method,
       headers: headers,
-      // GET/HEAD以外の場合、リクエストボディを転送
-      body: req.method !== 'GET' && req.method !== 'HEAD' ? req.body : null,
+      body: body,
       redirect: 'manual', // リダイレクトは手動で処理
     });
 
