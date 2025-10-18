@@ -29,7 +29,6 @@ def calculate_distance_km(
 models.Base.metadata.create_all(bind=engine)
 
 # GPSArtGeneratorのインスタンスを生成
-# キャッシュを有効にすると、2回目以降の同じ場所でのリクエストが高速になります
 art_generator = GPSArtGenerator(cache_enabled=True)
 
 app = FastAPI()
