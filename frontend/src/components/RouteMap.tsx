@@ -1,6 +1,12 @@
 "use client";
 
-import { MapContainer, TileLayer, Polyline, Marker, useMap } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Polyline,
+  Marker,
+  useMap,
+} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { LatLngExpression, divIcon, LatLngBounds } from "leaflet";
 import { useEffect } from "react";
@@ -11,13 +17,15 @@ interface RouteMapProps {
   positions?: LatLngExpression[];
   drawnLine?: LatLngExpression[];
   /** 実コンテナの高さ（fitBoundsのズーム決定に影響） */
-  height?: CSSSize;      // default: 400
+  height?: CSSSize; // default: 400
   /** 実コンテナの幅（fitBoundsのズーム決定に影響） */
-  width?: CSSSize;       // default: "100%"
+  width?: CSSSize; // default: "100%"
   /** fitBoundsの余白(px)。大きいほど引き気味 */
-  padding?: number;      // default: 5
+  padding?: number; // default: 5
   /** 近づきすぎ防止の上限ズーム */
-  maxZoom?: number;      // default: 16
+  maxZoom?: number; // default: 16
+  /** マップの操作を無効化する（サムネイルなど） */
+  interactive?: boolean; // default: true
 }
 
 const FitBounds = ({
@@ -47,6 +55,7 @@ const RouteMap = ({
   width = "100%",
   padding = 5,
   maxZoom = 16,
+  interactive = true,
 }: RouteMapProps) => {
   const h = typeof height === "number" ? `${height}px` : height;
   const w = typeof width === "number" ? `${width}px` : width;
@@ -60,7 +69,16 @@ const RouteMap = ({
   });
 
   return (
-    <MapContainer style={{ height: h, width: w }} zoomControl={false}>
+    <MapContainer
+      style={{ height: h, width: w }}
+      zoomControl={false}
+      dragging={interactive}
+      touchZoom={interactive}
+      scrollWheelZoom={interactive}
+      doubleClickZoom={interactive}
+      boxZoom={interactive}
+      keyboard={interactive}
+    >
       <TileLayer
         url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
@@ -68,14 +86,27 @@ const RouteMap = ({
 
       {positions && positions.length > 0 && (
         <>
-          <Polyline positions={positions} color="red" />
-          <Marker position={positions[0]} icon={startIcon} />
+          <Polyline
+            positions={positions}
+            color="red"
+            interactive={interactive}
+          />
+          <Marker
+            position={positions[0]}
+            icon={startIcon}
+            interactive={interactive}
+          />
         </>
       )}
 
       {/* 指で書いた線 (青い点線) */}
       {drawnLine && drawnLine.length > 0 && (
-        <Polyline positions={drawnLine} color="blue" dashArray="5, 10" />
+        <Polyline
+          positions={drawnLine}
+          color="blue"
+          dashArray="5, 10"
+          interactive={interactive}
+        />
       )}
 
       <FitBounds positions={positions} padding={padding} maxZoom={maxZoom} />
