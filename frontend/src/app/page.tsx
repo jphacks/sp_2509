@@ -106,7 +106,7 @@ export default function Home() {
           {/* Slider コンポーネントの動作確認 */}
           <div className="w-full text-left space-y-4">
             <h2 className="text-xl font-semibold">
-              Slider コンポーネントの動作確認
+              Slider コンポーネントの動作確認{sliderValue}
             </h2>
 
             <Slider
