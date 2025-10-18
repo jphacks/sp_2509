@@ -48,7 +48,7 @@ export default function Loading({
   loadingText,
   points,
   size = 64,
-  strokeColor = 'currentColor',
+  strokeColor = 'gray',
   strokeWidth = 2,
   dotColor = 'black',
   dotSize = 6,
