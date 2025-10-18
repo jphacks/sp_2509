@@ -57,8 +57,6 @@ const navigateToCondition = () => {
       router.push('/condition');
     } catch (error) {
       console.error("Failed to save drawing points to localStorage:", error);
-      // エラー処理 (例: アラート表示)
-      alert("コース形状の保存に失敗しました。");
     }
   };
 
