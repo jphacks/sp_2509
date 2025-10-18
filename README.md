@@ -1,6 +1,8 @@
 # サンプル（プロダクト名）
-
+![unnamed (1)](https://github.com/user-attachments/assets/31b4d23a-0a3e-4a87-a5e3-35c1b267125e)
+<!--
 [![IMAGE ALT TEXT HERE](https://jphacks.com/wp-content/uploads/2025/05/JPHACKS2025_ogp.jpg)](https://www.youtube.com/watch?v=lA9EluZugD8)
+-->
 
 ## 各種リンク
 * サイトURL:〇〇〇
