@@ -39,4 +39,6 @@ jobs:
       # テスト実行
       - name: Run tests
         run: |
-          PYTHONPATH=./backend pytest -v backend/tests
+          # backend ディレクトリをモジュール検索パスに追加（絶対パス）
+          export PYTHONPATH=$(pwd)/backend
+          pytest -v backend/tests
