@@ -7,3 +7,11 @@ psycopg2-binary
 geopy
 pytest
 httpx
+osmnx
+scipy
+networkx
+numpy
+shapely
+matplotlib
+pytest
+httpx
