@@ -6,7 +6,6 @@ import Title from '../../components/Title';
 import RoutingButton from '../../components/RoutingButton';
 import EmptyCourse from './components/EmptyCourse';
 import CourseList from './components/CourseList';
-import type { LatLngExpression } from "leaflet";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 

@@ -24,7 +24,7 @@ const CourseList = ({ courses, onDelete, onToggleFavorite }: CourseListProps) =>
     return (
         <div>
             {courses.map(course => {
-                const positions: LatLngExpression[] = course.route_points.map(p => [p.lat, p.lng]);
+                const positions: LatLngExpression[] = course.route_points.map(p => [p.lat, p.lng] as [number, number]);
                 return (
                     <MadeRoute
                         key={course.id}
