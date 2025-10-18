@@ -9,18 +9,22 @@ import CourseList from './components/CourseList';
 
 export default function Home() {
     const [courses, setCourses] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
         const fetchCourses = async (userId: string) => {
-            alert(userId); // userIdを表示
+            //alert(userId); // userIdを表示
+            //userId = '23af53791bd9448dbe98a095920266ec'; // テスト用に固定
             try {
                 const res = await fetch(`${API_URL}/users/${userId}/courses`);
                 const data = await res.json();
                 setCourses(data);
             } catch (error) {
                 console.error('Error fetching courses:', error);
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -88,7 +92,13 @@ export default function Home() {
                     {/* Created Course Section */}
                     <div>
                         <h2 className="text-2xl font-bold mb-4">作成したコース</h2>
-                        {courses.length === 0 ? <EmptyCourse /> : <CourseList />} {/*バックエンドから作成ルートのデータが返ってくるかどうかで条件分岐*/}
+                        {loading ? (
+                            <p>Loading...</p>
+                        ) : courses.length === 0 ? (
+                            <EmptyCourse />
+                        ) : (
+                            <CourseList />
+                        )}
                     </div>
                 </div>
 
