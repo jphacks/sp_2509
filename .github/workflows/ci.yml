@@ -36,9 +36,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
-      # テスト実行
       - name: Run tests
+        env:
+          PYTHONPATH: ${{ github.workspace }} # Pythonがモジュールを探すパスにリポジトリルートを追加
         run: |
-          # backend ディレクトリをモジュール検索パスに追加（絶対パス）
-          export PYTHONPATH=$(pwd)/backend
-          pytest -v backend/tests
+          # pytest をリポジトリルートから実行し、テスト対象ディレクトリを指定
+          python -m pytest backend
