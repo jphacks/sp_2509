@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Carousel from '../../components/Carousel';
 import Title from '../../components/Title';
 import RoutingButton from '../../components/RoutingButton';
@@ -53,32 +53,41 @@ export default function Home() {
     const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
     const [error, setError] = useState<string | null>(null);
 
+    const initializeUser = useCallback(async (forceNew: boolean = false) => {
+        try {
+            let userId = localStorage.getItem('uuid');
+            if (!userId || forceNew) {
+                if (forceNew) {
+                    localStorage.removeItem('uuid');
+                }
+                const res = await fetch(`${API_URL}/users`, { method: 'POST' });
+                if (!res.ok) throw new Error('Failed to create a new user.');
+                const data = await res.json();
+                userId = data.user_id;
+                if (userId) {
+                    localStorage.setItem('uuid', userId);
+                }
+            }
+            setUuid(userId);
+        } catch (err) {
+            console.error('Error initializing user:', err);
+            setError('ユーザー情報の初期化に失敗しました。');
+            setLoading(false);
+        }
+    }, []);
+
     // 1. UUIDの初期化
     useEffect(() => {
         if (isTestMode) return;
-        const initializeUser = async () => {
-            try {
-                let userId = localStorage.getItem('uuid');
-                if (!userId) {
-                    const res = await fetch(`${API_URL}/users`, { method: 'POST' });
-                    const data = await res.json();
-                    userId = data.user_id;
-                    if (userId) {
-                        localStorage.setItem('uuid', userId);
-                    }
-                }
-                setUuid(userId);
-            } catch (err) {
-                console.error('Error initializing user:', err);
-                setError('ユーザー情報の初期化に失敗しました。');
-            }
-        };
         initializeUser();
-    }, []);
+    }, [initializeUser]);
 
     // 2. 現在地の取得
     useEffect(() => {
-        if (isTestMode) return;
+        if (isTestMode) {
+            setLoading(false);
+            return;
+        };
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
@@ -88,11 +97,17 @@ export default function Home() {
                     });
                 },
                 (e) => {
-                    console.error('Failed to parse drawing points from localStorage:', e);
+                    console.error('Failed to get current location:', e);
+                    setError("現在地の取得に失敗しました。");
+                    setLoading(false);
+                },
+                {
+                    timeout: 10000, // 10秒でタイムアウト
                 }
             );
         } else {
             setError("お使いのブラウザはGeolocationに対応していません。");
+            setLoading(false);
         }
     }, []);
 
@@ -107,7 +122,15 @@ export default function Home() {
                 const res = await fetch(
                     `${API_URL}/users/${uuid}/courses?current_lat=${currentLocation.lat}&current_lng=${currentLocation.lng}&sort_by=${sortBy}`
                 );
-                if (!res.ok) throw new Error("コースの取得に失敗しました。");
+                if (!res.ok) {
+                    if (res.status === 404) {
+                        // DBからuserが消えたなどの理由で404が返ってきた場合、UUIDを再生成して再取得を試みる
+                        console.log("User not found (404). Re-initializing user UUID.");
+                        await initializeUser(true);
+                        return; // 再初期化後、useEffectが再実行されるのを待つ
+                    }
+                    throw new Error("コースの取得に失敗しました。");
+                }
                 const data = await res.json();
                 setCourses(data);
             } catch (err) {
@@ -118,7 +141,7 @@ export default function Home() {
         };
 
         fetchCourses();
-    }, [uuid, currentLocation, sortBy]);
+    }, [uuid, currentLocation, sortBy, initializeUser]);
 
     // 表示するコースリストを決定
     const displayCourses = isTestMode ? testCourses : courses;

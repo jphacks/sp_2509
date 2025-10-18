@@ -142,6 +142,11 @@ def list_user_courses(
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid user_id format. Must be UUID.")
 
+    # ユーザー存在確認
+    user = db.query(models.User).filter(models.User.id == user_uuid).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+
     courses = db.query(models.Course).filter(models.Course.user_id == user_uuid).all()
     response_courses = []
     for course in courses:
