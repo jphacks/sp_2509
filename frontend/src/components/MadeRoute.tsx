@@ -134,7 +134,7 @@ export default function MadeRoute({
     return (
         <article
             className="relative rounded-2xl border border-neutral-200/70 bg-white
-                 shadow-sm hover:shadow-md transition-shadow p-3 md:p-4"
+                 shadow-sm hover:shadow-md transition-shadow p-4"
             aria-label="ルート概要カード"
         >
             {/* 右上：三点メニュー */}
