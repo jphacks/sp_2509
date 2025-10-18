@@ -8,7 +8,6 @@ from typing import Optional
 from .database import engine, get_db
 from . import models, schemas
 from geopy.distance import geodesic
-from typing import Optional
 
 def calculate_distance_km(
     lat1: Optional[float],
