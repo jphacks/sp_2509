@@ -1,80 +1,92 @@
 "use client";
 
-import { useState } from 'react';
+import { useRef, useState, MouseEvent } from 'react';
 import Image from 'next/image';
 
-type CarouselProps = {
-  images: string[];
+type CarouselItem = {
+  src: string;
+  alt: string;
+  description: string;
 };
 
-export default function Carousel({ images }: CarouselProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+type CarouselProps = {
+  items: CarouselItem[];
+  imageBorderRadius?: string;
+  textClassName?: string;
+};
 
-  const goToPrevious = () => {
-    const isFirstImage = currentIndex === 0;
-    const newIndex = isFirstImage ? images.length - 1 : currentIndex - 1;
-    setCurrentIndex(newIndex);
+const imageWidth = 200;
+const imageHeight = 200;
+const gap = 16; // 画像間の余白 (px)
+
+export default function Carousel({
+  items,
+  // 画像の角丸
+  // 例: 'rounded-md', 'rounded-xl', 'rounded-2xl', 'rounded-full'
+  imageBorderRadius = 'rounded-lg',
+  // テキスト全体のスタイル (Tailwind CSSクラス)
+  // 例: 'font-sans text-yellow-300'
+  textClassName = 'text-white',
+}: CarouselProps) {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  const onMouseDown = (e: MouseEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+    if (scrollContainerRef.current) {
+      setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
+      setScrollLeft(scrollContainerRef.current.scrollLeft);
+    }
   };
-  const goToNext = () => {
-    const isLastImage = currentIndex === images.length - 1;
-    const newIndex = isLastImage ? 0 : currentIndex + 1;
-    setCurrentIndex(newIndex);
+
+  const onMouseLeave = () => {
+    setIsDragging(false);
+  };
+
+  const onMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const onMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+    if (!isDragging || !scrollContainerRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollContainerRef.current.offsetLeft;
+    const walk = (x - startX) * 2; // スクロール速度を調整
+    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
   };
 
   return (
-    <div className="relative w-full mx-auto">
-      <div className="overflow-hidden rounded-lg">
-        {/*
-          画像を横に並べるためのコンテナ
-          translate-xで表示する画像を切り替える
-        */}
-        <div
-          className="flex transition-transform duration-500 ease-in-out"
-          style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-        >
-          {images.map((src, index) => (
-            <div key={index} className="flex-shrink-0 px-0 w-full">
-              <Image
-                src={src}
-                alt={`Slide ${index + 1}`}
-                width={800}
-                height={600}
-                className="w-full object-cover rounded-md"
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 前へボタン */}
-      <button
-        onClick={goToPrevious}
-        className="absolute top-1/2 left-4 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/75 transition"
-        aria-label="Previous image"
+    <div className="w-full">
+      <div
+        ref={scrollContainerRef}
+        className={`flex overflow-x-auto snap-x snap-mandatory scrollbar-hide cursor-grab ${isDragging ? 'cursor-grabbing' : ''}`}
+        style={{ gap: `${gap}px`, paddingLeft: `${gap}px`, paddingRight: `${gap}px` }}
+        onMouseDown={onMouseDown}
+        onMouseLeave={onMouseLeave}
+        onMouseUp={onMouseUp}
+        onMouseMove={onMouseMove}
       >
-        &#10094;
-      </button>
-
-      {/* 次へボタン */}
-      <button
-        onClick={goToNext}
-        className="absolute top-1/2 right-4 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/75 transition"
-        aria-label="Next image"
-      >
-        &#10095;
-      </button>
-
-      {/* インジケーター */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
-        {images.map((_, index) => (
-          <button
+        {items.map((item, index) => (
+          <div
             key={index}
-            onClick={() => setCurrentIndex(index)}
-            className={`w-3 h-3 rounded-full transition ${
-              currentIndex === index ? 'bg-white' : 'bg-white/50'
-            }`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
+            className={`relative flex-shrink-0 snap-start overflow-hidden ${imageBorderRadius}`}
+            style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
+          >
+            <Image
+              src={item.src}
+              alt={item.alt}
+              width={imageWidth}
+              height={imageHeight}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/70 to-transparent" />
+            <div className={`absolute bottom-0 left-0 w-full p-2 text-left ${textClassName}`}>
+              <p className="font-bold text-lg">{index + 1}</p> {/* 画像の番号. font-bold text-lgで少し大きく */}
+              <p className="text-sm">{item.description}</p> {/* 画像の説明文. text-smで少し小さく */}
+            </div>
+          </div>
         ))}
       </div>
     </div>

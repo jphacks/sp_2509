@@ -4,3 +4,10 @@ databases[sqlite]
 databases[postgresql]
 sqlalchemy
 psycopg2-binary
+geopy
+osmnx
+scipy
+networkx
+numpy
+shapely
+matplotlib

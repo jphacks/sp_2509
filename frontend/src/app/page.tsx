@@ -3,8 +3,8 @@
 
 import { useState } from "react";
 import Header from "../components/Header";
-import Title from "../components/title";
-import RoutingButton from "../components/routingButton";
+import Title from '../components/title';
+import RoutingButton from '../components/routingButton';
 import { FaArrowRight } from "react-icons/fa";
 import MadeRoute from "../components/MadeRoute";
 import type { LatLngExpression } from "leaflet";

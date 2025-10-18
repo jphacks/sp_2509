@@ -6,5 +6,5 @@ type HeaderProps = {
 
 
 export default function Header({ headerText }: HeaderProps) {
-  return (<h2 className="text-xl md:text-2xl font-bold tracking-tight">{headerText}</h2>)
+  return (<h1 className="text-xl font-bold tracking-tight text-left">{headerText}</h1>)
 };

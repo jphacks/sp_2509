@@ -2,9 +2,10 @@
 import { useRouter } from 'next/navigation';
 import { useState, useCallback } from 'react'; // useCallback を追加
 import DrawingCanvas from '../../components/DrawingCanvas';
-import Title from '../../components/title';
+import Title from '../../components/Title';
+import BackButton from '../../components/BackButton';
 import ClearCanvasButton from '../../components/ClearCanvasButton'; // ★★★ 追加: クリアボタンをインポート
-import { FaHeart } from "react-icons/fa"; // FaHeart を追加 (例)
+import RecommendedShape from '../../components/RecommendedShape';
 
 interface Point {
     x: number;
@@ -58,14 +59,15 @@ export default function Draw() {
     return (
         <main className="flex min-h-screen flex-col items-center justify-center p-4">
         <div className="z-10 w-full max-w-5xl items-center justify-center text-sm">
-            <div className="text-center">
+            <div className="text-center px-4 mb-4">
                 <Title title="コースの形を描く" />
 
+                <div className="z-10 w-full self-start">
+                    <BackButton text="ホームに戻る" to="/home" />
+                </div>
 
-                <div className="w-full mt-10 flex justify-center">
+                <div className="w-full aspect-[1] mt-4 flex justify-center">
                     <DrawingCanvas
-                    width={600}
-                    height={400}
                     strokeWidth = {6}
                     strokeColor = "#FF0000"
                     onDrawEnd={handleDrawEnd}
@@ -82,12 +84,12 @@ export default function Draw() {
                         />
                     </div>
 
-                    <div className="mt-6 flex justify-center space-x-4">
-                                            <button
+                    <div className="flex justify-center space-x-4 mt-4">
+                        <button
                             onClick={selectHeart}
-                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded text-sm shadow transition-colors duration-150 ease-in-out ${selectedShape === heartShape ? 'bg-pink-500 hover:bg-pink-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`}
+                            className={"flex items-center justify-center rounded transition-colors duration-150 ease-in-out"}
                         >
-                            <FaHeart /> <span>Heart Shape</span>
+                            <RecommendedShape shapeImageSrc='/images/testHeart.png'/>
                         </button>
                     </div>  
                     

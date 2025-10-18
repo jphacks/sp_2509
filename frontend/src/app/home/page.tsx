@@ -1,6 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation'; // useRouterをインポート
-import Carousel from '../../components/Carousel_iwai'; // Carouselコンポーネントをインポート
+import Carousel from '../../components/Carousel'; // Carouselコンポーネントをインポート
 
 export default function Home() {
 

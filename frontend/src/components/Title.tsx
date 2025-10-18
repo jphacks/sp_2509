@@ -1,10 +1,11 @@
 import React from 'react';
 
+
 type TitleProps = {
   title: string;
 };
 
 
 export default function Title({title}: TitleProps)  {
-    return (<h1 className='text-3xl md:text-4xl font-extrabold tracking-tight'>{title}</h1>)
+    return (<h1 className='text-[28px] font-extrabold tracking-tight text-left'>{title}</h1>)
 };
