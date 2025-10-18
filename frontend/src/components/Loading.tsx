@@ -54,7 +54,7 @@ export default function Loading({
   strokeWidth = 2,
   dotColor = 'black',
   dotSize = 6,
-  animationDuration = 3,
+  animationDuration = 2,
   pauseDuration = 1,
 }: LoadingProps) {
   const pathRef = useRef<SVGPathElement>(null);
