@@ -154,7 +154,6 @@ export default function Loading({
     );
   }
 else{
-    console.log(points);
   // pointsがない場合はスピナーアニメーション
   return (
     <div className="flex flex-col items-center justify-center p-4">
