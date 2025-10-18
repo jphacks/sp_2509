@@ -1,78 +1,121 @@
+// jphacks/sp_2509/sp_2509-a378f8e8d74c8510cd17bbdfc0eecd7d10652dd6/frontend/src/app/condition/page.tsx
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useState } from 'react';
-import DrawnShapeImage from '@/components/DrawnShapeImage';
-import { useRouter } from 'next/navigation'; // useRouterをインポート
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import DrawnShapeImage from '../../components/DrawnShapeImage';
+import Slider from '../../components/Slider';
+import type { Point } from '../../types/types';
 
-
-const CenterPinMap = dynamic(() => import('@/components/CenterPinMap'), { ssr: false });
-
-type Point = { x: number; y: number };
-const heartPoints: Point[] = [
-  { x: 175, y: 100 }, { x: 205, y: 70 }, { x: 235, y: 80 }, { x: 250, y: 110 },
-  { x: 235, y: 140 }, { x: 175, y: 210 }, { x: 115, y: 140 }, { x: 100, y: 110 },
-  { x: 115, y: 80 }, { x: 145, y: 70 }, { x: 175, y: 100 },
-].map(p => ({ x: (p.x * 350) / 300, y: (p.y * 350) / 300 }));
+// 地図はクライアント専用
+const CenterPinMap = dynamic(() => import('../../components/CenterPinMap'), { ssr: false });
 
 export default function Condition() {
   const router = useRouter();
 
-  // ★ 赤ピン（地図中心）を保持
+  // localStorage から読み込む描画点
+  const [loadedDrawingPoints, setLoadedDrawingPoints] = useState<Point[]>([]);
+  // 地図中心（スタート地点）
   const [center, setCenter] = useState<[number, number] | null>(null);
+  // おおよその走行距離（km）
+  const [distanceKm, setDistanceKm] = useState<number>(10);
 
-  // ★ ボタン押下でクエリに載せて遷移
+  // 初回マウント時に描画データを読み込み
+  useEffect(() => {
+    try {
+      const saved = typeof window !== 'undefined' ? localStorage.getItem('drawingPointsData') : null;
+      if (!saved) {
+        alert('描画データが見つかりません。前のページでコースを描いてください。');
+        router.back();
+        return;
+      }
+      const points = JSON.parse(saved) as Point[];
+      if (!Array.isArray(points) || points.length === 0) {
+        alert('コース形状の読み込みに失敗しました。');
+        router.back();
+        return;
+      }
+      setLoadedDrawingPoints(points);
+    } catch (e) {
+      console.error('Failed to parse drawing points from localStorage:', e);
+      alert('コース形状の読み込みに失敗しました。');
+      router.back();
+    }
+  }, [router]);
+
+  // 次のページへ：描画点は localStorage に保存して、中心と距離はクエリで渡す
   const goNext = () => {
-    if (!center) return; // まだ未取得なら何もしない
+    if (!center) {
+      alert('スタート地点を地図で選択してください。');
+      return;
+    }
+    try {
+      // /route 側で読むために最終データとして保存
+      localStorage.setItem('finalDrawingPoints', JSON.stringify(loadedDrawingPoints));
+    } catch (_) {
+      // 保存に失敗してもクエリで進めるので致命ではない
+    }
     const [lat, lng] = center;
-    router.push(`/route?lat=${lat.toFixed(6)}&lng=${lng.toFixed(6)}`);
+    const url = `/route?lat=${lat.toFixed(6)}&lng=${lng.toFixed(6)}&dist=${distanceKm}`;
+    router.push(url);
   };
+
+  const canSubmit = center !== null && loadedDrawingPoints.length > 0;
 
   return (
     <main className="flex min-h-screen flex-col items-center p-4">
       <div className="w-full max-w-md space-y-6">
         <h1 className="text-2xl font-bold">条件設定</h1>
-        <p className="text-gray-500 text-sm">&lt;描き直す</p>
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="text-gray-500 text-sm hover:underline text-left"
+        >
+          &lt; 描き直す
+        </button>
 
-        <div className="space-y-1">
+        {/* プレビュー：あなたの描いた絵 */}
+        <section className="space-y-1">
           <p className="font-semibold">あなたの描いた絵</p>
           <DrawnShapeImage
-            points={heartPoints}
+            points={loadedDrawingPoints}
             size={160}
             strokeColor="#ef4444"
             strokeWidth={3}
             padding={8}
             className="bg-gray-100 border border-gray-300"
           />
-        </div>
+        </section>
 
-        <div className="space-y-1">
+        {/* スタート地点を選択 */}
+        <section className="space-y-1">
           <p className="font-semibold">スタート地点を選択</p>
-          <p className="text-gray-500 text-sm">どこから走り始めますか？</p>
-
-          {/* ★ CenterPinMap から赤ピン座標を常時受け取って保持 */}
-          <CenterPinMap
-            height={220}
-            onCenterChange={(c) => setCenter(c)}
-          />
-
-          {/* デバッグ表示（不要なら削除OK） */}
+          <p className="text-gray-500 text-sm">どこから走り始めますか？地図を動かして中央のピン位置を決めてください。</p>
+          <CenterPinMap height={220} onCenterChange={(c) => setCenter(c)} />
           <p className="text-xs text-gray-500">
             選択中の中心：{center ? `${center[0].toFixed(6)}, ${center[1].toFixed(6)}` : '—'}
           </p>
-        </div>
+        </section>
 
-        <div className="space-y-1">
-          <p className="font-semibold">おおよその走行距離</p>
-          <p className="text-gray-800">10km</p>
-          <div className="w-full h-2 bg-gray-200 rounded-full" />
-        </div>
+        {/* 距離スライダー */}
+        <section className="space-y-1">
+          <Slider
+            label="おおよその走行距離"
+            value={distanceKm}
+            onChange={setDistanceKm}
+            min={1}
+            max={50}
+            step={0.5}
+            unit="km"
+          />
+        </section>
 
-        {/* ★ ボタンで送信して遷移 */}
+        {/* 送信ボタン */}
         <button
           onClick={goNext}
-          disabled={!center}
-          className="w-full mt-4 bg-black text-white py-3 rounded-lg shadow-md enabled:hover:bg-gray-800 disabled:opacity-50"
+          disabled={!canSubmit}
+          className="w-full mt-2 bg-black text-white py-3 rounded-lg shadow-md enabled:hover:bg-gray-800 disabled:opacity-50"
         >
           この内容でルートを作成
         </button>
