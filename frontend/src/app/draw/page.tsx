@@ -83,10 +83,10 @@ export default function Draw() {
                         />
                     </div>
 
-                    <div className="mt-6 flex justify-center space-x-4">
+                    <div className="flex justify-center space-x-4 mt-4">
                         <button
                             onClick={selectHeart}
-                            className={"flex items-center justify-center rounded text-sm shadow transition-colors duration-150 ease-in-out"}
+                            className={"flex items-center justify-center rounded transition-colors duration-150 ease-in-out"}
                         >
                             <RecommendedShape shapeImageSrc='/images/testHeart.png'/>
                         </button>

@@ -17,9 +17,10 @@ export default function Condition() {
         <div className="text-center">
           <h1 className="text-4xl font-bold">Condition Page</h1>
           <p className="mt-4 text-lg">
-            This is Conditionpage.
+            条件設定
           </p>
 
+          <
 
           {/* ボタンによるページ遷移 */}
           <button
