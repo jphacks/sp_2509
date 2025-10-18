@@ -18,24 +18,25 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.11"] # プロジェクトで使用しているPythonバージョンを指定
+        python-version: ["3.11"] # プロジェクトで使用している Python バージョン
 
     steps:
+      # コードをチェックアウト
       - uses: actions/checkout@v4
 
+      # Python をセットアップ
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
+      # 依存パッケージのインストール
       - name: Install dependencies
-        working-directory: ./backend # backend ディレクトリに移動
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r backend/requirements.txt
 
+      # テスト実行
       - name: Run tests
-        working-directory: ./backend # backend ディレクトリに移動
         run: |
-          pytest
           PYTHONPATH=./backend pytest -v backend/tests
