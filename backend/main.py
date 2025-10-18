@@ -174,7 +174,7 @@ def get_user_course(
         distance_to_start_km = calculate_distance_km(current_lat, current_lng, start_point.get("lat"), start_point.get("lng"))
        
     return schemas.CourseSummary(
-        id=course_uuid,
+        id=course.id,
         total_distance_km=course.total_distance_km,
         distance_to_start_km=distance_to_start_km,
         is_favorite=course.is_favorite,
