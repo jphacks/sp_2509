@@ -97,7 +97,7 @@ const navigateToCondition = () => {
                             onClick={selectHeart}
                             className={"flex items-center justify-center rounded transition-colors duration-150 ease-in-out"}
                         >
-                            <RecommendedShape shapeImageSrc='/images/Recommend/testHeart.png'/>
+                            <RecommendedShape shapeImageSrc='/images/Recommend/Heart.png'/>
                         </button>
                     </div>  
                     
