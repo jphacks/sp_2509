@@ -1,11 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation'; // useRouterをインポート
 import  DrawnShapeImage  from '../../components/DrawnShapeImage';
-
-interface Point {
-    x: number;
-    y: number;
-}
+import type { Point } from '../../types/types';
 
 // 例: ハート型の座標配列 (ダミー)
 const heartShape: Point[] = [
