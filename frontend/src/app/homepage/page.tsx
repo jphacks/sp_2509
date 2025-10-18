@@ -87,8 +87,8 @@ export default function Home() {
                         lng: position.coords.longitude,
                     });
                 },
-                (err) => {
-                    setError("現在地の取得に失敗しました。");
+                (e) => {
+                    console.error('Failed to parse drawing points from localStorage:', e);
                 }
             );
         } else {

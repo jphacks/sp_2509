@@ -3,17 +3,21 @@ import { useRouter } from 'next/navigation';
 import { useState, useCallback } from 'react'; // useCallback を追加
 import DrawingCanvas from '../../components/DrawingCanvas';
 import Title from '../../components/Title';
+import Header from '../../components/Header';
+import Loading from '../../components/Loading';
 import BackButton from '../../components/BackButton';
+import RoutingButton from '../../components/RoutingButton';
 import ClearCanvasButton from '../../components/ClearCanvasButton'; // ★★★ 追加: クリアボタンをインポート
 import RecommendedShape from '../../components/RecommendedShape';
 import type { Point } from '../../types/types';
+
 
 // 例: ハート型の座標配列 (ダミー)
 const heartShape: Point[] = [
     { x: 175, y: 100 }, { x: 205, y: 70 }, { x: 235, y: 80 }, { x: 250, y: 110 },
     { x: 235, y: 140 }, { x: 175, y: 210 }, { x: 115, y: 140 }, { x: 100, y: 110 },
     { x: 115, y: 80 }, { x: 145, y: 70 }, { x: 175, y: 100 }
-].map(p => ({ x: p.x * 350 / 300, y: p.y * 350 / 300 })); // サイズに合わせて調整
+];
 
 
 export default function Draw() {
@@ -47,10 +51,15 @@ export default function Draw() {
 
 
 
-    // 遷移関数
-    const navigateToCondition = () => {
-    router.push('/condition');
-    };
+const navigateToCondition = () => {
+    try {
+      // drawingPoints を JSON 文字列に変換して localStorage に保存
+      localStorage.setItem('drawingPointsData', JSON.stringify(drawingPoints));
+      router.push('/condition');
+    } catch (error) {
+      console.error("Failed to save drawing points to localStorage:", error);
+    }
+  };
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-center p-4">
@@ -80,6 +89,9 @@ export default function Draw() {
                         />
                     </div>
 
+                    <div className="mt-4 text-black">
+                        <Header headerText="おすすめから選ぶ" />
+                    </div>
                     <div className="flex justify-center space-x-4 mt-4">
                         <button
                             onClick={selectHeart}
@@ -90,13 +102,14 @@ export default function Draw() {
                     </div>  
                     
                     {/* ボタンによるページ遷移 */}
-                    <button
-                        onClick={navigateToCondition}
-                        className="mt-4 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75"
-                    >
-                        Go to Condition Page (Button)
-                    </button>
+                    <RoutingButton
+                        buttonText="条件設定へ進む"
+                        onClick={navigateToCondition} // onClick で関数を渡す
+                        disabled={drawingPoints.length === 0} // disabled 状態を渡す
+                        // to プロパティは不要
+                    />
 
+                    <Loading loadingText='読み込み中' points={drawingPoints}/>
 
             </div>
         </div>
