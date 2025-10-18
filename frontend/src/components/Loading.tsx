@@ -1,5 +1,5 @@
+'use client';
 import React, { useEffect, useRef, useState } from 'react';
-import { useId } from 'react';
 import type { Point } from '../types/types';
 
 type LoadingProps = {
