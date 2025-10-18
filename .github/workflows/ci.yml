@@ -37,4 +37,5 @@ jobs:
       - name: Run tests
         working-directory: ./backend # backend ディレクトリに移動
         run: |
-          pytest # backend ディレクトリ内で pytest を実行
+          pytest
+          PYTHONPATH=./backend pytest -v backend/tests
