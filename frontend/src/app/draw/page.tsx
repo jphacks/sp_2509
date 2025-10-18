@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react'; // useCallback を追加
 import DrawingCanvas from '../../components/DrawingCanvas';
 import Title from '../../components/Title';
 import ClearCanvasButton from '../../components/ClearCanvasButton'; // ★★★ 追加: クリアボタンをインポート
-import RecommendedShape from '@/components/RecommendedShape';
+import RecommendedShape from '../../components/RecommendedShape';
 
 interface Point {
     x: number;
@@ -62,10 +62,8 @@ export default function Draw() {
                 <Title title="コースの形を描く" />
 
 
-                <div className="w-full mt-10 flex justify-center">
+                <div className="w-full aspect-[3/2] mt-10 flex justify-center">
                     <DrawingCanvas
-                    width={600}
-                    height={400}
                     strokeWidth = {6}
                     strokeColor = "#FF0000"
                     onDrawEnd={handleDrawEnd}
