@@ -6,6 +6,7 @@ import Title from '../../components/Title';
 import Header from '../../components/Header';
 import Loading from '../../components/Loading';
 import BackButton from '../../components/BackButton';
+import RoutingButton from '../../components/RoutingButton';
 import ClearCanvasButton from '../../components/ClearCanvasButton'; // ★★★ 追加: クリアボタンをインポート
 import RecommendedShape from '../../components/RecommendedShape';
 import type { Point } from '../../types/types';
@@ -16,7 +17,7 @@ const heartShape: Point[] = [
     { x: 175, y: 100 }, { x: 205, y: 70 }, { x: 235, y: 80 }, { x: 250, y: 110 },
     { x: 235, y: 140 }, { x: 175, y: 210 }, { x: 115, y: 140 }, { x: 100, y: 110 },
     { x: 115, y: 80 }, { x: 145, y: 70 }, { x: 175, y: 100 }
-].map(p => ({ x: p.x * 350 / 300, y: p.y * 350 / 300 })); // サイズに合わせて調整
+];
 
 
 export default function Draw() {
@@ -101,13 +102,12 @@ const navigateToCondition = () => {
                     </div>  
                     
                     {/* ボタンによるページ遷移 */}
-                    <button
-                        onClick={navigateToCondition}
-                        disabled={drawingPoints.length === 0}
-                        className="mt-4 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                    >
-                        Go to Condition Page (Button)
-                    </button>
+                    <RoutingButton
+                        buttonText="条件設定へ進む"
+                        onClick={navigateToCondition} // onClick で関数を渡す
+                        disabled={drawingPoints.length === 0} // disabled 状態を渡す
+                        // to プロパティは不要
+                    />
 
                     <Loading loadingText='読み込み中' points={drawingPoints}/>
 
