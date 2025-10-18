@@ -126,6 +126,7 @@ export default function Home() {
                     if (res.status === 404) {
                         // DBからuserが消えたなどの理由で404が返ってきた場合、UUIDを再生成して再取得を試みる
                         console.log("User not found (404). Re-initializing user UUID.");
+                        setLoading(false); // ローディングを止める
                         await initializeUser(true);
                         return; // 再初期化後、useEffectが再実行されるのを待つ
                     }
