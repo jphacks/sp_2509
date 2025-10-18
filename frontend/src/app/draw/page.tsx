@@ -71,7 +71,7 @@ const navigateToCondition = () => {
                     <BackButton text="ホームに戻る" to="/home" />
                 </div>
 
-                <div className="w-full aspect-[1/3] mt-4 flex justify-center">
+                <div className="w-full aspect-[1] mt-4 flex justify-center">
                     <DrawingCanvas
                     strokeWidth = {6}
                     strokeColor = "#FF0000"
@@ -97,7 +97,7 @@ const navigateToCondition = () => {
                             onClick={selectHeart}
                             className={"flex items-center justify-center rounded transition-colors duration-150 ease-in-out"}
                         >
-                            <RecommendedShape shapeImageSrc='/images/testHeart.png'/>
+                            <RecommendedShape shapeImageSrc='/images/Recommend/testHeart.png'/>
                         </button>
                     </div>  
                     
