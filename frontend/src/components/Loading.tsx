@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useId } from 'react';
 
 interface Point {
   x: number;
@@ -61,7 +62,7 @@ export default function Loading({
   const pathRef = useRef<SVGPathElement>(null);
   const [pathLength, setPathLength] = useState<number>(0);
   const [pathData, setPathData] = useState<string>('');
-  const pathId = "loading-path-" + Math.random().toString(36).substring(7);
+  const pathId = `loading-path-${useId()} `;
 
   const totalDuration = animationDuration + pauseDuration;
   const activeEndKeyTime = (animationDuration / totalDuration).toFixed(3);
@@ -111,7 +112,7 @@ export default function Loading({
               values={`${pathLength}; 0; 0`}
               keyTimes={`0; ${activeEndKeyTime}; 1`}
               dur={`${totalDuration}s`}
-              calcMode="linear" // ★★★ 追加: 線形補間を指定 ★★★
+              calcMode="linear"
               repeatCount="indefinite"
             />
             {/* stroke-opacityアニメーション */}
@@ -120,7 +121,7 @@ export default function Loading({
               values="1; 1; 0"
               keyTimes={`0; ${activeEndKeyTime}; 1`}
               dur={`${totalDuration}s`}
-              calcMode="linear" // ★★★ 追加: 線形補間を指定 ★★★
+              calcMode="linear"
               repeatCount="indefinite"
             />
           </path>
@@ -130,7 +131,7 @@ export default function Loading({
             <animateMotion
               keyPoints="0; 1; 1"
               keyTimes={`0; ${activeEndKeyTime}; 1`}
-              calcMode="linear" // ★★★ 確認: デフォルトで線形だが明示 ★★★
+              calcMode="linear"
               dur={`${totalDuration}s`}
               repeatCount="indefinite"
             >
@@ -143,7 +144,6 @@ export default function Loading({
               values="hidden; visible; hidden; hidden"
               keyTimes={`0; 0.001; ${activeEndKeyTime}; 1`}
               dur={`${totalDuration}s`}
-              // visibilityは離散的なのでcalcModeは不要
               repeatCount="indefinite"
             />
           </circle>
@@ -154,7 +154,6 @@ export default function Loading({
     );
   }
 else{
-  // pointsがない場合はスピナーアニメーション
   return (
     <div className="flex flex-col items-center justify-center p-4">
       <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-primary motion-reduce:animate-[spin_1.5s_linear_infinite]" role="status">
