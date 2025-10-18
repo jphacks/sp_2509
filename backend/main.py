@@ -119,7 +119,13 @@ def list_user_courses(
     if sort_by not in ("created_at", "distance"):
         raise HTTPException(status_code=400, detail="sort_by must be 'created_at' or 'distance'")
     
-    courses = db.query(models.Course).filter(models.Course.user_id == user_id).all()
+    # user_id はパスパラメータで文字列として受け取るため、UUID に変換してクエリする
+    try:
+        user_uuid = uuid.UUID(user_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid user_id format. Must be UUID.")
+
+    courses = db.query(models.Course).filter(models.Course.user_id == user_uuid).all()
     response_courses = []
     for course in courses:
         distance_to_start_km = 0.0
@@ -128,14 +134,14 @@ def list_user_courses(
             distance_to_start_km = calculate_distance_km(current_lat, current_lng, start_point.get("lat"), start_point.get("lng"))
         response_courses.append(
             schemas.CourseSummary(
-                id=course.id,
+                id=str(course.id),
                 total_distance_km=course.total_distance_km,
                 distance_to_start_km=distance_to_start_km,
                 is_favorite=course.is_favorite,
                 created_at=course.created_at,
                 route_points=course.route_points,
                 drawing_points=None,
-            ) 
+            )
         )
 
 
@@ -149,7 +155,7 @@ def list_user_courses(
 @app.get("/users/{user_id}/courses/{course_id}", response_model=schemas.CourseSummary)
 def get_user_course(
     user_id: str,
-    course_id: str,
+    course_id: uuid.UUID ,
     db: Session = Depends(get_db),
     current_lat: Optional[float] = None,
     current_lng: Optional[float] = None,
@@ -157,15 +163,18 @@ def get_user_course(
     """
     特定のコース1件の詳細を返す。
     """
-    course = db.query(models.Course).filter(models.Course.user_id == user_id, models.Course.id == course_id).first()
-
-
-    # course_id の形式チェック（UUIDでない場合は 400）
+    # user_id を UUID に変換してクエリする
     try:
-        course_uuid = uuid.UUID(course_id)
+        user_uuid = uuid.UUID(user_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid course_id format. Must be UUID.")
+        raise HTTPException(status_code=400, detail="Invalid user_id format. Must be UUID.")
 
+    course = db.query(models.Course).filter(models.Course.user_id == user_uuid, models.Course.id == course_id).first()
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
+
+    
     jst = timezone(timedelta(hours=+9), 'JST')
     distance_to_start_km = 0.0
     if current_lat is not None and current_lng is not None and course.route_points:
@@ -173,7 +182,7 @@ def get_user_course(
         distance_to_start_km = calculate_distance_km(current_lat, current_lng, start_point.get("lat"), start_point.get("lng"))
        
     return schemas.CourseSummary(
-        id=course.id,
+        id=str(course.id),
         total_distance_km=course.total_distance_km,
         distance_to_start_km=distance_to_start_km,
         is_favorite=course.is_favorite,
