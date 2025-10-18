@@ -3,7 +3,6 @@
 import Image from 'next/image';
 import Carousel from '../../components/Carousel_iwai';
 import Title from '../../components/title';
-import Header from '../../components/Header';
 import RoutingButton from '../../components/routingButton';
 import mapIcon from './img/map_icon.png';
 
@@ -18,16 +17,19 @@ export default function Home() {
     const paddingX = 'px-4';
     const paddingTop = 'pt-8';
     const paddingBottom = 'pb-12';
+    const backgroundColor = 'rgb(248, 246, 251)';
 
     return (
-        <div className="bg-white text-black min-h-screen">
+        <div style={{ backgroundColor }} className="text-black min-h-screen">
             <main className={`flex flex-col ${paddingTop} ${paddingBottom} max-w-md mx-auto min-h-screen`}>
                 <div className={`${paddingX} flex flex-col gap-y-10`}>
                     {/* Top Text */}
                     <div className='text-left'>
                         <Title title="ジョギングアプリ" />
-                        <Header headerText="好きな絵のコースで走ってみませんか？" />
-                        <Header headerText="GPSアートになるジョギングコースをデザインしましょう" />
+                        <div className="mt-2 text-sm text-gray-500">
+                            <p>好きな絵のコースで走ってみませんか？</p>
+                            <p>GPSアートになるジョギングコースをデザインしましょう</p>
+                        </div>
                     </div>
 
                     {/* How to Use Section */}
