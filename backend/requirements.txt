@@ -11,3 +11,4 @@ networkx
 numpy
 shapely
 matplotlib
+pygame
