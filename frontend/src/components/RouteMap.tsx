@@ -18,6 +18,8 @@ interface RouteMapProps {
   padding?: number;      // default: 5
   /** 近づきすぎ防止の上限ズーム */
   maxZoom?: number;      // default: 16
+  /** 地図の操作（ズーム・ドラッグ）を許可するか */
+  interactive?: boolean; // default: true
 }
 
 const FitBounds = ({
@@ -47,6 +49,7 @@ const RouteMap = ({
   width = "100%",
   padding = 5,
   maxZoom = 16,
+  interactive = true,
 }: RouteMapProps) => {
   const h = typeof height === "number" ? `${height}px` : height;
   const w = typeof width === "number" ? `${width}px` : width;
@@ -60,10 +63,19 @@ const RouteMap = ({
   });
 
   return (
-    <MapContainer style={{ height: h, width: w }} zoomControl={false}>
+    <MapContainer
+      style={{ height: h, width: w }}
+      attributionControl={false}
+      zoomControl={interactive}
+      dragging={interactive}
+      touchZoom={interactive}
+      doubleClickZoom={interactive}
+      scrollWheelZoom={interactive}
+      boxZoom={interactive}
+      keyboard={interactive}
+    >
       <TileLayer
         url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
       />
 
       {positions && positions.length > 0 && (
