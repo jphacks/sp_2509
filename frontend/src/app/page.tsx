@@ -198,7 +198,7 @@ export default function Home() {
           </div>
 
           <div>
-            <Loading loadingText="読み込み中" points={starShapePoints} />
+            <Loading loadingText='読み込み中...' points={starShapePoints} />
           </div>
         </div>
       </div>
