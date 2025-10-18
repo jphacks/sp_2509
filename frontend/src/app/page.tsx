@@ -7,13 +7,13 @@ import Title from "../components/Title";
 import RoutingButton from "../components/RoutingButton";
 import { FaArrowRight } from "react-icons/fa";
 import MadeRoute from "../components/MadeRoute";
+import MadeRouteCard_Big from "../components/MadeRouteCard_Big";
 import type { LatLngExpression } from "leaflet";
 import Slider from "../components/Slider";
-import Loading from '../components/Loading';
+import Loading from "../components/Loading";
 import type { Point } from "../types/types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-
+const API_URL = "/api";
 
 // ダミーのハート座標
 function makeHeartPositions(): LatLngExpression[] {
@@ -38,13 +38,36 @@ function makeHeartPositions(): LatLngExpression[] {
   });
 }
 
+// ダミーの長方形座標
+function makeRectanglePositions(): LatLngExpression[] {
+  const base: Point[] = [
+    { x: 100, y: 100 },
+    { x: 250, y: 100 },
+    { x: 250, y: 200 },
+    { x: 100, y: 200 },
+    { x: 100, y: 100 }, // 閉じる
+  ];
+
+  return base.map((p) => {
+    const lat = 43.06 - (p.y - 150) * 0.0005;
+    const lng = 141.35 + (p.x - 175) * 0.0005;
+    return [lat, lng] as [number, number];
+  });
+}
 
 // ダミー座標データ
 const starShapePoints: Point[] = [
-  { x: 50, y: 5 },   { x: 61.8, y: 38.2 }, { x: 98, y: 38.2 },
-  { x: 68.2, y: 61.8 }, { x: 79, y: 95 },   { x: 50, y: 76 },
-  { x: 21, y: 95 },   { x: 31.8, y: 61.8 }, { x: 2, y: 38.2 },
-  { x: 38.2, y: 38.2 }, { x: 50, y: 5 } // 閉じる
+  { x: 50, y: 5 },
+  { x: 61.8, y: 38.2 },
+  { x: 98, y: 38.2 },
+  { x: 68.2, y: 61.8 },
+  { x: 79, y: 95 },
+  { x: 50, y: 76 },
+  { x: 21, y: 95 },
+  { x: 31.8, y: 61.8 },
+  { x: 2, y: 38.2 },
+  { x: 38.2, y: 38.2 },
+  { x: 50, y: 5 }, // 閉じる
 ];
 
 export default function Home() {
@@ -52,14 +75,27 @@ export default function Home() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // ルートカード（単一の例）
+  // ルートカード(単一の例)
   const [routeVisible, setRouteVisible] = useState(true);
   const [isFavorite, setIsFavorite] = useState<boolean>(true); // 初期お気に入り状態
   const routeId = "route-1";
-  const positions = makeHeartPositions();
+  const positions = makeRectanglePositions();
 
   // Slider の状態
   const [sliderValue, setSliderValue] = useState<number>(50);
+
+  // MadeRouteCard_Big 用のダミーデータ
+  const dummyRouteData = {
+    total_distance_km: 5.2,
+    route_points: positions.map((p) => {
+      const [lat, lng] = p as [number, number];
+      return { lat, lng };
+    }),
+    drawing_points: positions.map((p) => {
+      const [lat, lng] = p as [number, number];
+      return { lat, lng };
+    }),
+  };
 
   const fetchMessage = async () => {
     setIsLoading(true);
@@ -99,6 +135,14 @@ export default function Home() {
         <div className="text-center space-y-6">
           <h1 className="text-4xl font-bold">Sample App</h1>
 
+          {/* MadeRouteCard_Big コンポーネントの表示 */}
+          <div className="w-full">
+            <h2 className="text-xl font-semibold mb-4">
+              MadeRouteCard_Big の表示
+            </h2>
+            <MadeRouteCard_Big routeData={dummyRouteData} />
+          </div>
+
           {/* ルートカード（可視の時のみ描画） */}
           {routeVisible && (
             <MadeRoute
@@ -127,7 +171,6 @@ export default function Home() {
               step={1}
               unit="km"
             />
-    
           </div>
 
           <Title title="Title" />
@@ -154,9 +197,8 @@ export default function Home() {
             )}
           </div>
 
-
           <div>
-            <Loading loadingText='読み込み中' points={starShapePoints}/>
+            <Loading loadingText='読み込み中...' points={starShapePoints} />
           </div>
         </div>
       </div>

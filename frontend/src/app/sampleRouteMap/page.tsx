@@ -47,7 +47,7 @@ export default function Home() {
                     <h1 className="text-4xl font-bold">Sample App</h1>
 
                     <div className='my-8'>
-                        <RouteMap positions={activeRoute} drawnLine={drawnLinePositions} />
+                        <RouteMap positions={activeRoute} secondaryPositions={drawnLinePositions} />
                     </div>
 
                     <div className="flex justify-center gap-4 my-4">

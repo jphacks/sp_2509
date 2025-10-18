@@ -46,7 +46,7 @@ app.add_middleware(
 def read_message():
     jst = timezone(timedelta(hours=+9), 'JST')
     now = datetime.now(jst).strftime('%Y-%m-%d %H:%M:%S')
-    return {"message": f"Hello, World!  {now}"}
+    return {"message": f"Hello! {now}"}
 
 @app.post("/users", response_model=schemas.UserResponse, status_code=201)
 def create_user(db: Session = Depends(get_db)):

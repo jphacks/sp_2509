@@ -1,44 +1,53 @@
-# .github/workflows/ci.yml
-name: Backend CI
+name: CI
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "backend/**"
-      - ".github/workflows/ci.yml"
   pull_request:
-    branches: [main]
     paths:
-      - "backend/**"
-      - ".github/workflows/ci.yml"
+      - 'frontend/**'
+      - 'backend/**'
 
 jobs:
-  test:
+  build-frontend:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.11"] # プロジェクトで使用している Python バージョン
-
+    defaults:
+      run:
+        working-directory: ./frontend
     steps:
-      # コードをチェックアウト
       - uses: actions/checkout@v4
 
-      # Python をセットアップ
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+  test-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: '3.9'
 
-      # 依存パッケージのインストール
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r backend/requirements.txt
+        run: pip install -r backend/requirements.txt
 
       - name: Run tests
-        env:
-          PYTHONPATH: ${{ github.workspace }} # Pythonがモジュールを探すパスにリポジトリルートを追加
-        run: |
-          # pytest をリポジトリルートから実行し、テスト対象ディレクトリを指定
-          python -m pytest backend
+        run: pytest
