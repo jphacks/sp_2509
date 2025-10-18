@@ -1,12 +1,54 @@
 'use client';
 
-import Image from 'next/image';
+import { useEffect, useState } from 'react';
 import Carousel from '../../components/Carousel';
 import Title from '../../components/Title';
 import RoutingButton from '../../components/RoutingButton';
-import mapIcon from './img/map_icon.png';
+import EmptyCourse from './components/EmptyCourse';
+import CourseList from './components/CourseList';
 
 export default function Home() {
+    const [courses, setCourses] = useState([]);
+
+    useEffect(() => {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+
+        const fetchCourses = async (userId: string) => {
+            alert(userId); // userIdを表示
+            try {
+                const res = await fetch(`${API_URL}/users/${userId}/courses`);
+                const data = await res.json();
+                setCourses(data);
+            } catch (error) {
+                console.error('Error fetching courses:', error);
+            }
+        };
+
+        const initializeUser = async () => {
+            let uuid = localStorage.getItem('uuid');
+            if (!uuid) {
+                try {
+                    const res = await fetch(`${API_URL}/users`, { method: 'POST' });
+                    const data = await res.json();
+                    uuid = data.user_id;
+                    if (uuid) {
+                        localStorage.setItem('uuid', uuid);
+                    }
+                } catch (error) {
+                    console.error('Error creating user:', error);
+                    return;
+                }
+            }
+            if (uuid) {
+                fetchCourses(uuid);
+            }
+        };
+
+        initializeUser();
+    }, []);
+
+
+
     const carouselItems = [
         { src: '/images/sample4.png', alt: 'Slide 1', description: '走りたいルートの形を書く' },
         { src: '/images/whiteblue.png', alt: 'Slide 2', description: '走り始める場所とおおよその長さを決める' },
@@ -46,15 +88,7 @@ export default function Home() {
                     {/* Created Course Section */}
                     <div>
                         <h2 className="text-2xl font-bold mb-4">作成したコース</h2>
-                        <div className="text-center flex flex-col items-center gap-y-4">
-                            <div>
-                                <Image src={mapIcon} alt="Map Icon" width={96} height={96} />
-                            </div>
-                            <div>
-                                <p className="text-gray-500">まだルートがありません</p>
-                                <p className="text-gray-500">絵を描いて最初のルートを作りましょう</p>
-                            </div>
-                        </div>
+                        {courses.length === 0 ? <EmptyCourse /> : <CourseList />} {/*バックエンドから作成ルートのデータが返ってくるかどうかで条件分岐*/}
                     </div>
                 </div>
 
