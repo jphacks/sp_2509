@@ -1,9 +1,10 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import DrawnShapeImage from '@/components/DrawnShapeImage';
+import { useRouter } from 'next/navigation'; // useRouterをインポート
+
 
 const CenterPinMap = dynamic(() => import('@/components/CenterPinMap'), { ssr: false });
 

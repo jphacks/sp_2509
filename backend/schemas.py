@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from typing import Optional
-from uuid import UUID
 from datetime import datetime
 
 class UserResponse(BaseModel):
@@ -38,7 +37,7 @@ class RouteCalculateResponse(BaseModel):
     drawing_points: list[LatLng]
 
 class CourseSummary(BaseModel):
-    id: UUID
+    id: str
     total_distance_km: float
     distance_to_start_km: float
     is_favorite: bool
@@ -54,5 +53,5 @@ class CourseCreateRequest(BaseModel):
 
     # 1件の「お気に入り状態」だけ返すシンプルなレスポンス
 class ToggleFavoriteResponse(BaseModel):
-    id: UUID
+    id: str
     is_favorite: bool

@@ -1,0 +1,44 @@
+# .github/workflows/ci.yml
+name: Backend CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/ci.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/ci.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11"] # プロジェクトで使用している Python バージョン
+
+    steps:
+      # コードをチェックアウト
+      - uses: actions/checkout@v4
+
+      # Python をセットアップ
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # 依存パッケージのインストール
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Run tests
+        env:
+          PYTHONPATH: ${{ github.workspace }} # Pythonがモジュールを探すパスにリポジトリルートを追加
+        run: |
+          # pytest をリポジトリルートから実行し、テスト対象ディレクトリを指定
+          python -m pytest backend
