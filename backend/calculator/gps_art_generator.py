@@ -23,16 +23,16 @@ class GPSArtGenerator:
         """
         ox.settings.use_cache = cache_enabled
         
-        self.alpha = 1.0 #方向性の重み
-        self.beta = 5.0 #効率性の重み
-        self.gamma = 1.0 #形状忠実性の重み
+        self.alpha = 1.0 # 方向性の重み
+        self.beta = 5.0 # 効率性の重み
+        self.gamma = 1.0 # 形状忠実性の重み
         
         self.network_type = "walk"
-        self.network_distance = 4000 #地図の取得する範囲（メートル）
-        self.path_length_adjustment = 0.7 #目標距離の調整係数
-        self.rotation_search_steps = 360 #経路角度探索のステップ数
-        self.resample_points = 40 #経路探索のためにリサンプリングする点の数
-        self.rotation_search_points = 200 #角度決定のためにリサンプリングする点の数
+        self.network_distance = 4000 # 地図の取得する範囲（メートル）
+        self.path_length_adjustment = 0.7 # 目標距離の調整係数
+        self.rotation_search_steps = 360 # 経路角度探索のステップ数
+        self.resample_points = 40 # 経路探索のためにリサンプリングする点の数
+        self.rotation_search_points = 200 # 角度決定のためにリサンプリングする点の数
         self._road_network = None
         self._road_network_latlon = None
         self._anchor_point = None
