@@ -8,6 +8,7 @@ from typing import Optional
 from .database import engine, get_db
 from . import models, schemas
 from geopy.distance import geodesic
+from .calculator.gps_art_generator import GPSArtGenerator
 
 def calculate_distance_km(
     lat1: Optional[float],
@@ -26,6 +27,10 @@ def calculate_distance_km(
 
 # DBテーブルの作成
 models.Base.metadata.create_all(bind=engine)
+
+# GPSArtGeneratorのインスタンスを生成
+# キャッシュを有効にすると、2回目以降の同じ場所でのリクエストが高速になります
+art_generator = GPSArtGenerator(cache_enabled=True)
 
 app = FastAPI()
 
@@ -76,30 +81,40 @@ def get_all_users(db: Session = Depends(get_db)):
 
 
 # ------------------------------------------------------------
-# Routes: Calculate API (dummy)
+# Routes: Calculate API
 # ------------------------------------------------------------
 @app.post("/routes/calculate", response_model=schemas.RouteCalculateResponse)
 def calculate_route(payload: schemas.RouteCalculateRequest):
     """
-    図形のディスプレイ座標、開始位置、目標距離(km)を受け取り、
-    ダミーの経路計算結果を返す。
+    手書きの描画データ、開始地点、目標距離から最適なGPSアートコースを生成。
 
-    現状は固定値のダミーデータを返すのみ。
+    このエンドポイントは、ユーザーが手書きした図形の座標、コースの開始地点（緯度経度）、
+    そして目標とするコースの総距離（km）を入力として受け取る。
+
+    Args:
+        payload (schemas.RouteCalculateRequest): APIリクエストボディ。
+            - `drawing_display_points`: 手書き図形のディスプレイ座標リスト (`[{x, y}, ...]`)
+            - `start_location`: 開始地点の緯度経度 (`{lat, lng}`)
+            - `target_distance_km`: 目標距離 (km)
+
+    Returns:
+        schemas.RouteCalculateResponse: 計算結果。
+            - `total_distance_km`: 実際に生成されたルートの総距離 (km)
+            - `route_points`: ルートを構成する緯度経度のリスト (`[{lat, lng}, ...]`)
+            - `drawing_points`: 手書き経路の緯度経度のリスト
     """
+    drawing_display_points = [point.dict() for point in payload.drawing_display_points]
+    
+    result = art_generator.calculate_route(
+        drawing_display_points=drawing_display_points,
+        start_location=payload.start_location.dict(),
+        target_distance_km=payload.target_distance_km
+    )
 
-    # ダミー応答データ（指定フォーマットに合わせる）
     return schemas.RouteCalculateResponse(
-        total_distance_km=10.5,
-        route_points=[
-            schemas.LatLng(lat=12.123, lng=139.456),
-            schemas.LatLng(lat=34.133, lng=139.466),
-            schemas.LatLng(lat=56.143, lng=139.456),
-        ],
-        drawing_points=[
-            schemas.LatLng(lat=98.125, lng=139.458),
-            schemas.LatLng(lat=76.135, lng=139.468),
-            schemas.LatLng(lat=54.145, lng=139.458),
-        ],
+        total_distance_km=result["total_distance_km"],
+        route_points=[schemas.LatLng(**point) for point in result["route_points"]],
+        drawing_points=[schemas.LatLng(**point) for point in result["drawing_points"]],
     )
 
 @app.get("/users/{user_id}/courses", response_model=list[schemas.CourseSummary])
