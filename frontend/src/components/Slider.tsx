@@ -22,8 +22,11 @@ export default function Slider({
   unit,
   disabled = false,
 }: SliderProps) {
+  // max と min が等しい場合の例外処理
+  const safeMax = Math.max(max, min + 1);
+
   // 現在値の割合を計算
-  const percentage = ((value - min) / (max - min)) * 100;
+  const percentage = ((value - min) / (safeMax - min)) * 100;
 
   return (
     <div className={`w-full ${disabled ? "opacity-50" : ""}`}>
