@@ -7,7 +7,6 @@ from fastapi import Response, status
 from typing import Optional
 from .database import engine, get_db
 from . import models, schemas
-from .utils import calculate_distance_km
 from geopy.distance import geodesic
 from typing import Optional
 
@@ -172,8 +171,8 @@ def get_user_course(
     distance_to_start_km = 0.0
     if current_lat is not None and current_lng is not None and course.route_points:
         start_point = course.route_points[0]
-        distance_to_start_km = calculate_distance_km(current_lat,current_lng,start_point.get("lat"),start_point.get("lng"))
-
+        distance_to_start_km = calculate_distance_km(current_lat, current_lng, start_point.get("lat"), start_point.get("lng"))
+       
     return schemas.CourseSummary(
         id=course_uuid,
         total_distance_km=course.total_distance_km,
