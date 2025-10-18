@@ -236,10 +236,36 @@ def create_course_for_user(
 def delete_user_course(
     user_id: str,
     course_id: str,
+    db: Session = Depends(get_db),
 ):
     """
-    完全ダミー: 実際には削除せず、常に 204 No Content を返す。
+    指定ユーザーのコースを削除し、204 No Content を返す。
+    - user_id, course_id は UUID 形式を検証（不正なら 400）
+    - コースが存在しない、またはユーザーのものではない場合は 404
     """
+    # UUID 形式チェック
+    try:
+        user_uuid = uuid.UUID(user_id)
+        course_uuid = uuid.UUID(course_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid id format. Must be UUID.")
+
+    # コース存在＆所有者確認
+    course = (
+        db.query(models.Course)
+        .filter(
+            models.Course.id == course_uuid,
+            models.Course.user_id == user_uuid,
+        )
+        .first()
+    )
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found.")
+
+    # 削除
+    db.delete(course)
+    db.commit()
+
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @app.post("/users/{user_id}/courses/{course_id}/toggle_favorite", response_model=schemas.ToggleFavoriteResponse)
