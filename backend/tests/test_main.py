@@ -1,14 +1,10 @@
-# backend/tests/test_main.py
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 import pytest
 import uuid
 
-# backend パッケージ内のモジュールをインポート
 from backend import models
 from backend import schemas
-
-# conftest.py で定義した client, db_session フィクスチャを使用
 
 
 def test_create_user(client: TestClient):
@@ -78,16 +74,15 @@ def test_list_user_courses_empty(client: TestClient, db_session: Session):
     response = client.get(f"/users/{user_id}/courses")
     assert response.status_code == 200
     assert response.json() == []
-# backend/tests/test_main.py のフィクスチャを修正
 @pytest.fixture
 def setup_user_and_course(db_session: Session):
     user = models.User()
     db_session.add(user)
-    db_session.commit() # <-- 先にユーザーをコミットして ID を確定させる
-    db_session.refresh(user) # <-- user.id を確実に取得
+    db_session.commit()
+    db_session.refresh(user)
 
     course = models.Course(
-        user_id=user.id, # <-- これで確定した user.id を使える
+    user_id=user.id,
         total_distance_km=5.0,
         is_favorite=False,
         route_points=[{"lat": 35.0, "lng": 139.0}],
@@ -98,12 +93,10 @@ def setup_user_and_course(db_session: Session):
     db_session.refresh(course)
     return user, course
 
-# backend/tests/test_main.py の test_list_user_courses_with_data を修正
-
 def test_list_user_courses_with_data(client: TestClient, db_session: Session, setup_user_and_course):
     user, course = setup_user_and_course
     user_id = str(user.id)
-    expected_course_id = str(course.id) # <--- ★★★ API呼び出し前に ID を変数に保存 ★★★
+    expected_course_id = str(course.id)
 
     # 別のユーザーとコースも作成してみる
     other_user = models.User()
@@ -119,11 +112,10 @@ def test_list_user_courses_with_data(client: TestClient, db_session: Session, se
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 1 # 対象ユーザーのコースのみが返ることを確認
-    # assert data[0]["id"] == str(course.id) # <--- 元のオブジェクトにアクセスしない
-    assert data[0]["id"] == expected_course_id # <--- ★★★ 保存しておいた ID 文字列と比較 ★★★
+    assert data[0]["id"] == expected_course_id
     assert data[0]["total_distance_km"] == 5.0
     assert data[0]["is_favorite"] is False
-    assert data[0]["drawing_points"] is None # 一覧では drawing_points は null
+    assert data[0]["drawing_points"] is None
 
 
 def test_get_user_course_detail(client: TestClient, db_session: Session, setup_user_and_course):
@@ -148,9 +140,8 @@ def test_get_user_course_detail_not_found(client: TestClient, db_session: Sessio
     non_existent_course_id = str(uuid.uuid4())
 
     response = client.get(f"/users/{user_id}/courses/{non_existent_course_id}")
-    # main.py の修正により、正しく 404 が返るはず
-    assert response.status_code == 404 # <--- 500 から 404 に変更
-    assert response.json()["detail"] == "Course not found" # エラーメッセージも確認
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Course not found"
 
 def test_get_user_course_detail_invalid_uuid(client: TestClient, db_session: Session, setup_user_and_course):
     # course_id の形式がUUIDでない場合に422が返ることを検証する
