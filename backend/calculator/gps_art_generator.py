@@ -1,5 +1,5 @@
 import osmnx as ox
-from osmnx import projection
+from osmnx import projection, _errors
 import networkx as nx
 import numpy as np
 from shapely.geometry import Point
@@ -89,12 +89,16 @@ class GPSArtGenerator:
             print("道路ネットワークデータを取得中...")
             self._anchor_point = (center_lat, center_lon)
             
-            self._road_network_latlon = ox.graph_from_point(
-                self._anchor_point, 
-                dist=self.network_distance, 
-                network_type=self.network_type
-            )
-            
+            try:
+                self._road_network_latlon = ox.graph_from_point(
+                    self._anchor_point, 
+                    dist=self.network_distance, 
+                    network_type=self.network_type
+                )
+            except _errors.InsufficientResponseError as e:
+                print(f"エラー: 指定された座標({center_lat}, {center_lon})周辺に道路データが見つかりませんでした。")
+                raise ValueError("指定された場所の近くに道路が見つかりませんでした。") from e
+
             print("グラフを投影中...")
             self._road_network = ox.project_graph(self._road_network_latlon)
             

@@ -5,57 +5,80 @@ import "leaflet/dist/leaflet.css";
 import { LatLngExpression, divIcon, LatLngBounds } from "leaflet";
 import { useEffect } from "react";
 
+type CSSSize = number | string; // numberはpx、stringは"100%"など
+
 interface RouteMapProps {
   positions?: LatLngExpression[];
   drawnLine?: LatLngExpression[];
+  /** 実コンテナの高さ（fitBoundsのズーム決定に影響） */
+  height?: CSSSize;      // default: 400
+  /** 実コンテナの幅（fitBoundsのズーム決定に影響） */
+  width?: CSSSize;       // default: "100%"
+  /** fitBoundsの余白(px)。大きいほど引き気味 */
+  padding?: number;      // default: 5
+  /** 近づきすぎ防止の上限ズーム */
+  maxZoom?: number;      // default: 16
 }
 
-const FitBounds = ({ positions }: { positions?: LatLngExpression[] }) => {
+const FitBounds = ({
+  positions,
+  padding = 5,
+  maxZoom = 16,
+}: {
+  positions?: LatLngExpression[];
+  padding?: number;
+  maxZoom?: number;
+}) => {
   const map = useMap();
 
   useEffect(() => {
-    if (positions && positions.length > 0) {
-      const bounds = new LatLngBounds(positions);
-      map.fitBounds(bounds, { padding: [5, 5] });
-    }
-  }, [positions, map]);
+    if (!positions || positions.length === 0) return;
+    const bounds = new LatLngBounds(positions);
+    map.fitBounds(bounds, { padding: [padding, padding], maxZoom });
+  }, [positions, padding, maxZoom, map]);
 
   return null;
 };
 
-const RouteMap = ({ positions, drawnLine }: RouteMapProps) => {
-  // "S"の文字を持つカスタムスタートピンを作成
+const RouteMap = ({
+  positions,
+  drawnLine,
+  height = 400,
+  width = "100%",
+  padding = 5,
+  maxZoom = 16,
+}: RouteMapProps) => {
+  const h = typeof height === "number" ? `${height}px` : height;
+  const w = typeof width === "number" ? `${width}px` : width;
+
+  // "S" のカスタムスタートピン
   const startIcon = divIcon({
-    html: `<div style="background-color: #4A90E2; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white;">S</div>`,
-    className: "", // leaflet-div-iconのデフォルトスタイルを無効化
+    html: `<div style="background-color:#4A90E2;color:white;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-weight:bold;border:2px solid white;">S</div>`,
+    className: "",
     iconSize: [30, 30],
-    iconAnchor: [15, 15], // アイコンの中心がマーカー位置になるように調整
+    iconAnchor: [15, 15],
   });
 
   return (
-    <MapContainer
-      style={{ height: "400px", width: "100%" }}
-      zoomControl={false}
-    // centerとzoomはFitBoundsコンポーネントが動的に設定するため、削除しました。
-    // 初期表示位置が必要な場合は、positionsが空の時のためのデフォルトboundsを設定するなどの工夫が必要です。
-    >
+    <MapContainer style={{ height: h, width: w }} zoomControl={false}>
       <TileLayer
         url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
       />
 
       {positions && positions.length > 0 && (
-        <div>
+        <>
           <Polyline positions={positions} color="red" />
           <Marker position={positions[0]} icon={startIcon} />
-        </div>
+        </>
       )}
 
       {/* 指で書いた線 (青い点線) */}
       {drawnLine && drawnLine.length > 0 && (
         <Polyline positions={drawnLine} color="blue" dashArray="5, 10" />
       )}
-      <FitBounds positions={positions} />
+
+      <FitBounds positions={positions} padding={padding} maxZoom={maxZoom} />
     </MapContainer>
   );
 };
