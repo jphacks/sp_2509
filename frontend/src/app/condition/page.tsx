@@ -20,7 +20,7 @@ export default function Condition() {
             条件設定
           </p>
 
-          <
+          
 
           {/* ボタンによるページ遷移 */}
           <button
