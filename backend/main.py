@@ -185,43 +185,122 @@ def get_user_course(
 def create_course_for_user(
     user_id: str,
     payload: schemas.CourseCreateRequest,
+    db: Session = Depends(get_db),
 ):
     """
-    完全ダミー:
-    - DBへは保存しない
-    - UUID形式の検証もしない
-    - 201 Created を返し、Location ヘッダーで擬似IDを通知
+    コースをDBに保存し、201 Created を返す。
+    - user_id は UUID 形式を検証
+    - ユーザーが存在しない場合は 404
+    - 保存後、Location ヘッダーに作成したコースIDを設定
     - レスポンスボディはなし
     """
-    fake_course_id = str(uuid.uuid4())
+    # UUID形式チェック
+    try:
+        user_uuid = uuid.UUID(user_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid user_id format. Must be UUID.")
+
+    # ユーザー存在確認
+    user = db.query(models.User).filter(models.User.id == user_uuid).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    # ポイントをJSONへ整形
+    def to_point_dict(p) -> dict:
+        return {"lat": float(p.lat), "lng": float(p.lng)}
+
+    route_points = [to_point_dict(p) for p in payload.route_points]
+    dp = getattr(payload, "drawing_points", None)
+    drawing_points = [to_point_dict(p) for p in dp] if dp is not None else []
+
+    is_favorite = bool(getattr(payload, "is_favorite", False))
+
+    # コース保存
+    new_course = models.Course(
+        user_id=user_uuid,
+        total_distance_km=float(payload.total_distance_km),
+        is_favorite=is_favorite,
+        route_points=route_points,
+        drawing_points=drawing_points,
+    )
+    db.add(new_course)
+    db.commit()
+    db.refresh(new_course)
+
     return Response(
         status_code=status.HTTP_201_CREATED,
-        headers={"Location": f"/users/{user_id}/courses/{fake_course_id}"}
+        headers={"Location": f"/users/{user_id}/courses/{str(new_course.id)}"}
     )
 
 @app.delete("/users/{user_id}/courses/{course_id}", status_code=204)
 def delete_user_course(
     user_id: str,
     course_id: str,
+    db: Session = Depends(get_db),
 ):
     """
-    完全ダミー: 実際には削除せず、常に 204 No Content を返す。
+    指定ユーザーのコースを削除し、204 No Content を返す。
+    - user_id, course_id は UUID 形式を検証（不正なら 400）
+    - コースが存在しない、またはユーザーのものではない場合は 404
     """
+    # UUID 形式チェック
+    try:
+        user_uuid = uuid.UUID(user_id)
+        course_uuid = uuid.UUID(course_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid id format. Must be UUID.")
+
+    # コース存在＆所有者確認
+    course = (
+        db.query(models.Course)
+        .filter(
+            models.Course.id == course_uuid,
+            models.Course.user_id == user_uuid,
+        )
+        .first()
+    )
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found.")
+
+    # 削除
+    db.delete(course)
+    db.commit()
+
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @app.post("/users/{user_id}/courses/{course_id}/toggle_favorite", response_model=schemas.ToggleFavoriteResponse)
 def toggle_course_favorite(
     user_id: str,
     course_id: str,
+    db: Session = Depends(get_db),
 ):
     """
-    完全ダミー:
-    - DBへは保存しない
-    - UUID形式の検証はしない（非UUIDは UUIDv5 で正規化）
-    - 擬似的に現在値を推定して反転した is_favorite を返す
+    指定ユーザーのコースのお気に入りフラグをトグルして返す。
+    - user_id, course_id は UUID 形式を検証（不正なら 400）
+    - コースが存在しない、またはユーザーのものではない場合は 404
     """
-    cid="cb657453-7ccf-41c6-a496-121b1a1469e8"
+    # UUID検証
+    try:
+        user_uuid = uuid.UUID(user_id)
+        course_uuid = uuid.UUID(course_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid id format. Must be UUID.")
 
-    toggled = True
+    # コース存在＆所有者確認
+    course = (
+        db.query(models.Course)
+        .filter(
+            models.Course.id == course_uuid,
+            models.Course.user_id == user_uuid,
+        )
+        .first()
+    )
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found.")
 
-    return schemas.ToggleFavoriteResponse(id=cid, is_favorite=toggled)
+    # トグルして保存
+    course.is_favorite = not bool(course.is_favorite)
+    db.commit()
+    db.refresh(course)
+
+    return schemas.ToggleFavoriteResponse(id=str(course.id), is_favorite=course.is_favorite)
