@@ -1,58 +1,32 @@
 'use client';
-import { useRouter } from 'next/navigation'; // useRouterをインポート
+import { useSearchParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
+import { useMemo } from 'react';
 
-export default function Route() {
+const RouteMap = dynamic(() => import('@/components/RouteMap'), { ssr: false }); // 任意
 
-    const router = useRouter(); // useRouterを初期化
+export default function RoutePage() {
+  const params = useSearchParams();
+  const lat = parseFloat(params.get('lat') ?? '');
+  const lng = parseFloat(params.get('lng') ?? '');
+  const hasCenter = Number.isFinite(lat) && Number.isFinite(lng);
 
-    //遷移関数
-
-    const navigateToHome = () => {
-    router.push('/home');
-    }
-
-    const navigateToDraw = () => {
-    router.push('/draw');
-    }
-
-    const navigateToCondition = () => {
-    router.push('/condition');
-    }
+  const center: [number, number] | null = useMemo(
+    () => (hasCenter ? [lat, lng] : null),
+    [hasCenter, lat, lng]
+  );
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4">
-      <div className="z-10 w-full max-w-5xl items-center justify-center text-sm">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold">Route Page</h1>
-          <p className="mt-4 text-lg">
-            This is Route page.
-          </p>
+    <main className="p-4 max-w-md mx-auto space-y-4">
+      <h1 className="text-xl font-bold">ルート作成</h1>
+      <p className="text-sm text-gray-600">
+        受け取った座標: {hasCenter ? `${lat.toFixed(6)}, ${lng.toFixed(6)}` : '未指定'}
+      </p>
 
-
-          {/* ボタンによるページ遷移 */}
-          <button
-            onClick={navigateToHome}
-            className="mt-4 px-6 py-3 bg-black text-white font-semibold rounded-lg shadow-md hover:bg-zinc-700 focus:outline-gray-600 focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75"
-          >
-            Go to Home Page (Button)
-          </button>
-
-          <button
-            onClick={navigateToDraw}
-            className="mt-4 px-6 py-3 bg-black text-white font-semibold rounded-lg shadow-md hover:bg-zinc-700 focus:outline-gray-600 focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75"
-          >
-            Go to Draw Page (Button)
-          </button>
-
-          <button
-            onClick={navigateToCondition}
-            className="mt-4 px-6 py-3 bg-black text-white font-semibold rounded-lg shadow-md hover:bg-zinc-700 focus:outline-gray-600 focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75"
-          >
-            Go to Route Condition (Button)
-          </button>
-
-        </div>
-      </div>
+      {/* 任意：受け取った座標で地図を表示 */}
+      {center && (
+        <RouteMap positions={[center]} height={260} />
+      )}
     </main>
   );
 }
