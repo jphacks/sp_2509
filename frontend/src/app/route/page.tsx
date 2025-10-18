@@ -1,10 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import MadeRouteCard_Big from "@/components/MadeRouteCard_Big";
 import Title from "@/components/Title";
 import RoutingButton from "@/components/RoutingButton";
 import { FaPencilAlt, FaCog, FaSave } from "react-icons/fa";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+
 
 type RoutePoint = {
   lat: number;
@@ -19,6 +23,8 @@ type ResponseData = {
 
 export default function CourseDetailPage() {
   const [routeData, setRouteData] = useState<ResponseData | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     // ローカルストレージからデータを取得
@@ -43,6 +49,53 @@ export default function CourseDetailPage() {
       }
     }
   }, []);
+
+  const handleSaveCourse = async () => {
+    if (!routeData || isSaving) return;
+
+    setIsSaving(true);
+
+    try {
+      // ユーザーIDをローカルストレージから取得
+      // 実際の実装に合わせてユーザーIDの取得方法を調整してください
+      const userId = localStorage.getItem("uuid");
+      if (!userId) {
+        alert("ユーザー情報が見つかりません");
+        setIsSaving(false);
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/users/${userId}/courses`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          total_distance_km: routeData.total_distance_km,
+          route_points: routeData.route_points,
+          drawing_points: routeData.drawing_points,
+          is_favorite: false,
+        }),
+      });
+
+      if (response.ok) {
+        // 保存成功後、ローカルストレージをクリア
+        localStorage.removeItem("responsePointsData");
+        localStorage.removeItem("drawingPointsData");
+
+        // ホーム画面に遷移
+        router.push("/home");
+      } else {
+        const errorData = await response.json();
+        alert(`保存に失敗しました: ${errorData.detail || "不明なエラー"}`);
+        setIsSaving(false);
+      }
+    } catch (error) {
+      console.error("コース保存エラー:", error);
+      alert("保存中にエラーが発生しました");
+      setIsSaving(false);
+    }
+  };
 
   if (!routeData) {
     return (
@@ -74,11 +127,14 @@ export default function CourseDetailPage() {
             icon={FaPencilAlt}
           />
           <RoutingButton buttonText="条件変更" to="/condition" icon={FaCog} />
-          <RoutingButton
-            buttonText="保存してホームに戻る"
-            to="/home"
-            icon={FaSave}
-          />
+          <button
+            onClick={handleSaveCourse}
+            disabled={isSaving}
+            className="w-full flex items-center justify-center gap-2 bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+          >
+            <FaSave />
+            <span>{isSaving ? "保存中..." : "保存してホームに戻る"}</span>
+          </button>
         </div>
       </main>
     </div>
