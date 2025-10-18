@@ -100,8 +100,8 @@ export default function Condition() {
         // /route へ遷移（IDがあるならそれを使う）
         router.push(`/route`);
       }
-    } catch (err) {
-      console.log("エラーです");
+    } catch (e) {
+      console.error('Failed to parse drawing points from localStorage:', e);
     } finally {
       setSubmitting(false);
     }
