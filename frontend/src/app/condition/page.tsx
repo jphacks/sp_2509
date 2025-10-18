@@ -11,7 +11,6 @@ import type { Point } from '../../types/types';
 
 const CenterPinMap = dynamic(() => import('../../components/CenterPinMap'), { ssr: false });
 
-// 環境変数（例: http://127.0.0.1:8000）
 const API_URL = "/api";
 
 
