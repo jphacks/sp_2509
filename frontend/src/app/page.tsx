@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import Header from "../components/Header";
-import Title from '../components/title';
-import RoutingButton from '../components/routingButton';
+import Title from '../components/Title';
+import RoutingButton from '../components/RoutingButton';
 import { FaArrowRight } from "react-icons/fa";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
