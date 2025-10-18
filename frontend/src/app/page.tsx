@@ -8,6 +8,7 @@ import RoutingButton from "../components/RoutingButton";
 import { FaArrowRight } from "react-icons/fa";
 import MadeRoute from "../components/MadeRoute";
 import type { LatLngExpression } from "leaflet";
+import Slider from "../components/Slider";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
@@ -16,9 +17,17 @@ type Point = { x: number; y: number };
 // ダミーのハート座標
 function makeHeartPositions(): LatLngExpression[] {
   const base: Point[] = [
-    { x: 175, y: 100 }, { x: 205, y: 70 }, { x: 235, y: 80 }, { x: 250, y: 110 },
-    { x: 235, y: 140 }, { x: 175, y: 210 }, { x: 115, y: 140 }, { x: 100, y: 110 },
-    { x: 115, y: 80 }, { x: 145, y: 70 }, { x: 175, y: 100 },
+    { x: 175, y: 100 },
+    { x: 205, y: 70 },
+    { x: 235, y: 80 },
+    { x: 250, y: 110 },
+    { x: 235, y: 140 },
+    { x: 175, y: 210 },
+    { x: 115, y: 140 },
+    { x: 100, y: 110 },
+    { x: 115, y: 80 },
+    { x: 145, y: 70 },
+    { x: 175, y: 100 },
   ].map((p) => ({ x: (p.x * 350) / 300, y: (p.y * 350) / 300 }));
 
   return base.map((p) => {
@@ -39,6 +48,9 @@ export default function Home() {
   const routeId = "route-1";
   const positions = makeHeartPositions();
 
+  // Slider の状態
+  const [sliderValue, setSliderValue] = useState<number>(50);
+
   const fetchMessage = async () => {
     setIsLoading(true);
     setError("");
@@ -49,7 +61,9 @@ export default function Home() {
       const data = await res.json();
       setMessage(data.message);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An unknown error occurred");
+      setError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -89,6 +103,23 @@ export default function Home() {
             />
           )}
 
+          {/* Slider コンポーネントの動作確認 */}
+          <div className="w-full text-left space-y-4">
+            <h2 className="text-xl font-semibold">
+              Slider コンポーネントの動作確認
+            </h2>
+
+            <Slider
+              value={sliderValue}
+              onChange={setSliderValue}
+              min={0}
+              max={30}
+              step={1}
+              unit="km"
+            />
+    
+          </div>
+
           <Title title="Title" />
           <Header headerText="This is a header." />
           <RoutingButton buttonText="press" to="/home" icon={FaArrowRight} />
@@ -106,7 +137,9 @@ export default function Home() {
             {message && (
               <div>
                 <p className="mt-4 text-lg">Message from backend:</p>
-                <p className="mt-2 text-2xl font-semibold text-green-500">{message}</p>
+                <p className="mt-2 text-2xl font-semibold text-green-500">
+                  {message}
+                </p>
               </div>
             )}
           </div>
