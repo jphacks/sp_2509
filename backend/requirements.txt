@@ -13,5 +13,3 @@ networkx
 numpy
 shapely
 matplotlib
-pytest
-httpx
