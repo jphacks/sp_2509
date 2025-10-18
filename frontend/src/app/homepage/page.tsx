@@ -17,10 +17,9 @@ export default function Home() {
     const paddingX = 'px-4';
     const paddingTop = 'pt-8';
     const paddingBottom = 'pb-12';
-    const backgroundColor = 'rgb(248, 246, 251)';
 
     return (
-        <div style={{ backgroundColor }} className="text-black min-h-screen">
+        <div className="text-black min-h-screen bg-[rgb(248,246,251)]">
             <main className={`flex flex-col ${paddingTop} ${paddingBottom} max-w-md mx-auto min-h-screen`}>
                 <div className={`${paddingX} flex flex-col gap-y-10`}>
                     {/* Top Text */}
