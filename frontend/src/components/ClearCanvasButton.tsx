@@ -20,10 +20,10 @@ const ClearCanvasButton: React.FC<ClearCanvasButtonProps> = ({
       disabled={disabled}
       className={`
         flex items-center justify-center gap-2
-        px-4 py-2 rounded text-sm shadow
+        px-4 py-2 rounded text-sm
         transition-colors duration-150 ease-in-out
         ${disabled
-          ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+          ? 'bg-white text-gray-300 cursor-not-allowed border border-gray-300' 
           : 'bg-black hover:bg-gray-700 text-white'     
         }
       `}
