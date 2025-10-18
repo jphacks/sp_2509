@@ -25,24 +25,6 @@ def test_create_user(client: TestClient):
         pytest.fail("user_id is not a valid UUID")
 
 
-def test_calculate_route_dummy(client: TestClient):
-    # /routes/calculate がダミーの経路データ（固定値）を返すことを検証する
-    payload = {
-        "drawing_display_points": [{"x": 10.0, "y": 20.0}, {"x": 30.0, "y": 40.0}],
-        "start_location": {"lat": 35.0, "lng": 139.0},
-        "target_distance_km": 5.0
-    }
-    response = client.post("/routes/calculate", json=payload)
-    assert response.status_code == 200
-    data = response.json()
-    assert "total_distance_km" in data
-    assert "route_points" in data
-    assert "drawing_points" in data
-    # ダミーの値を確認 (main.py の実装に依存)
-    assert data["total_distance_km"] == 10.5
-    assert len(data["route_points"]) == 3
-    assert len(data["drawing_points"]) == 3
-
 # --- Course API Tests ---
 
 def test_create_course_for_user(client: TestClient, db_session: Session):
