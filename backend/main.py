@@ -231,7 +231,7 @@ def create_course_for_user(
     # ユーザー存在確認
     user = db.query(models.User).filter(models.User.id == user_uuid).first()
     if not user:
-        raise HTTPException(status_code=405, detail="User not found.")
+        raise HTTPException(status_code=404, detail="User not found.")
 
     # ポイントをJSONへ整形
     def to_point_dict(p) -> dict:
