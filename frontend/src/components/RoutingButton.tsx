@@ -9,6 +9,7 @@ type RoutingButtonProps = {
   icon?: IconType;
 };
 
+
 export default function RoutingButton({ buttonText, to, icon: Icon }: RoutingButtonProps) {
   const router = useRouter();
   const [isActive, setIsActive] = useState(false);
