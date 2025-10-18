@@ -48,7 +48,7 @@ export default function RoutingButton({
   const handleLeave = () => {
     if (disabled) return;
     setIsActive(false);
-  }
+  };
 
   return (
     <button

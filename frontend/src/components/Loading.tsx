@@ -127,7 +127,7 @@ useEffect(() => {
 
             <animate
               attributeName="stroke-opacity"
-              values="1; 1; 0" // <- これを削除
+              values="1; 1; 0"
               keyTimes={`0; ${activeEndKeyTime}; 1`}
               dur={`${totalDuration}s`}
               calcMode="linear"
