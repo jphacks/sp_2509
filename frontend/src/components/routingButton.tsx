@@ -7,9 +7,10 @@ type RoutingButtonProps = {
   buttonText: string;
   to: string;
   icon?: IconType;
+  className?: string; //classNameを指定できるように追加
 };
 
-export default function RoutingButton({ buttonText, to, icon: Icon }: RoutingButtonProps) {
+export default function RoutingButton({ buttonText, to, icon: Icon, className }: RoutingButtonProps) {
   const router = useRouter();
   const [isActive, setIsActive] = useState(false);
 
@@ -44,6 +45,7 @@ export default function RoutingButton({ buttonText, to, icon: Icon }: RoutingBut
           ? "bg-gray-500 text-black scale-[0.97]"
           : "bg-black text-white hover:brightness-105"
         }
+        ${className}
       `}
     >
       {Icon && <Icon size={22} />}
