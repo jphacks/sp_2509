@@ -3,8 +3,21 @@
 import BackButton from "@/components/BackButton";
 import MadeRouteCard_Big from "@/components/MadeRouteCard_Big";
 import Title from "@/components/Title"; // Title コンポーネントをインポート
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function CourseDetailPage() {
+function CourseDetailContent() {
+    const searchParams = useSearchParams();
+
+    const id = searchParams.get("id");
+    const positionsStr = searchParams.get("positions");
+    const course_distance = searchParams.get("course_distance");
+    const start_distance = searchParams.get("start_distance");
+    const created_at = searchParams.get("created_at");
+    const isFavorite = searchParams.get("isFavorite") === "true";
+
+    const positions = positionsStr ? JSON.parse(positionsStr) : [];
+
     const routePositionsTokyo: [number, number][] = [
         [35.6895, 139.6917], // 新宿
         [35.6812, 139.7671], // 東京駅
@@ -24,11 +37,19 @@ export default function CourseDetailPage() {
 
                 <div className="px-4"> {/* 左右に16pxの余白を追加 */}
                     <MadeRouteCard_Big
-                        positions={routePositionsTokyo}
-                        course_distance={courseDistance}
+                        positions={positions.length > 0 ? positions : routePositionsTokyo}
+                        course_distance={course_distance ?? courseDistance}
                     />
                 </div>
             </main>
         </div>
+    );
+}
+
+export default function CourseDetailPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <CourseDetailContent />
+        </Suspense>
     );
 }

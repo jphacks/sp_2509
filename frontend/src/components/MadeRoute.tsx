@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { AiFillStar, AiOutlineStar } from "react-icons/ai";
 import { BiDotsVertical } from "react-icons/bi";
 import { createPortal } from "react-dom";
+import { useRouter } from "next/navigation";
 
 // ★ SSRでreact-leafletが評価されないようにする（window is not defined対策）
 const RouteMap = dynamic(() => import("./RouteMap"), { ssr: false });
@@ -47,6 +48,8 @@ export default function MadeRoute({
     onToggleFavorite,
     onDelete,
 }: MadeRouteProps) {
+    const router = useRouter();
+
     // ローカルUI反映用（props 変更に追従）
     const [fav, setFav] = useState<boolean>(isFavorite);
     useEffect(() => setFav(isFavorite), [isFavorite]);
@@ -131,11 +134,34 @@ export default function MadeRoute({
         onDelete(id);
     };
 
+    const handleCardClick = () => {
+        const query: { [key: string]: string | number | boolean | undefined | null } = {
+            id,
+            positions: JSON.stringify(positions),
+            course_distance: course_distance,
+            start_distance: start_distance,
+            created_at: created_at,
+            isFavorite: isFavorite,
+        };
+
+        const filteredQuery: { [key: string]: string } = {};
+        for (const key in query) {
+            const value = query[key];
+            if (value !== undefined && value !== null) {
+                filteredQuery[key] = String(value);
+            }
+        }
+
+        const queryString = new URLSearchParams(filteredQuery).toString();
+        router.push(`/courseDetail?${queryString}`);
+    };
+
     return (
         <article
             className="relative rounded-2xl border border-neutral-200/70 bg-white
-                 shadow-sm hover:shadow-md transition-shadow p-4"
+                 shadow-sm hover:shadow-md transition-shadow p-4 cursor-pointer"
             aria-label="ルート概要カード"
+            onClick={handleCardClick}
         >
             {/* 右上：三点メニュー */}
             <button
@@ -145,7 +171,10 @@ export default function MadeRoute({
                 aria-expanded={menuOpen}
                 aria-label="その他の操作"
                 title="その他の操作"
-                onClick={() => setMenuOpen((v) => !v)}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setMenuOpen((v) => !v);
+                }}
                 className="absolute right-2 top-2 text-neutral-500 hover:text-neutral-700
                    p-1 rounded-full hover:bg-black/5 active:scale-95 z-50
                    focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
@@ -220,7 +249,10 @@ export default function MadeRoute({
                     {/* ⭐ 右下 */}
                     <button
                         type="button"
-                        onClick={handleFav}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleFav();
+                        }}
                         aria-label={fav ? "お気に入り解除" : "お気に入り"}
                         title={fav ? "お気に入り解除" : "お気に入り"}
                         className={`absolute bottom-0 right-0 text-2xl p-1
