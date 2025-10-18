@@ -7,7 +7,7 @@ import RoutingButton from '../../components/RoutingButton';
 import EmptyCourse from './components/EmptyCourse';
 import CourseList from './components/CourseList';
 
-const API_URL = "/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 // ★★★ テストモード切り替え ★★★
 // テストデータを使用する場合は true に、APIから取得する場合は false にしてください。
