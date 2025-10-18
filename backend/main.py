@@ -104,11 +104,14 @@ def calculate_route(payload: schemas.RouteCalculateRequest):
     """
     drawing_display_points = [point.dict() for point in payload.drawing_display_points]
     
-    result = art_generator.calculate_route(
-        drawing_display_points=drawing_display_points,
-        start_location=payload.start_location.dict(),
-        target_distance_km=payload.target_distance_km
-    )
+    try:
+        result = art_generator.calculate_route(
+            drawing_display_points=drawing_display_points,
+            start_location=payload.start_location.dict(),
+            target_distance_km=payload.target_distance_km
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     return schemas.RouteCalculateResponse(
         total_distance_km=result["total_distance_km"],
