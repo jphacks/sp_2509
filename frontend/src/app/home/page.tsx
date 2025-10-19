@@ -246,7 +246,7 @@ export default function Home() {
       description: "走りたいコースの形を書く",
     },
     {
-      src: "/images/whiteblue.png",
+      src: "/images/sample2.png",
       alt: "Slide 2",
       description: "走り始める場所とおおよその長さを決める",
     },
