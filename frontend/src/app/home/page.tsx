@@ -289,7 +289,7 @@ export default function Home() {
           {/* How to Use Section */}
           <div>
             <h2 className="text-2xl font-bold mb-4">How to Use</h2>
-            <div className="-mx-4. mb-4">
+            <div className="-mx-4 mb-4">
               <Carousel
                 items={carouselItems}
                 imageBorderRadius="rounded-2xl"
