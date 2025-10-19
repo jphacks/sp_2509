@@ -1,5 +1,5 @@
 # AshiArt
-![README_header](https://github.com/user-attachments/assets/84faa9dd-fc3d-4c72-bec9-b65c0e03d071)
+![README_header](https://github.com/user-attachments/assets/8cf74ee5-c692-4f53-b57e-4cc4daae2841)
 
 
 ## 各種リンク
