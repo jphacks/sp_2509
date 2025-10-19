@@ -181,11 +181,15 @@ export default function MadeRoute({
           e.stopPropagation();
           setMenuOpen((v) => !v);
         }}
-        className="absolute right-2 top-2 text-neutral-500 hover:text-neutral-700
+        className="absolute right-2 top-2 text-black hover:text-neutral-700
                    p-1 rounded-full hover:bg-black/5 active:scale-95 z-50
                    focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
       >
-        <BiDotsVertical className="text-2xl" />
+        <div className="flex flex-col items-center gap-[3px]">
+          <div className="w-[4px] h-[4px] bg-current rounded-full"></div>
+          <div className="w-[4px] h-[4px] bg-current rounded-full"></div>
+          <div className="w-[4px] h-[4px] bg-current rounded-full"></div>
+        </div>
       </button>
 
       {/* ドロップダウン（Portal で <body> 直下に描画） */}

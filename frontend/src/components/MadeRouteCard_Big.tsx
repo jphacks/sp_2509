@@ -18,7 +18,7 @@ type RouteData = {
 };
 
 type MadeRouteCardBigProps = {
-  /** コースデータ */
+  /** ルートデータ */
   routeData: RouteData;
 };
 

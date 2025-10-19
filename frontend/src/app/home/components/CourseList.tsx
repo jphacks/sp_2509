@@ -22,7 +22,7 @@ type CourseListProps = {
 
 const CourseList = ({ courses, onDelete, onToggleFavorite }: CourseListProps) => {
     return (
-        <div>
+        <div className="flex flex-col gap-[4px]">
             {courses.map(course => {
                 const positions: LatLngExpression[] = course.route_points.map(p => [p.lat, p.lng] as [number, number]);
                 return (

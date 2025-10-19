@@ -312,7 +312,7 @@ export default function Home() {
                   onChange={(e) =>
                     setSortBy(e.target.value as "created_at" | "distance")
                   }
-                  className="p-2 border rounded"
+                  className="p-2 rounded-[8px] font-semibold"
                 >
                   <option value="created_at">作成順</option>
                   <option value="distance">近さ順</option>
