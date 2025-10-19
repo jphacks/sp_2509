@@ -40,18 +40,18 @@ def test_api_format():
     # コスト関数パラメータを元のスクリプトと同じに設定
     generator.set_cost_parameters(alpha=1.0, beta=5.0, gamma=1.0)
     
-    # ルート計算の実行
-    print("ルート計算を開始します...")
+    # コース計算の実行
+    print("コース計算を開始します...")
     result = generator.calculate_route(**api_request)
     
     # レスポンスの表示
     print("\n=== APIレスポンス ===")
     print(f"総距離: {result['total_distance_km']} km")
-    print(f"ルートポイント数: {len(result['route_points'])}")
+    print(f"コースポイント数: {len(result['route_points'])}")
     print(f"描画ポイント数: {len(result['drawing_points'])}")
     
     # 最初の数ポイントを表示
-    print("\n最初の3つのルートポイント:")
+    print("\n最初の3つのコースポイント:")
     for i, point in enumerate(result['route_points'][:3]):
         print(f"  {i+1}: lat={point['lat']:.6f}, lng={point['lng']:.6f}")
     
@@ -78,7 +78,7 @@ def test_original_compatibility():
     start_location = {"lat": 43.0686, "lng": 141.3508}  # 札幌駅
     target_distance = 10.0
     
-    # ルート計算
+    # コース計算
     result = generator.calculate_route(
         drawing_display_points=drawing_points,
         start_location=start_location,
@@ -126,12 +126,12 @@ def visualize_result(result, generator):
             x_ideal, y_ideal = zip(*drawing_utm_coords)
             ax.plot(x_ideal, y_ideal, 'b--', linewidth=2, label='Ideal Shape')
     
-    # 計算されたルートをプロット（赤い実線）
+    # 計算されたコースをプロット（赤い実線）
     if result['route_points']:
         route_lats = [p['lat'] for p in result['route_points']]
         route_lngs = [p['lng'] for p in result['route_points']]
         
-        # ルートポイントをノードIDに逆変換
+        # コースポイントをノードIDに逆変換
         import numpy as np
         route_node_ids = []
         all_nodes = list(road_network.nodes())
@@ -152,7 +152,7 @@ def visualize_result(result, generator):
             closest_idx = np.argmin(distances)
             route_node_ids.append(all_nodes[closest_idx])
         
-        # ルートをプロット
+        # コースをプロット
         if route_node_ids:
             ox.plot_graph_route(road_network, route_node_ids, 
                                route_color='r', route_linewidth=3, 

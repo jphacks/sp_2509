@@ -16,7 +16,7 @@ type MadeRouteProps = {
   /** 固有ID。削除・お気に入り更新で使用 */
   id: string;
 
-  /** 地図上のルート座標 */
+  /** 地図上のコース座標 */
   positions?: LatLngExpression[];
 
   /** コース距離 (km) */
@@ -132,7 +132,7 @@ export default function MadeRoute({
   // 削除：確認→親へ通知
   const handleDelete = () => {
     setMenuOpen(false);
-    const ok = window.confirm("このルートを削除しますか？");
+    const ok = window.confirm("このコースを削除しますか？");
     if (!ok) return;
     if ("vibrate" in navigator) navigator.vibrate?.(15);
     onDelete(id);
@@ -166,7 +166,7 @@ export default function MadeRoute({
     <article
       className="relative rounded-2xl border border-neutral-200/70 bg-white
                  shadow-sm hover:shadow-md transition-shadow p-4 cursor-pointer"
-      aria-label="ルート概要カード"
+      aria-label="コース概要カード"
       onClick={handleCardClick}
     >
       {/* 右上：三点メニュー */}
