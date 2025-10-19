@@ -165,7 +165,7 @@ export default function MadeRoute({
   return (
     <article
       className="relative rounded-3xl border border-neutral-200/70 bg-white
-                 shadow-sm hover:shadow-md transition-shadow p-4 cursor-pointer"
+                 shadow-sm hover:shadow-md transition-shadow p-2 cursor-pointer"
       aria-label="コース概要カード"
       onClick={handleCardClick}
     >
@@ -181,7 +181,7 @@ export default function MadeRoute({
           e.stopPropagation();
           setMenuOpen((v) => !v);
         }}
-        className="absolute right-2 top-2 text-black hover:text-neutral-700
+        className="absolute right-4 top-4 text-black hover:text-neutral-700
                    p-1 rounded-full hover:bg-black/5 active:scale-95 z-50
                    focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
       >
