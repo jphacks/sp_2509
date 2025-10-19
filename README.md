@@ -36,23 +36,23 @@
 
 GPS アートを簡単に描けるようになれば、ランニングの**モチベーションの向上**に繋がりますよね！
 
-### GPS アートとは
-
-<table>
-  <tr>
-    <td>
-      <img width="250" alt="image" src="https://github.com/user-attachments/assets/35abd6fb-4796-47a1-9a34-8fba848f7d1d" />
-    </td>
-    <td>
-      <img width="250" alt="image" src="https://github.com/user-attachments/assets/44f42365-db82-4fc1-aef9-1cf62496ae03" />
-    </td>
-  </tr>
-</table>
-(出典：https://www.bgf.or.jp/gpsart/2018result.html)
-
-GPS アートとは、GPS を使用して現在位置を記録しながら移動し、その軌跡で大規模な地上絵を描くアクティビティのことを指します。
-当初はアートの要素が強かった GPS アートですが、徐々に日々のフィットネスへの追加のモチベーションとして、シンプルな図形を走る人々が増え始めました。
-そして、コロナ禍を経てランニングを行う人口が増えたことにより、その成果として、自身が走った独創的なルートを、GPS アプリや SNS を通してシェアする文化が普及しています。
+> ### GPS アートとは
+>
+> <table>
+>   <tr>
+>     <td>
+>       <img width="250" alt="image" src="https://github.com/user-attachments/assets/35abd6fb-4796-47a1-9a34-8fba848f7d1d" />
+>     </td>
+>     <td>
+>       <img width="250" alt="image" src="https://github.com/user-attachments/assets/44f42365-db82-4fc1-aef9-1cf62496ae03" />
+>     </td>
+>   </tr>
+> </table>
+> (出典：https://www.bgf.or.jp/gpsart/2018result.html)
+> 
+> GPS アートとは、GPS を使用して現在位置を記録しながら移動し、その軌跡で大規模な地上絵を描くアクティビティのことを指します。
+> 当初はアートの要素が強かった GPS アートですが、徐々に日々のフィットネスへの追加のモチベーションとして、シンプルな図形を走る人々が増え始めました。
+> そして、コロナ禍を経てランニングを行う人口が増えたことにより、その成果として、自身が走った独創的なルートを、GPS アプリや SNS を通してシェアする文化が普及しています。
 
 ### 製品説明（具体的な製品の説明）
 
