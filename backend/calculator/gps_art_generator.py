@@ -368,8 +368,8 @@ class GPSArtGenerator:
             計算結果のDict（APIレスポンス形式）
         """
         raw_shape_points = [(point["x"], point["y"]) for point in drawing_display_points]
-        anchor_lat = start_location["lat"]
-        anchor_lon = start_location["lng"]
+        anchor_lat = float(round(start_location["lat"], 3))
+        anchor_lon = float(round(start_location["lng"], 3))
 
         if target_distance_km <= 10:
             self.network_distance = 3000
