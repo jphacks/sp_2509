@@ -9,6 +9,7 @@ import Slider from "../../components/Slider";
 import Loading from "../../components/Loading"; // ★ 追加
 import type { Point } from "../../types/types";
 import Title from "@/components/Title";
+import BackButton from "@/components/BackButton";
 
 const CenterPinMap = dynamic(() => import("../../components/CenterPinMap"), {
   ssr: false,
@@ -133,14 +134,12 @@ export default function Condition() {
   return (
     <main className="flex min-h-screen flex-col items-center p-4">
       <div className="w-full max-w-md space-y-6">
-        <Title title="条件設定" />
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="text-gray-500 text-sm hover:underline text-left"
-        >
-          &lt; 描き直す
-        </button>
+        <div>
+          <Title title="条件設定" />
+          <div className="w-full self-start mt-2">
+            <BackButton text="描き直す" />
+          </div>
+        </div>
 
         {/* プレビュー：あなたの描いた絵 */}
         <section className="space-y-1">
