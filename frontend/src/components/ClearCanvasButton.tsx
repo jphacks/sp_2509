@@ -26,7 +26,7 @@ const ClearCanvasButton: React.FC<ClearCanvasButtonProps> = ({
         select-none font-sans
         ${disabled
           ? 'bg-white text-gray-300 cursor-not-allowed border border-gray-300' 
-          : 'bg-white hover:bg-gray-700 text-amber-600'     
+          : 'bg-white hover:bg-gray-200 text-amber-600'     
         }
       `}
     >
