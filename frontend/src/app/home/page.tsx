@@ -1,3 +1,4 @@
+// frontend/src/app/home/page.tsx
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
@@ -7,6 +8,7 @@ import RoutingButton from "../../components/RoutingButton";
 import EmptyCourse from "../../components/EmptyCourse";
 import CourseList from "../../components/CourseList";
 import Loading from "../../components/Loading";
+import Image from "next/image"; // Image コンポーネントをインポート
 import Header from "@/components/Header";
 
 const API_URL = "/api";
@@ -72,7 +74,9 @@ export default function Home() {
   const [uuid, setUuid] = useState<string | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(!isTestMode); // テストモード時はローディング不要
-  const [sortBy, setSortBy] = useState<"created_at" | "distance">("created_at");
+  const [sortBy, setSortBy] = useState<"created_at" | "distance">(
+    "created_at"
+  );
   const [currentLocation, setCurrentLocation] = useState<{
     lat: number;
     lng: number;
@@ -282,20 +286,28 @@ export default function Home() {
       <main
         className={`flex flex-col ${paddingTop} ${paddingBottom} max-w-md mx-auto min-h-screen`}
       >
-        <div className={`${paddingX} flex flex-col gap-y-10`}>
+        <div className={`${paddingX} flex flex-col`}>
           {/* Top Text */}
-          <div className="text-left">
-            <Title title="AshiArt" />
-            <div className="mt-2 text-sm text-gray-500">
-              <p>好きな絵のコースで走ってみませんか？</p>
-              <p>GPSアートになるジョギングコースをデザインしましょう</p>
-            </div>
+          {/* ↓↓↓ 変更箇所: flexコンテナでアイコンとタイトルを囲む ↓↓↓ */}
+          <div className="flex items-center my-2">
+            <Image src="/Title.png" alt="AshiArt icon" width={280} height={280} /> {/* アイコンを追加 */}
+            {/* <div className="text-left">
+              <Title title="AshiArt" />
+            </div> */}
+
           </div>
 
+          {/* <hr className="border-black my-2" /> */}
+
+            <div className="mt-2 text-sm font-bold text-gray-500">
+            <p>好きな絵のコースで走ってみませんか？</p>
+            <p>GPSアートになるジョギングコースをデザインしましょう</p>
+              </div>
+
           {/* How to Use Section */}
-          <div>
+          <div className="my-4">
             <Header headerText="How to Use" />
-            <div className="-mx-4 mb-4">
+            <div className="my-4 mb-4">
               <Carousel
                 items={carouselItems}
                 imageBorderRadius="rounded-2xl"
