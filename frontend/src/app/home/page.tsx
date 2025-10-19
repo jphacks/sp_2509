@@ -4,8 +4,9 @@ import { useEffect, useState, useCallback } from "react";
 import Carousel from "../../components/Carousel";
 import Title from "../../components/Title";
 import RoutingButton from "../../components/RoutingButton";
-import EmptyCourse from "./components/EmptyCourse";
-import CourseList from "./components/CourseList";
+import EmptyCourse from "../../components/EmptyCourse";
+import CourseList from "../../components/CourseList";
+import Loading from "../../components/Loading";
 
 const API_URL = "/api";
 
@@ -259,7 +260,7 @@ export default function Home() {
   const paddingBottom = "pb-12";
 
   const renderCourses = () => {
-    if (loading) return <p>Loading...</p>;
+    if (loading) return <Loading loadingText="コースを読み込み中..." />;
     if (error) return <p>エラー: {error}</p>;
     if (displayCourses.length === 0) return <EmptyCourse />;
     return (

@@ -1,6 +1,6 @@
 "use client";
 
-import MadeRoute from "../../../components/MadeRoute";
+import MadeRoute from "./MadeRoute";
 import type { LatLngExpression } from "leaflet";
 
 // page.tsx から渡される course オブジェクトの型
