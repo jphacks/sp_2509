@@ -12,6 +12,14 @@ const compat = new FlatCompat({
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
+    rules: {
+      indent: ["error", 2, { SwitchCase: 1 }],
+      "react/jsx-indent": ["error", 2],
+      "react/jsx-indent-props": ["error", 2],
+      "@typescript-eslint/indent": ["error", 2, { SwitchCase: 1 }],
+    },
+  },
+  {
     ignores: [
       "node_modules/**",
       ".next/**",
