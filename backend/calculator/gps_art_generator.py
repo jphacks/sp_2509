@@ -146,7 +146,7 @@ class GPSArtGenerator:
             
         return new_points
 
-    def _simplify_path_rdp(self, path: List[Tuple[float, float]], epsilon_ratio: float = 0.02) -> List[Tuple[float, float]]:
+    def _simplify_path_rdp(self, path: List[Tuple[float, float]], epsilon_ratio: float) -> List[Tuple[float, float]]:
         """
         Ramer-Douglas-Peuckerアルゴリズムを使用してパスを単純化します。
         epsilonは描画領域の対角線の長さに比例して決定されます。
@@ -408,7 +408,7 @@ class GPSArtGenerator:
         adjusted_target_km = target_distance_km * self.path_length_adjustment
 
         # 経路探索用に形状を単純化（RDP）
-        resampled_shape = self._simplify_path_rdp(raw_shape_points, epsilon_ratio=0.01)
+        resampled_shape = self._simplify_path_rdp(raw_shape_points, epsilon_ratio=0.003)
         
         target_shape_latlon = self._create_scaled_geo_path(
             resampled_shape, anchor_lat, anchor_lon, adjusted_target_km
