@@ -5,7 +5,6 @@
 ## 各種リンク
 
 - サイト URL:<<https://ashiart.vercel.app/>>
-- canva URL:<<https://www.canva.com/design/DAG2Mtx20no/hRDT1oBMKq8AcZpFIRxSXw/edit?utm_content=DAG2Mtx20no&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton>>
 
 ### サイト QR コード
 
@@ -25,8 +24,9 @@
 そんな中、こんなポストを見かけました。
 
 <div align="left">
-<img width="300" alt="image" src="https://github.com/user-attachments/assets/3b8f3868-f7f2-484b-a0dc-074a21f04df2" />
+<img height="350" alt="image" src="https://github.com/user-attachments/assets/3b8f3868-f7f2-484b-a0dc-074a21f04df2" />
 </div>
+
 (https://x.com/yomo_tri/status/1969979228914651139)
 
 「**GPS アート？！楽しそう！ちょっとやってみたい！**」
@@ -40,10 +40,10 @@ GPS アートを簡単に描けるようになれば、ランニングの**モ�
 <table>
   <tr>
     <td>
-      <img width="300" alt="image" src="https://github.com/user-attachments/assets/35abd6fb-4796-47a1-9a34-8fba848f7d1d" />
+      <img width="250" alt="image" src="https://github.com/user-attachments/assets/35abd6fb-4796-47a1-9a34-8fba848f7d1d" />
     </td>
     <td>
-      <img width="300" alt="image" src="https://github.com/user-attachments/assets/44f42365-db82-4fc1-aef9-1cf62496ae03" />
+      <img width="250" alt="image" src="https://github.com/user-attachments/assets/44f42365-db82-4fc1-aef9-1cf62496ae03" />
     </td>
   </tr>
 </table>
@@ -65,13 +65,13 @@ GPS アートとは、GPS を使用して現在位置を記録しながら移動
 ユーザは自由に一筆書きで絵を描き、自分だけのランニングコースを作成できます。
 スタート地点と走行距離の調整も可能です。
 
-<div><video width="300" controls src="https://github.com/user-attachments/assets/ccec795f-87b4-46b7-a95b-97fc71eff704" muted="false"></video></div>
+<div><video height="300" controls src="https://github.com/user-attachments/assets/ccec795f-87b4-46b7-a95b-97fc71eff704" muted="false"></video></div>
 
 #### 2. おすすめの絵から選択も可能
 
 一筆書きの絵が思いつかなくても、アプリが提案するいくつかのサンプル図形からコースを作成することもできます。同じ図形でも、スタート地点や走行距離を変えるだけで、全く異なるランニングコースを設計できます。
 
-<div><video width="300" controls src="https://github.com/user-attachments/assets/e160864e-a80c-45c3-93d6-4436a50f842e" muted="false"></video></div>
+<div><video height="300" controls src="https://github.com/user-attachments/assets/e160864e-a80c-45c3-93d6-4436a50f842e" muted="false"></video></div>
 
 #### 3. コースの保存・お気に入り登録・削除機能
 
@@ -79,15 +79,15 @@ GPS アートとは、GPS を使用して現在位置を記録しながら移動
 気に入ったコースはお気に入り登録、不要なコースは削除をすることも可能です。
 「作成順」や「近い順(現在地からスタート地点までの距離)」でソートをすることもでき、見やすい UI を心がけています。
 
-<div><video width="300" controls src="https://github.com/user-attachments/assets/b48b828a-d0e3-4693-8003-80448aa4210d" muted="false"></video></div>
+<div><video height="300" controls src="https://github.com/user-attachments/assets/b48b828a-d0e3-4693-8003-80448aa4210d" muted="false"></video></div>
 
 ### 解決出来ること
 
 - これまで時間がかかっていた GPS アート用のランニングコースを、とても**簡単**に作成することができます。
 
-  - 例えば、このアプリを使うと、札幌市の中に北海道を描く！なんてこともできます。
+  - 例えば、このアプリを使うと、札幌市の中に北海道を描く！なんてこともできます↓↓
 
-  <img height="200" alt="Image" src="https://github.com/user-attachments/assets/f6bf4b34-2dc5-4a8d-bd02-80069c5f3939" />
+  <img height="300" alt="Image" src="https://github.com/user-attachments/assets/f6bf4b34-2dc5-4a8d-bd02-80069c5f3939" />
 
 - これにより、誰もが好きな絵のコースを設計して実際に走ることができるので、ランニングのモチベーションにつながります！
 
@@ -96,23 +96,34 @@ GPS アートとは、GPS を使用して現在位置を記録しながら移動
 GPS アートを使ったランニング体験を手軽に提供するため、**Award Day** に行けることになったら以下の機能を実装したいと考えています！
 
 - 音声でのランニングコースのナビゲーション機能
-  - せっかくコースを作っても、アプリの地図を凝視しながら走るわけにはいきませんよね！
+  - せっかくコースの通りに、実際に走ってみたいですよね！
 - このアプリを利用して作り上げた GPS アートのシェア機能
 
 ナビゲーション画面のイメージ
 
-<img width="200" alt="Image" src="https://github.com/user-attachments/assets/161e8751-e2d8-4339-bd72-496e69abb4f5" />
+<img height="300" alt="Image" src="https://github.com/user-attachments/assets/161e8751-e2d8-4339-bd72-496e69abb4f5" />
 
 ### 注力したこと（こだわり等）
 
-- 独自の経路計算アルゴリズム： 経路計算に関する論文をもとに、オリジナルのアルゴリズムを構築しました。
-- 描画の再現性： 図形の角度を調整することで、ユーザが描いた形を忠実に再現します。
+- 経路計算アルゴリズムのこだわり
+  - 複数の文献を参考にして経路計算を実現独自のアルゴリズムを考案しました。このREADME.mdの最後で内容を説明します
+  - https://github.com/jphacks/sp_2509/pull/55/files
+- GitHubの機能を精一杯活用してチームメンバーの開発体験を高めました
+  - PullRequestの作成時にビルドチェックと単体テストの実行を回したり、自動デプロイ環境を構築したりして、CI/CD環境を整えました
+  　　- 本番環境が動かない！というようなトラブルはこれのおかげで起きませんでした。  
+  - GitHub Projectのカンバン機能を使ってチームメンバーのタスクを簡単に確認できるようにしました
+  - GitHub Copilotを使ってコードレビュー自動化の環境を整えました
+- チームメンバー間で作業負荷に大きな偏りもなく、全員がGitHubの機能を使いこなして、プロダクト作成に力を注ぐことができました
+  -  ([issue番号3桁突破](https://github.com/jphacks/sp_2509/issues?q=is%3Aissue%20state%3Aclosed))
+  - <img height="300" alt=" 2025-10-20 1 06 21" src="https://github.com/user-attachments/assets/83b37e77-cc5d-4f70-a453-c6ecf337ac72" />
+
+  
 
 ## 開発技術
 
 ### 活用した技術
 
-<img width="1920" height="1080" alt="JPHACKS2025_sp2509_O's" src="https://github.com/user-attachments/assets/32701531-2bd7-4f6b-b092-008536a484c3" />
+<img height="300" alt="JPHACKS2025_sp2509_O's" src="https://github.com/user-attachments/assets/11cdc80f-57db-44b6-ad17-3e80728ca69b" />
 
 #### フロントエンド
 
@@ -139,9 +150,7 @@ GPS アートを使ったランニング体験を手軽に提供するため、*
   - フロントエンドのデプロイ先として選定しました
 - GitHub Actions(https://github.com/jphacks/sp_2509/actions)
   - Frontend CI でフロントエンドの**ビルドチェック**を実施
-    - 本番環境が動かない！というトラブルはこれのおかげで起きませんでした。
   - Backend CI でバックエンドの**ユニットテスト**を実施
-    - バックエンドのテストを書いたので、ハッカソン中バックエンドが突然落ちることはありませんでした。
   - CD として vercel の本番環境に自動デプロイ
     - CD を構築して自動デプロイを実現することで開発メンバーのデプロイの手間を省ことができました。
 - GitHub Copilot (コードレビュー)
@@ -171,6 +180,7 @@ GPS アートを使ったランニング体験を手軽に提供するため、*
 - 基本的なコース計算のアルゴリズムの検討と仮実装
 - API 設計,DB 設計
 - Figma によるデザイン設計
+  - https://www.canva.com/design/DAG2Mtx20no/hRDT1oBMKq8AcZpFIRxSXw/edit?utm_content=DA[…]m_campaign=designshare&utm_medium=link2&utm_source=sharebutton
 
 ##### HackDay 期間中に作成した機能
 
@@ -185,12 +195,9 @@ GPS アートを使ったランニング体験を手軽に提供するため、*
 - インフラ
   - CI/CD 環境の構築(例: https://github.com/jphacks/sp_2509/actions/workflows/ci.yml)
 
-その他にも様々なタスクを issue として管理し、ラベルや Assign を設定しました!
-https://github.com/jphacks/sp_2509/issues?q=is%3Aissue%20state%3Aclosed
-
 ##### 経路探索アルゴリズムについて
 
-単なる「最短経路」を見つけるアプリなら、GoogleMaps のように世の中にいくらでもあります。しかし、私たちが作りたかったのはユーザーの描きたいという想いを実現するための異なる機能です。そこで、古典的な [ダイクストラ法](https://ja.wikipedia.org/wiki/%E3%83%80%E3%82%A4%E3%82%AF%E3%82%B9%E3%83%88%E3%83%A9%E6%B3%95)を改良したアルゴリズムを実装しました。
+単なる**最短経路**を見つけるアプリなら、GoogleMaps のように世の中にいくらでもあります。しかし、私たちが作りたかったのはユーザーの描きたいという想いを実現するための異なる機能です。そこで、古典的な [ダイクストラ法](https://ja.wikipedia.org/wiki/%E3%83%80%E3%82%A4%E3%82%AF%E3%82%B9%E3%83%88%E3%83%A9%E6%B3%95)を改良したアルゴリズムを実装しました。
 
 ユーザーが描いた形を、そのまま地図に重ねても、道路の向きと合わず、うまくコースが作れません。そこで、まず手書きの形を少しずつ回転させ最適な角度を計算しています。最適な角度が決まったら、その回転させた入力の曲線を、経路探索の基準点となるいくつかのチェックポイントに分割します。これにより、「A 地点から B 地点へ」「B 地点から C 地点へ」という具体的な経路探索のタスクに分解できます。そして、サンプリングした各チェックポイントの間の経路を探索します。
 
