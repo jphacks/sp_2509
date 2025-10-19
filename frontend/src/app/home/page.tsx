@@ -250,8 +250,12 @@ export default function Home() {
       alt: "Slide 2",
       description: "走り始める場所とおおよその長さを決める",
     },
-    { src: "/images/sample4.png", alt: "Slide 3", description: "説明文3" },
-    { src: "/images/sample4.png", alt: "Slide 4", description: "説明文4" },
+    {
+      src: "/images/sample3.png",
+      alt: "Slide 3",
+      description: "システムがルートを生成",
+    },
+    { src: "/images/sample4.png", alt: "Slide 4", description: "走る！" },
   ];
 
   const paddingX = "px-4";
