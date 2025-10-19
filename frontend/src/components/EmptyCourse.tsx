@@ -1,6 +1,7 @@
-import Image from "next/image";
-import mapIcon from "../img/map_icon.png";
+import Image from 'next/image';
 
+
+const mapIcon = '/images/map_icon.png';
 const EmptyCourse = () => {
   return (
     <div className="text-center flex flex-col items-center gap-y-4">

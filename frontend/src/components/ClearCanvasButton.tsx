@@ -1,7 +1,7 @@
 // frontend/src/components/ClearCanvasButton.tsx
 'use client';
 import React from 'react';
-import { FaTrashAlt } from 'react-icons/fa'; // 例としてゴミ箱アイコンを使用
+import { FaArrowRotateLeft } from "react-icons/fa6";
 
 interface ClearCanvasButtonProps {
   onClick: () => void; // 親から受け取るクリック時の処理
@@ -20,15 +20,17 @@ const ClearCanvasButton: React.FC<ClearCanvasButtonProps> = ({
       disabled={disabled}
       className={`
         flex items-center justify-center gap-2
-        px-4 py-2 rounded text-sm
-        transition-colors duration-150 ease-in-out
+        py-3 text-lg font-semibold tracking-wide
+        rounded-2xl shadow-md w-1/2
+        transition-all duration-200 ease-out
+        select-none font-sans
         ${disabled
           ? 'bg-white text-gray-300 cursor-not-allowed border border-gray-300' 
-          : 'bg-black hover:bg-gray-700 text-white'     
+          : 'bg-white hover:bg-gray-200 text-amber-600'     
         }
       `}
     >
-      <FaTrashAlt /> {/* アイコン */}
+      <FaArrowRotateLeft /> {/* アイコン */}
       <span>{buttonText}</span>
     </button>
   );
