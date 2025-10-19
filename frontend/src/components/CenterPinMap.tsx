@@ -144,6 +144,7 @@ export default function CenterPinMap({
                 center={initialCenter}
                 zoom={zoom}
                 zoomControl={false}
+                attributionControl={false}
                 style={{ height: "100%", width: "100%" }}
             >
                 <TileLayer
