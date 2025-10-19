@@ -5,9 +5,9 @@
 ## 各種リンク
 
 - **アプリURL**:https://ashiart.vercel.app/
-- canva URL:https://www.canva.com/design/DAG2Mtx20no/hRDT1oBMKq8AcZpFIRxSXw/edit?utm_content=DAG2Mtx20no&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
+- スライドURL:https://www.canva.com/design/DAG2Mtx20no/hRDT1oBMKq8AcZpFIRxSXw/edit?utm_content=DAG2Mtx20no&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
 
-### サイト QR コード
+### アプリ QR コード
 
 ![サイトQRコード](frontend/public/images/QR.png)
 
