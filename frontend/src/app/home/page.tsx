@@ -243,7 +243,7 @@ export default function Home() {
 
   const carouselItems = [
     {
-      src: "/images/sample4.png",
+      src: "/images/pic1.png",
       alt: "Slide 1",
       description: "走りたいコースの形を書く",
     },
