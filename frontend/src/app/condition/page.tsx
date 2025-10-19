@@ -9,6 +9,7 @@ import Slider from "../../components/Slider";
 import Loading from "../../components/Loading"; // ★ 追加
 import type { Point } from "../../types/types";
 import Title from "@/components/Title";
+import Header from "@/components/Header";
 
 const CenterPinMap = dynamic(() => import("../../components/CenterPinMap"), {
   ssr: false,
@@ -126,6 +127,9 @@ export default function Condition() {
           animationDuration={2.2}
           pauseDuration={0.8}
         />
+        <div className="mt-2 text-sm text-gray-500">
+          <p>この処理は30秒程度かかる可能性があります。</p>
+        </div>
       </main>
     );
   }
