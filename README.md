@@ -4,7 +4,8 @@
 
 ## 各種リンク
 
-- サイト URL:<<https://ashiart.vercel.app/>>
+- サイト URL:https://ashiart.vercel.app/
+- canva URL:https://www.canva.com/design/DAG2Mtx20no/hRDT1oBMKq8AcZpFIRxSXw/edit?utm_content=DAG2Mtx20no&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
 
 ### サイト QR コード
 
@@ -180,7 +181,7 @@ GPS アートを使ったランニング体験を手軽に提供するため、*
 - 基本的なコース計算のアルゴリズムの検討と仮実装
 - API 設計,DB 設計
 - Figma によるデザイン設計
-  - https://www.canva.com/design/DAG2Mtx20no/hRDT1oBMKq8AcZpFIRxSXw/edit?utm_content=DA[…]m_campaign=designshare&utm_medium=link2&utm_source=sharebutton
+  - https://www.figma.com/design/rft6M0sW2d7Rax1bfat3SS/Runninng?t=yCbRqFttgztGwUT3-1
 
 ##### HackDay 期間中に作成した機能
 
