@@ -174,6 +174,7 @@ GPS アートを使ったランニング体験を手軽に提供するため、*
 - フロントエンド
   - UI コンポーネントの作成
   - 各ページの作成 (例: https://github.com/jphacks/sp_2509/issues/24)
+  - ユーザの描いた線がローディング時のアニメーションになる機能
 - バックエンド
   - API の実装 (例: https://github.com/jphacks/sp_2509/pull/49)
   - API の単体テストの実装 (例: https://github.com/jphacks/sp_2509/pull/62)
