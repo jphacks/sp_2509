@@ -8,6 +8,7 @@ import DrawnShapeImage from '../../components/DrawnShapeImage';
 import Slider from '../../components/Slider';
 import Loading from '../../components/Loading'; // ★ 追加
 import type { Point } from '../../types/types';
+import Title from '@/components/Title';
 
 const CenterPinMap = dynamic(() => import('../../components/CenterPinMap'), { ssr: false });
 
@@ -128,7 +129,7 @@ export default function Condition() {
   return (
     <main className="flex min-h-screen flex-col items-center p-4">
       <div className="w-full max-w-md space-y-6">
-        <h1 className="text-2xl font-bold">条件設定</h1>
+        <Title title="条件設定" />
         <button
           type="button"
           onClick={() => router.back()}

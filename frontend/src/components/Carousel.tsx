@@ -61,8 +61,7 @@ export default function Carousel({
     <div className="w-full">
       <div
         ref={scrollContainerRef}
-        className={`flex overflow-x-auto snap-x snap-mandatory scrollbar-hide cursor-grab ${isDragging ? 'cursor-grabbing' : ''}`}
-        style={{ gap: `${gap}px`, paddingLeft: `${gap}px`, paddingRight: `${gap}px` }}
+        className={`flex overflow-x-auto snap-x snap-mandatory scrollbar-hide cursor-grab ${isDragging ? 'cursor-grabbing' : ''} gap-4 px-4 scroll-px-4`}
         onMouseDown={onMouseDown}
         onMouseLeave={onMouseLeave}
         onMouseUp={onMouseUp}
