@@ -285,7 +285,7 @@ export default function Home() {
         <div className={`${paddingX} flex flex-col gap-y-10`}>
           {/* Top Text */}
           <div className="text-left">
-            <Title title="ジョギングアプリ" />
+            <Title title="AshiArt" />
             <div className="mt-2 text-sm text-gray-500">
               <p>好きな絵のコースで走ってみませんか？</p>
               <p>GPSアートになるジョギングコースをデザインしましょう</p>
