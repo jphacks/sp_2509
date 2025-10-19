@@ -1,10 +1,10 @@
-# AshiArt
+# [AshiArt](https://ashiart.vercel.app/)
 
 ![README_header](https://github.com/user-attachments/assets/8cf74ee5-c692-4f53-b57e-4cc4daae2841)
 
 ## 各種リンク
 
-- サイト URL:https://ashiart.vercel.app/
+- **アプリURL**:https://ashiart.vercel.app/
 - canva URL:https://www.canva.com/design/DAG2Mtx20no/hRDT1oBMKq8AcZpFIRxSXw/edit?utm_content=DAG2Mtx20no&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
 
 ### サイト QR コード
