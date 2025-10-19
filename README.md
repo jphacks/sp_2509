@@ -5,6 +5,7 @@
 ## 各種リンク
 
 - サイト URL:<<https://ashiart.vercel.app/>>
+- canva URL:<<https://www.canva.com/design/DAG2Mtx20no/hRDT1oBMKq8AcZpFIRxSXw/edit?utm_content=DAG2Mtx20no&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton>>
 
 ### サイト QR コード
 
@@ -110,6 +111,8 @@ GPS アートを使ったランニング体験を手軽に提供するため、*
 ## 開発技術
 
 ### 活用した技術
+
+<img width="1920" height="1080" alt="JPHACKS2025_sp2509_O's" src="https://github.com/user-attachments/assets/32701531-2bd7-4f6b-b092-008536a484c3" />
 
 #### フロントエンド
 
