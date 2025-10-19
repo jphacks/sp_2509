@@ -38,7 +38,7 @@ def test_api_format():
     generator = GPSArtGenerator(cache_enabled=True)
     
     # コスト関数パラメータを元のスクリプトと同じに設定
-    generator.set_cost_parameters(alpha=1.0, beta=5.0, gamma=1.0)
+    generator.set_cost_parameters(alpha=1, beta=100, gamma=10)
     
     # ルート計算の実行
     print("ルート計算を開始します...")
