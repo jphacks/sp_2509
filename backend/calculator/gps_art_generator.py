@@ -28,7 +28,6 @@ class GPSArtGenerator:
         self.gamma = 1.0 # 形状忠実性の重み
         
         self.network_type = "walk"
-        self.network_distance = 4000 # 地図の取得する範囲（メートル）
         self.path_length_adjustment = 0.7 # 目標距離の調整係数
         self.rotation_search_steps = 360 # 経路角度探索のステップ数
         self.resample_points = 40 # 経路探索のためにリサンプリングする点の数
@@ -371,6 +370,11 @@ class GPSArtGenerator:
         raw_shape_points = [(point["x"], point["y"]) for point in drawing_display_points]
         anchor_lat = start_location["lat"]
         anchor_lon = start_location["lng"]
+
+        if target_distance_km <= 10:
+            self.network_distance = 3000
+        else:
+            self.network_distance = 4000
         
         self._load_road_network(anchor_lat, anchor_lon)
         

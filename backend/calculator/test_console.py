@@ -31,7 +31,7 @@ def test_api_format():
             "lat": 43.0686,
             "lng": 141.3508
         },
-        "target_distance_km": 20.0
+        "target_distance_km": 10.0
     }
     
     # ジェネレーターの初期化
