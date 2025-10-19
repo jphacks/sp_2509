@@ -45,7 +45,7 @@ export default function MadeRouteCard_Big({
 
   return (
     <article
-      className="relative rounded-3xl border border-neutral-200/70 bg-white shadow-sm transition-shadow p-4 font-sans"
+      className="relative rounded-3xl border border-neutral-200/70 bg-white shadow-sm transition-shadow p-2 pb-4 font-sans"
       style={{ height: "361px" }}
       aria-label="RouteCard"
     >
