@@ -7,6 +7,7 @@ import RoutingButton from "../../components/RoutingButton";
 import EmptyCourse from "../../components/EmptyCourse";
 import CourseList from "../../components/CourseList";
 import Loading from "../../components/Loading";
+import Header from "@/components/Header";
 
 const API_URL = "/api";
 
@@ -293,7 +294,7 @@ export default function Home() {
 
           {/* How to Use Section */}
           <div>
-            <h2 className="text-2xl font-bold mb-4">How to Use</h2>
+            <Header headerText="How to Use" />
             <div className="-mx-4 mb-4">
               <Carousel
                 items={carouselItems}
@@ -306,7 +307,7 @@ export default function Home() {
           {/* Created Course Section */}
           <div>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">作成したコース</h2>
+              <Header headerText="作成したコース" />
               {!isTestMode && (
                 <select
                   value={sortBy}
