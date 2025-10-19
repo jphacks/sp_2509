@@ -45,13 +45,13 @@ export default function MadeRouteCard_Big({
 
     return (
         <article
-            className="relative rounded-2xl border border-neutral-200/70 bg-white shadow-sm transition-shadow p-4"
+            className="relative rounded-3xl border border-neutral-200/70 bg-white shadow-sm transition-shadow p-2"
             style={{ height: "361px" }}
             aria-label="RouteCard"
         >
             <div className="h-full flex flex-col">
                 {/* 上:地図 */}
-                <div className="flex-grow rounded-xl overflow-hidden ring-1 ring-black/5 bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.02)]">
+                <div className="flex-grow rounded-2xl overflow-hidden ring-1 ring-black/5 bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.02)]">
                     <RouteMap
                         positions={routePositions}
                         secondaryPositions={drawingPositions}

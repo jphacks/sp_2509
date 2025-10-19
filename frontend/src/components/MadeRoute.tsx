@@ -158,8 +158,8 @@ export default function MadeRoute({
 
     return (
         <article
-            className="relative rounded-2xl border border-neutral-200/70 bg-white
-                 shadow-sm hover:shadow-md transition-shadow p-4 cursor-pointer"
+            className="relative rounded-3xl border border-neutral-200/70 bg-white
+                 shadow-sm hover:shadow-md transition-shadow p-2 cursor-pointer"
             aria-label="ルート概要カード"
             onClick={handleCardClick}
         >
@@ -210,7 +210,7 @@ export default function MadeRoute({
             <div className="flex items-start gap-3 relative">
                 {/* 左：地図サムネ（見た目だけ縮小） */}
                 <div
-                    className="shrink-0 rounded-xl overflow-hidden ring-1 ring-black/5 bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.02)]"
+                    className="shrink-0 rounded-2xl overflow-hidden ring-1 ring-black/5 bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.02)]"
                     style={{ width: THUMB, height: THUMB }}
                 >
                     <div
