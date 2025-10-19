@@ -244,7 +244,7 @@ export default function Home() {
     {
       src: "/images/sample4.png",
       alt: "Slide 1",
-      description: "走りたいルートの形を書く",
+      description: "走りたいコースの形を書く",
     },
     {
       src: "/images/whiteblue.png",
@@ -309,7 +309,7 @@ export default function Home() {
                   onChange={(e) =>
                     setSortBy(e.target.value as "created_at" | "distance")
                   }
-                  className="p-2 border rounded"
+                  className="p-2 rounded-[8px] font-semibold"
                 >
                   <option value="created_at">作成順</option>
                   <option value="distance">近さ順</option>
@@ -322,7 +322,7 @@ export default function Home() {
 
         {/* Create New Route Button */}
         <div className={`mt-auto ${paddingX} w-full pt-10`}>
-          <RoutingButton buttonText="新しいルートを作る" to="/draw" />
+          <RoutingButton buttonText="新しいコースを作る" to="/draw" />
         </div>
       </main>
     </div>

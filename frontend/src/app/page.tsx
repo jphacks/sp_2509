@@ -75,7 +75,7 @@ export default function Home() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // ルートカード(単一の例)
+  // コースカード(単一の例)
   const [routeVisible, setRouteVisible] = useState(true);
   const [isFavorite, setIsFavorite] = useState<boolean>(true); // 初期お気に入り状態
   const routeId = "route-1";
@@ -143,7 +143,7 @@ export default function Home() {
             <MadeRouteCard_Big routeData={dummyRouteData} />
           </div>
 
-          {/* ルートカード（可視の時のみ描画） */}
+          {/* コースカード（可視の時のみ描画） */}
           {routeVisible && (
             <MadeRoute
               id={routeId}
@@ -198,7 +198,7 @@ export default function Home() {
           </div>
 
           <div>
-            <Loading loadingText='読み込み中...' points={starShapePoints} />
+            <Loading loadingText="読み込み中..." points={starShapePoints} />
           </div>
         </div>
       </div>

@@ -98,8 +98,8 @@ def calculate_route(payload: schemas.RouteCalculateRequest):
 
     Returns:
         schemas.RouteCalculateResponse: 計算結果。
-            - `total_distance_km`: 実際に生成されたルートの総距離 (km)
-            - `route_points`: ルートを構成する緯度経度のリスト (`[{lat, lng}, ...]`)
+            - `total_distance_km`: 実際に生成されたコースの総距離 (km)
+            - `route_points`: コースを構成する緯度経度のリスト (`[{lat, lng}, ...]`)
             - `drawing_points`: 手書き経路の緯度経度のリスト
     """
     drawing_display_points = [point.dict() for point in payload.drawing_display_points]
