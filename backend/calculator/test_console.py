@@ -31,14 +31,14 @@ def test_api_format():
             "lat": 43.0686,
             "lng": 141.3508
         },
-        "target_distance_km": 20.0
+        "target_distance_km": 12.0
     }
     
     # ジェネレーターの初期化
     generator = GPSArtGenerator(cache_enabled=True)
     
     # コスト関数パラメータを元のスクリプトと同じに設定
-    generator.set_cost_parameters(alpha=1.0, beta=5.0, gamma=1.0)
+    generator.set_cost_parameters(alpha=1, beta=100, gamma=10)
     
     # コース計算の実行
     print("コース計算を開始します...")

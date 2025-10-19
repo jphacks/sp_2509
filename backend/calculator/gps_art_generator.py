@@ -4,8 +4,8 @@ import networkx as nx
 import numpy as np
 from shapely.geometry import Point
 from scipy.spatial import KDTree
-from typing import List, Dict, Tuple, Optional
-import json
+from typing import List, Dict, Tuple
+from simplification.cutil import simplify_coords
 
 class GPSArtGenerator:
     """
@@ -23,15 +23,13 @@ class GPSArtGenerator:
         """
         ox.settings.use_cache = cache_enabled
         
-        self.alpha = 1.0 # 方向性の重み
-        self.beta = 5.0 # 効率性の重み
-        self.gamma = 1.0 # 形状忠実性の重み
+        self.alpha = 1 # 方向性の重み
+        self.beta = 100 # 効率性の重み
+        self.gamma = 10 # 形状忠実性の重み
         
         self.network_type = "walk"
-        self.network_distance = 4000 # 地図の取得する範囲（メートル）
         self.path_length_adjustment = 0.7 # 目標距離の調整係数
         self.rotation_search_steps = 360 # 経路角度探索のステップ数
-        self.resample_points = 40 # 経路探索のためにリサンプリングする点の数
         self.rotation_search_points = 200 # 角度決定のためにリサンプリングする点の数
         self._road_network = None
         self._road_network_latlon = None
@@ -147,6 +145,34 @@ class GPSArtGenerator:
             new_points.append(tuple(new_point))
             
         return new_points
+
+    def _simplify_path_rdp(self, path: List[Tuple[float, float]], epsilon_ratio: float = 0.02) -> List[Tuple[float, float]]:
+        """
+        Ramer-Douglas-Peuckerアルゴリズムを使用してパスを単純化します。
+        epsilonは描画領域の対角線の長さに比例して決定されます。
+        """
+        if len(path) < 3:
+            return path
+
+        path_np = np.array(path)
+        
+        # 描画領域のバウンディングボックスからepsilonを計算
+        min_coords = np.min(path_np, axis=0)
+        max_coords = np.max(path_np, axis=0)
+        diagonal_length = np.linalg.norm(max_coords - min_coords)
+        
+        if diagonal_length == 0:
+            return [path[0]]
+
+        epsilon = diagonal_length * epsilon_ratio
+        
+        simplified_path = simplify_coords(path_np, epsilon)
+        
+        # 少なくとも2点は残す
+        if len(simplified_path) < 2 and len(path) >= 2:
+            return [path[0], path[-1]]
+
+        return [tuple(p) for p in simplified_path]
 
     def _calculate_path_length(self, path: List[Tuple[float, float]]) -> float:
         """座標リストで定義されたパスの全長を計算します。"""
@@ -369,14 +395,20 @@ class GPSArtGenerator:
             計算結果のDict（APIレスポンス形式）
         """
         raw_shape_points = [(point["x"], point["y"]) for point in drawing_display_points]
-        anchor_lat = start_location["lat"]
-        anchor_lon = start_location["lng"]
+        anchor_lat = float(round(start_location["lat"], 3))
+        anchor_lon = float(round(start_location["lng"], 3))
+
+        if target_distance_km <= 10:
+            self.network_distance = 3000
+        else:
+            self.network_distance = 4000
         
         self._load_road_network(anchor_lat, anchor_lon)
         
-        resampled_shape = self._resample_shape(raw_shape_points, self.resample_points)
-        
         adjusted_target_km = target_distance_km * self.path_length_adjustment
+
+        # 経路探索用に形状を単純化（RDP）
+        resampled_shape = self._simplify_path_rdp(raw_shape_points, epsilon_ratio=0.01)
         
         target_shape_latlon = self._create_scaled_geo_path(
             resampled_shape, anchor_lat, anchor_lon, adjusted_target_km
@@ -391,6 +423,7 @@ class GPSArtGenerator:
             )
             base_target_shape_proj.append(np.array(point_proj.coords[0]))
         
+        # 角度探索用に形状をリサンプリング（等間隔）
         rotation_search_shape = self._resample_shape(raw_shape_points, self.rotation_search_points)
         rotation_search_latlon = self._create_scaled_geo_path(
             rotation_search_shape, anchor_lat, anchor_lon, adjusted_target_km

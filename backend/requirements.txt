@@ -12,5 +12,6 @@ scipy
 networkx
 numpy
 shapely
+simplification
 matplotlib
 pygame
