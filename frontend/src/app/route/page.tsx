@@ -9,7 +9,6 @@ import { FaPencilAlt, FaCog, FaSave } from "react-icons/fa";
 
 const API_URL = "/api";
 
-
 type RoutePoint = {
   lat: number;
   lng: number;
@@ -112,8 +111,8 @@ export default function CourseDetailPage() {
   return (
     <div className="bg-gray-50 min-h-screen">
       <main className="max-w-md mx-auto p-4">
-        <div className="text-left mb-6">
-          <Title title="コース詳細" />
+        <div className="text-left mb-6 font-sans">
+          <Title title="コースが完成しました" />
         </div>
 
         <div className="px-4">
@@ -121,18 +120,21 @@ export default function CourseDetailPage() {
         </div>
 
         <div className="px-4 mt-6 space-y-4">
-          <RoutingButton
-            buttonText="描きなおす"
-            to="/draw"
-            icon={FaPencilAlt}
-          />
-          <RoutingButton buttonText="条件変更" to="/condition" icon={FaCog} />
+          <div className="flex gap-2">
+            <RoutingButton buttonText="条件変更" to="/condition" icon={FaCog} />
+
+            <RoutingButton
+              buttonText="描きなおす"
+              to="/draw"
+              icon={FaPencilAlt}
+            />
+          </div>
           <button
             onClick={handleSaveCourse}
             disabled={isSaving}
-            className="w-full flex items-center justify-center gap-2 bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            className="w-full flex items-center justify-center gap-2 bg-blue-500 text-white py-3 text-lg font-semibold tracking-wide rounded-2xl shadow-md hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 ease-out select-none font-sans"
           >
-            <FaSave />
+            <FaSave size={22} />
             <span>{isSaving ? "保存中..." : "保存してホームに戻る"}</span>
           </button>
         </div>

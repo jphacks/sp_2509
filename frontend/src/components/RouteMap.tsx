@@ -88,15 +88,17 @@ const RouteMap = ({
         url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
       />
 
+      {/* drawing_points: 赤い線 */}
+      {secondaryPositions && secondaryPositions.length > 0 && (
+        <Polyline positions={secondaryPositions} color="red" weight={3} />
+      )}
+      
       {/* route_points: 青い線 */}
       {positions && positions.length > 0 && (
         <Polyline positions={positions} color="blue" weight={3} />
       )}
 
-      {/* drawing_points: 赤い線 */}
-      {secondaryPositions && secondaryPositions.length > 0 && (
-        <Polyline positions={secondaryPositions} color="red" weight={3} />
-      )}
+      
 
       {/* スタートマーカー */}
       {startPosition && <Marker position={startPosition} icon={startIcon} />}
