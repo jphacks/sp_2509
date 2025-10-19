@@ -162,7 +162,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     ctx.lineWidth = strokeWidth;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    if ('touches' in event) event.preventDefault();
+    //if ('touches' in event) event.preventDefault();
   }, [strokeColor, strokeWidth, hasDrawn, performClear]);
 
   const stopDrawing = useCallback(() => {
@@ -194,7 +194,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       ctx.stroke();
       setPoints(prevPoints => [...prevPoints, coords]);
     }
-    if ('touches' in event) event.preventDefault();
+    //if ('touches' in event) event.preventDefault();
   }, [isDrawing, hasDrawn, stopDrawing]); // stopDrawingを依存配列に追加
 
   return (
@@ -224,6 +224,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         className={`touch-none bg-white rounded-lg shadow-md block w-full h-full ${
           hasDrawn ? 'cursor-not-allowed opacity-70' : 'cursor-crosshair'
         }`}
+        style={{ touchAction: 'none' }}
       />
     </div>
   );

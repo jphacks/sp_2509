@@ -3,7 +3,7 @@
 import { useRef, useState, MouseEvent } from 'react';
 import Image from 'next/image';
 
-type CarouselItem = {
+export type CarouselItem = {
   src: string;
   alt: string;
   description: string;

@@ -4,7 +4,8 @@ import { useState, useCallback } from 'react'; // useCallback を追加
 import DrawingCanvas from '../../components/DrawingCanvas';
 import Title from '../../components/Title';
 import Header from '../../components/Header';
-import Loading from '../../components/Loading';
+import type { CarouselItem } from '../../components/Carousel';
+import CarouselWithClick from '../../components/CarouselWithClick';
 import BackButton from '../../components/BackButton';
 import RoutingButton from '../../components/RoutingButton';
 import ClearCanvasButton from '../../components/ClearCanvasButton'; // ★★★ 追加: クリアボタンをインポート
@@ -19,6 +20,19 @@ const heartShape: Point[] = [
     { x: 115, y: 80 }, { x: 145, y: 70 }, { x: 175, y: 100 }
 ];
 
+
+const items: CarouselItem[] = [
+    {
+        src: '/images/Recommend/Heart.png',
+        alt: 'Heart Shape',
+        description: 'ハート型'
+    },
+        {
+        src: '/images/Recommend/Heart.png',
+        alt: 'Heart Shape',
+        description: 'ハート型'
+    },
+]
 
 export default function Draw() {
   const [drawingPoints, setDrawingPoints] = useState<Point[]>([]);
@@ -61,6 +75,15 @@ const navigateToCondition = () => {
     }
   };
 
+interface ItemClickHandler {
+    (item: CarouselItem, index: number): void;
+}
+
+const handleItemClick: ItemClickHandler = (item, index) => {
+    alert(`${index + 1}枚目がクリックされました: ${item.description}`);
+};
+
+
     return (
         <main className="flex min-h-screen flex-col items-center justify-center p-4">
         <div className="z-10 w-full max-w-5xl items-center justify-center text-sm">
@@ -92,24 +115,31 @@ const navigateToCondition = () => {
                     <div className="mt-4 text-black">
                         <Header headerText="おすすめから選ぶ" />
                     </div>
-                    <div className="flex justify-center space-x-4 mt-4">
+                    
+                    {/* <div className="flex justify-center space-x-4 mt-4">
                         <button
                             onClick={selectHeart}
                             className={"flex items-center justify-center rounded transition-colors duration-150 ease-in-out"}
                         >
                             <RecommendedShape shapeImageSrc='/images/Recommend/Heart.png'/>
                         </button>
-                    </div>  
-                    
-                    {/* ボタンによるページ遷移 */}
-                    <RoutingButton
-                        buttonText="条件設定へ進む"
-                        onClick={navigateToCondition} // onClick で関数を渡す
-                        disabled={drawingPoints.length === 0} // disabled 状態を渡す
-                        // to プロパティは不要
-                    />
+                    </div>   */}
 
-                    <Loading loadingText='読み込み中' points={drawingPoints}/>
+                    <div className="p-4">
+                        <CarouselWithClick items={items} onItemClick={handleItemClick}/>
+                    </div>
+
+                    <div className="mt-8 flex justify-center">
+                    {/* ボタンによるページ遷移 */}
+                        <RoutingButton
+                            buttonText="条件設定へ進む"
+                            onClick={navigateToCondition} // onClick で関数を渡す
+                            disabled={drawingPoints.length === 0} // disabled 状態を渡す
+                            // to プロパティは不要
+                        />
+                    </div>
+
+                    {/* <Loading loadingText='読み込み中' points={drawingPoints}/> */}
 
             </div>
         </div>
