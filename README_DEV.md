@@ -24,6 +24,7 @@
 ```bash
 bash setup.sh
 ```
+
 > **Note:**
 > もし `permission denied` エラーが出る場合は、`chmod +x setup.sh` を実行して権限を付与してください。
 
@@ -31,9 +32,10 @@ bash setup.sh
 
 Windowsでは、以下の手順で手動セットアップを行ってください。
 
-1.  **リポジトリをクローンします。**
+1. **リポジトリをクローンします。**
 
 2. **バックエンドのセットアップ (PowerShell):**
+
     ```powershell
     # Python仮想環境の作成
     python -m venv backend\.venv
@@ -49,6 +51,7 @@ Windowsでは、以下の手順で手動セットアップを行ってくださ�
     ```
 
 3. **フロントエンドのセットアップ (PowerShell):**
+
     ```powershell
     # フロントエンドのディレクトリに移動
     cd frontend
@@ -111,6 +114,7 @@ Windowsでは、以下の手順で手動セットアップを行ってくださ�
         ```powershell
         .\backend\.venv\Scripts\activate
         ```
+
 2. **(ライブラリを変更した場合のみ)依存関係のインストール:**
 
     * **macOS / Linux:**
