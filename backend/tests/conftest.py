@@ -1,5 +1,12 @@
 # backend/tests/conftest.py
+import sys
+import os
 import pytest
+
+# プロジェクトルートをsys.pathに追加
+# conftest.pyが backend/tests/ にあるので、2階層上がる
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, project_root)
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
