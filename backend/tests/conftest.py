@@ -13,7 +13,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 # backend パッケージ内のモジュールをインポート
-# (pytest をプロジェクトルートから実行すれば 'backend.' で見つかるはず)
+# (pytest をプロジェクトコースから実行すれば 'backend.' で見つかるはず)
 from backend.database import Base, get_db
 from backend.main import app
 

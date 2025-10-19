@@ -285,7 +285,7 @@ class GPSArtGenerator:
         return weight_func
 
     def _find_route_for_shape(self, shape_points: List[np.ndarray]) -> List:
-        """指定された形状全体を描くためのルートを探索します。"""
+        """指定された形状全体を描くためのコースを探索します。"""
         full_route = []
         all_node_coords = np.array([self._road_network.nodes[node]['coords'] 
                                   for node in self._road_network.nodes()])
@@ -318,13 +318,13 @@ class GPSArtGenerator:
                 
                 current_node = path[-1]
             except nx.NetworkXNoPath:
-                print(f"  - ルートが見つかりませんでした。このセグメントをスキップします。")
+                print(f"  - コースが見つかりませんでした。このセグメントをスキップします。")
                 continue
                 
         return full_route
 
     def _calculate_route_length_km(self, route_nodes: List) -> float:
-        """計算されたルートの全長をキロメートル単位で計算します。"""
+        """計算されたコースの全長をキロメートル単位で計算します。"""
         if not route_nodes or len(route_nodes) < 2:
             return 0.0
             
@@ -337,7 +337,7 @@ class GPSArtGenerator:
         return round(total_length_m / 1000, 1)
 
     def _convert_route_to_latlon(self, route_nodes: List) -> List[Dict[str, float]]:
-        """UTM座標系のルートを緯度経度に変換します。"""
+        """UTM座標系のコースを緯度経度に変換します。"""
         route_points = []
         for node in route_nodes:
             x, y = self._road_network.nodes[node]['x'], self._road_network.nodes[node]['y']
@@ -408,7 +408,7 @@ class GPSArtGenerator:
         
         target_shape_proj = self._rotate_shape(base_target_shape_proj, best_angle)
         
-        print("最適な形状でルート探索を開始します。")
+        print("最適な形状でコース探索を開始します。")
         route_nodes = self._find_route_for_shape(target_shape_proj)
         
         total_distance_km = self._calculate_route_length_km(route_nodes)
