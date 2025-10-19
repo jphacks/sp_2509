@@ -10,6 +10,7 @@ interface DrawingCanvasProps {
   onDrawEnd?: (points: Point[]) => void;
   initialPoints?: Point[];
   clearSignal?: number;
+  disabled?: boolean;
 }
 
 const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
@@ -17,21 +18,27 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
   strokeWidth = 6,
   onDrawEnd,
   initialPoints,
-  clearSignal
+  clearSignal,
+  disabled = false
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [points, setPoints] = useState<Point[]>([]);
-  const [hasDrawn, setHasDrawn] = useState(false);
+  const [hasContent, setHasContent] = useState(false);
   const lastClearSignalRef = useRef<number | undefined>(undefined);
 
+  // initialPoints が与えられたときの処理
   const redrawInitialPoints = useCallback(() => {
+    // ... (redrawInitialPoints の中身は変更なし) ...
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
     if (initialPoints && initialPoints.length > 0) {
       ctx.beginPath();
       ctx.moveTo(initialPoints[0].x, initialPoints[0].y);
@@ -43,117 +50,125 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       ctx.stroke();
       ctx.closePath();
       setPoints(initialPoints);
-      setHasDrawn(true);
+      setHasContent(true);
       if (onDrawEnd) onDrawEnd(initialPoints);
     } else {
-      setHasDrawn(false);
+      setHasContent(false);
     }
   }, [initialPoints, strokeColor, strokeWidth, onDrawEnd]);
 
-  // ★★★ Canvasのサイズとスケールを再設定する関数 ★★★
+  // Canvasのリサイズ処理 (変更なし)
   const handleResize = useCallback(() => {
-    const canvas = canvasRef.current;
-    const container = containerRef.current;
-    if (!canvas || !container) return;
-
-    const dpr = window.devicePixelRatio || 1;
-    const rect = container.getBoundingClientRect();
-
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      ctx.scale(dpr, dpr);
-    }
-    
-    // サイズ変更後に既存の描画を再描画する
-    // （今回は initialPoints のみ再描画）
-    redrawInitialPoints();
+      const canvas = canvasRef.current;
+      const container = containerRef.current;
+      if (!canvas || !container) return;
+      const dpr = window.devicePixelRatio || 1;
+      const rect = container.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      const ctx = canvas.getContext('2d');
+      if (ctx) { ctx.scale(dpr, dpr); }
+      redrawInitialPoints();
   }, [redrawInitialPoints]);
 
 
-  // ★★★ useLayoutEffectからuseEffectに変更し、ResizeObserverをセット ★★★
   useEffect(() => {
-    handleResize(); // 初回実行
-
+    handleResize();
     const container = containerRef.current;
     if (!container) return;
-
-    // 親要素のサイズ変更を監視
-    const resizeObserver = new ResizeObserver(() => {
-      handleResize();
-    });
+    const resizeObserver = new ResizeObserver(() => { handleResize(); });
     resizeObserver.observe(container);
-
-    // クリーンアップ関数
-    return () => {
-      resizeObserver.disconnect();
-    };
+    return () => { resizeObserver.disconnect(); };
   }, [handleResize]);
 
 
+  // クリア処理 (変更なし)
   const performClear = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    
-    // scaleを考慮せずにクリアするために一度リセット
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.restore(); // 元のscaleに戻す
-
+    ctx.restore();
     setPoints([]);
-    setHasDrawn(false);
+    setHasContent(false);
     setIsDrawing(false);
     if (onDrawEnd) {
       onDrawEnd([]);
     }
   }, [onDrawEnd]);
 
+  // clearSignal の監視 (変更なし)
   useEffect(() => {
-    if (clearSignal === undefined) return;
-    if (lastClearSignalRef.current === undefined) {
-      lastClearSignalRef.current = clearSignal;
-      return;
+    const firstRender = lastClearSignalRef.current === undefined;
+    if (clearSignal === undefined) {
+        if(firstRender) redrawInitialPoints();
+        return;
+    };
+    if (firstRender) {
+        lastClearSignalRef.current = clearSignal;
+        redrawInitialPoints();
+        return;
     }
     if (clearSignal !== lastClearSignalRef.current) {
+      console.log('DrawingCanvas: clearSignal received, performing clear.');
       performClear();
       lastClearSignalRef.current = clearSignal;
     }
-  }, [clearSignal, performClear]);
+  }, [clearSignal, performClear, redrawInitialPoints]);
 
+  // 座標取得関数 (変更なし)
   const getCoordinates = (event: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>): Point | null => {
-    const canvas = canvasRef.current;
-    if (!canvas) return null;
-    const rect = canvas.getBoundingClientRect();
-    let clientX, clientY;
-    if ('touches' in event) {
-      if (event.touches.length === 0) return null;
-      clientX = event.touches[0].clientX;
-      clientY = event.touches[0].clientY;
-    } else {
-      clientX = event.clientX;
-      clientY = event.clientY;
-    }
-    const x = clientX - rect.left;
-    const y = clientY - rect.top;
-    return { x, y };
+      const canvas = canvasRef.current;
+      if (!canvas) return null;
+      const rect = canvas.getBoundingClientRect();
+      let clientX, clientY;
+      if ('touches' in event) {
+        if (event.touches.length === 0) return null;
+        clientX = event.touches[0].clientX; clientY = event.touches[0].clientY;
+      } else {
+        clientX = event.clientX; clientY = event.clientY;
+      }
+      const x = clientX - rect.left; const y = clientY - rect.top;
+      return { x, y };
   };
 
+  // 描画開始処理
   const startDrawing = useCallback((event: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
-    if (hasDrawn) return;
+    if (disabled) {
+        console.log('DrawingCanvas: Drawing disabled.');
+        return;
+    }
+    if (hasContent) {
+        console.log('DrawingCanvas: Canvas already has content or initial points.');
+        return;
+    }
+
     const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    if (!ctx) return;
-    
-    // 新規描画の前にクリア
-    performClear();
+    // ★★★ canvas の null チェックを追加 ★★★
+    if (!canvas) {
+        console.error('DrawingCanvas: Canvas element not found.');
+        return;
+    }
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+        console.error('DrawingCanvas: Failed to get 2D context.');
+        return;
+    }
+
+    // Canvas を直接クリア
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    // ↓↓↓ canvas が null でないことを確認済みなので安全 ↓↓↓
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+    setPoints([]); // ポイントデータもクリア
 
     const coords = getCoordinates(event);
     if (!coords) return;
+    console.log('DrawingCanvas: startDrawing');
     setIsDrawing(true);
     setPoints([coords]);
     ctx.beginPath();
@@ -162,27 +177,29 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     ctx.lineWidth = strokeWidth;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    //if ('touches' in event) event.preventDefault();
-  }, [strokeColor, strokeWidth, hasDrawn, performClear]);
+    if ('touches' in event) event.preventDefault();
+  }, [disabled, hasContent, strokeColor, strokeWidth]); // performClear を削除した依存配列
 
+  // 描画終了処理 (変更なし)
   const stopDrawing = useCallback(() => {
     if (!isDrawing) return;
+    console.log('DrawingCanvas: stopDrawing');
     setIsDrawing(false);
     const ctx = canvasRef.current?.getContext('2d');
     if (ctx) ctx.closePath();
-
     if (points.length > 1) {
-      setHasDrawn(true);
+      setHasContent(true);
       if (onDrawEnd) onDrawEnd(points);
     } else {
       performClear();
     }
   }, [isDrawing, onDrawEnd, points, performClear]);
 
+  // 描画中処理 (変更なし)
   const draw = useCallback((event: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || hasDrawn) return;
-    if ('buttons' in event && event.buttons !== 1) {
-        // マウスボタンが押されていなければ終了
+    if (!isDrawing) return;
+    if ('buttons' in event && event.buttons !== 1 && event.type.startsWith('mouse')) {
+        console.log('DrawingCanvas: Mouse button released during draw, stopping.');
         stopDrawing();
         return;
     }
@@ -194,12 +211,12 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       ctx.stroke();
       setPoints(prevPoints => [...prevPoints, coords]);
     }
-    //if ('touches' in event) event.preventDefault();
-  }, [isDrawing, hasDrawn, stopDrawing]); // stopDrawingを依存配列に追加
+    if ('touches' in event) event.preventDefault();
+  }, [isDrawing, stopDrawing]);
 
   return (
     <div ref={containerRef} className="relative w-full h-full">
-      {!isDrawing && !hasDrawn && (
+      {!disabled && !isDrawing && !hasContent && (
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none space-y-4 z-10">
           <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center">
             <FaPencilAlt className="text-gray-500 text-4xl" />
@@ -222,13 +239,11 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         onTouchEnd={stopDrawing}
         onTouchCancel={stopDrawing}
         className={`touch-none bg-white rounded-lg shadow-md block w-full h-full ${
-          hasDrawn ? 'cursor-not-allowed opacity-70' : 'cursor-crosshair'
+          disabled || hasContent ? 'cursor-not-allowed opacity-70' : 'cursor-crosshair'
         }`}
-        style={{ touchAction: 'none' }}
       />
     </div>
   );
 };
 
 export default DrawingCanvas;
-

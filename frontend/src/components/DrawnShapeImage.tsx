@@ -83,8 +83,7 @@ const DrawnShapeImage: React.FC<DrawnShapeImageProps> = ({
             ref={canvasRef}
             width={size}
             height={size}
-            // canvas自体の背景はボタンに任せるため透明に
-            className={`bg-gray-100 rounded-md`}
+            className={`bg-white rounded-md`}
         />
   );
   // ★★★ 変更ここまで ★★★
