@@ -175,8 +175,8 @@ export default function Condition() {
             value={distanceKm}
             onChange={setDistanceKm}
             min={1}
-            max={50}
-            step={0.5}
+            max={25}
+            step={1}
             unit="km"
           />
         </section>
