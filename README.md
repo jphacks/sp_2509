@@ -6,6 +6,7 @@
 
 - **アプリURL**:https://ashiart.vercel.app/
 - スライドURL:https://www.canva.com/design/DAG2Mtx20no/hRDT1oBMKq8AcZpFIRxSXw/edit?utm_content=DAG2Mtx20no&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
+- デモ動画URL:https://youtube.com/shorts/27tdlkKjnt4?si=fqWmWE4z-FZHzUta
 
 ### アプリ QR コード
 
