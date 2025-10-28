@@ -5,7 +5,7 @@ import MadeRouteCard_Big from "@/components/MadeRouteCard_Big";
 import Title from "@/components/Title";
 import RoutingButton from "@/components/RoutingButton";
 import { useEffect, useState } from "react";
-import { HiPlay } from "react-icons/hi";
+import { FaRunning } from "react-icons/fa";
 
 type CourseData = {
     id: string;
@@ -91,8 +91,8 @@ function CourseDetailContent() {
             <div className="fixed bottom-4 left-0 right-0 px-4">
                 <div className="max-w-md mx-auto p-4">
                     <RoutingButton
-                        buttonText="経路案内を開始"
-                        icon={HiPlay}
+                        buttonText="ランニングを開始"
+                        icon={FaRunning}
                         onClick={handleStartNavigation}
                     />
                 </div>
