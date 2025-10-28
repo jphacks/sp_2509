@@ -2,35 +2,80 @@
 
 import BackButton from "@/components/BackButton";
 import MadeRouteCard_Big from "@/components/MadeRouteCard_Big";
-import Title from "@/components/Title"; // Title コンポーネントをインポート
-import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import Title from "@/components/Title";
+import RoutingButton from "@/components/RoutingButton";
+import { useEffect, useState } from "react";
+import { HiPlay } from "react-icons/hi";
+
+type CourseData = {
+    id: string;
+    positions: [number, number][];
+    course_distance: number;
+    start_distance: number;
+    created_at: string;
+    isFavorite: boolean;
+};
 
 function CourseDetailContent() {
-    const searchParams = useSearchParams();
+    const [courseData, setCourseData] = useState<CourseData | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const id = searchParams.get("id");
-    const positionsStr = searchParams.get("positions");
-    const course_distance = searchParams.get("course_distance");
-    const start_distance = searchParams.get("start_distance");
-    const created_at = searchParams.get("created_at");
-    const isFavorite = searchParams.get("isFavorite") === "true";
-    const drawingPointsStr = searchParams.get("drawing_points");
+    useEffect(() => {
+        // SessionStorageからコース詳細データを取得
+        const storedData = sessionStorage.getItem('courseDetailData');
 
-    const positions = positionsStr ? JSON.parse(positionsStr) : [];
-    const drawingPoints = drawingPointsStr ? JSON.parse(drawingPointsStr) : positions;
+        if (storedData) {
+            try {
+                const parsedData = JSON.parse(storedData);
+                setCourseData(parsedData);
+            } catch (error) {
+                console.error('コース詳細データの解析に失敗しました:', error);
+                window.location.href = '/home';
+            }
+        } else {
+            console.warn('コース詳細データが見つかりません');
+            window.location.href = '/home';
+        }
 
+        setIsLoading(false);
+    }, []);
+
+    if (isLoading || !courseData) {
+        return (
+            <div className="flex items-center justify-center h-screen bg-gray-50">
+                <div className="text-center">
+                    <div className="w-8 h-8 bg-black rounded-full animate-pulse mb-4 mx-auto"></div>
+                    <p>読み込み中...</p>
+                </div>
+            </div>
+        );
+    }
 
     const routeData = {
-        total_distance_km: course_distance ? parseFloat(course_distance) : 0,
-        route_points: positions.map((p: [number, number]) => ({ lat: p[0], lng: p[1] })),
-        drawing_points: drawingPoints.map((p: [number, number]) => ({ lat: p[0], lng: p[1] })),
+        total_distance_km: courseData.course_distance,
+        route_points: courseData.positions.map((p: [number, number]) => ({ lat: p[0], lng: p[1] })),
+        drawing_points: courseData.positions.map((p: [number, number]) => ({ lat: p[0], lng: p[1] })),
     };
 
 
-    return (
-        <div className="bg-gray-50 min-h-screen">
-            <main className="max-w-md mx-auto p-4">
+    const handleStartNavigation = () => {
+        // SessionStorageにナビゲーションデータを保存
+        const navigationData = {
+            id: courseData.id,
+            route_points: courseData.positions.map((p: [number, number]) => ({ lat: p[0], lng: p[1] })),
+            total_distance_km: courseData.course_distance,
+            start_distance: courseData.start_distance,
+            created_at: courseData.created_at,
+            isFavorite: courseData.isFavorite,
+        };
+
+        sessionStorage.setItem('navigationData', JSON.stringify(navigationData));
+
+        // ナビゲーションページに遷移
+        window.location.href = '/navigation';
+    }; return (
+        <div className="bg-gray-50 max-w-md mx-auto min-h-screen pb-20 relative">
+            <main className="p-4">
                 <div className="text-left mb-6"> {/* 左寄せのコンテナに変更 */}
                     <Title title="コース詳細" /> {/* Title コンポーネントを使用 */}
                     <div className="mt-2"> {/* 戻るボタンをTitleの下に配置 */}
@@ -38,20 +83,24 @@ function CourseDetailContent() {
                     </div>
                 </div>
 
-                <div className="px-4"> {/* 左右に16pxの余白を追加 */}
-                    <MadeRouteCard_Big
-                        routeData={routeData}
+                <MadeRouteCard_Big
+                    routeData={routeData}
+                />
+            </main>
+
+            <div className="fixed bottom-4 left-0 right-0 px-4">
+                <div className="max-w-md mx-auto p-4">
+                    <RoutingButton
+                        buttonText="経路案内を開始"
+                        icon={HiPlay}
+                        onClick={handleStartNavigation}
                     />
                 </div>
-            </main>
+            </div>
         </div>
     );
 }
 
 export default function CourseDetailPage() {
-    return (
-        <Suspense fallback={<div>Loading...</div>}>
-            <CourseDetailContent />
-        </Suspense>
-    );
+    return <CourseDetailContent />;
 }
