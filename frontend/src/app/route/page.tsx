@@ -6,6 +6,7 @@ import MadeRouteCard_Big from "@/components/MadeRouteCard_Big";
 import Title from "@/components/Title";
 import RoutingButton from "@/components/RoutingButton";
 import { FaPencilAlt, FaCog, FaSave } from "react-icons/fa";
+import MadeRouteCardWithPoints from "@/components/MadeRouteCardWithPoints";
 
 const API_URL = "/api";
 
@@ -116,7 +117,8 @@ export default function CourseDetailPage() {
         </div>
 
         <div className="px-4">
-          <MadeRouteCard_Big routeData={routeData} />
+          {/* <MadeRouteCard_Big routeData={routeData} /> */}
+          <MadeRouteCardWithPoints routeData={routeData} />
         </div>
 
         <div className="px-4 mt-6 space-y-4">

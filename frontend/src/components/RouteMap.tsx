@@ -92,28 +92,28 @@ const RouteMap = ({
       {secondaryPositions && secondaryPositions.length > 0 && (
         <Polyline positions={secondaryPositions} color="red" weight={3} />
       )}
-      
+
       {/* route_points: 水色の線（グラデーション風） */}
       {positions && positions.length > 0 && (
         <>
           {/* 青い縁取り（外側） */}
-          <Polyline 
-            positions={positions} 
-            color="#1E40CF" 
+          <Polyline
+            positions={positions}
+            color="#1E40CF"
             weight={8}
             opacity={0.6}
           />
           {/* 水色の本体（内側） */}
-          <Polyline 
-            positions={positions} 
-            color="#07D8F9" 
+          <Polyline
+            positions={positions}
+            color="#07D8F9"
             weight={4}
             opacity={0.9}
           />
         </>
       )}
 
-      
+
 
       {/* スタートマーカー */}
       {startPosition && <Marker position={startPosition} icon={startIcon} />}
