@@ -10,7 +10,8 @@ import {
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { HiArrowLeft, HiSun, HiMoon } from "react-icons/hi";
+import { HiSun, HiMoon } from "react-icons/hi";
+import { MdOutlineTurnLeft, MdOutlineTurnRight, MdOutlineUTurnRight } from "react-icons/md";
 import { FaRunning } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 
@@ -155,9 +156,7 @@ export default function NavigationMap({ routeData }: NavigationMapProps) {
           {/* 次の案内情報 */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-4 mb-4">
-              <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
-                <span className="text-white font-bold text-2xl">↑</span>
-              </div>
+              <MdOutlineTurnRight size={64} />
               <div>
                 <span className="text-white font-bold text-5xl">100</span>
                 <span className="text-white text-2xl ml-2">m</span>
@@ -214,7 +213,7 @@ export default function NavigationMap({ routeData }: NavigationMapProps) {
       </MapContainer>
 
       {/* 地図上のグラデーションオーバーレイ */}
-      <div className="absolute inset-0 z-[500] bg-gradient-to-b from-white/80 via-transparent to-transparent pointer-events-none" />
+      <div className="absolute inset-0 z-[500] bg-gradient-to-b from-white/80 via-transparent via-25% to-transparent pointer-events-none" />
 
       {/* 左上: タイトル */}
       <div className="absolute top-6 left-4 z-[1000]">
@@ -236,9 +235,7 @@ export default function NavigationMap({ routeData }: NavigationMapProps) {
         <div className="space-y-4">
           {/* 次の案内 */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gray-300 rounded-lg flex items-center justify-center">
-              <span className="text-black font-bold">↑</span>
-            </div>
+            <MdOutlineTurnRight size={32} />
             <div>
               <span className="text-black font-bold text-2xl">100</span>
               <span className="text-black text-base ml-1">m</span>
@@ -247,9 +244,7 @@ export default function NavigationMap({ routeData }: NavigationMapProps) {
 
           {/* その次の案内 */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gray-300 rounded-lg flex items-center justify-center">
-              <span className="text-black font-bold">→</span>
-            </div>
+            <MdOutlineTurnLeft size={32} />
             <div>
               <span className="text-black font-bold text-2xl">240</span>
               <span className="text-black text-base ml-1">m</span>
@@ -258,9 +253,7 @@ export default function NavigationMap({ routeData }: NavigationMapProps) {
 
           {/* さらに次の案内 */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gray-300 rounded-lg flex items-center justify-center">
-              <span className="text-black font-bold">←</span>
-            </div>
+            <MdOutlineUTurnRight size={32} />
             <div>
               <span className="text-black font-bold text-2xl">320</span>
               <span className="text-black text-base ml-1">m</span>
