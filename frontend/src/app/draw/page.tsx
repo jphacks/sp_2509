@@ -13,6 +13,7 @@ import type { Point } from '../../types/types';
 import SelectedShapePlaceholder from '../../components/SelectedShapePlaceholder';
 
 // --- 図形データ定義 ---
+// (heartShape, starShape, circleShape の定義は変更なし)
 const heartShape: Point[] = [
   { x: 175, y: 100 }, { x: 205, y: 70 }, { x: 235, y: 80 }, { x: 250, y: 110 },
   { x: 235, y: 140 }, { x: 175, y: 210 }, { x: 115, y: 140 }, { x: 100, y: 110 },
@@ -33,43 +34,36 @@ const circleShape: Point[] = Array.from({ length: 105 }, (_, i) => {
 
 // --- Draw コンポーネント本体 ---
 export default function Draw() {
-  const [drawingPoints, setDrawingPoints] = useState<Point[]>([]);
-  const [clearTrigger, setClearTrigger] = useState(0);
-  const [selectedItemDescription, setSelectedItemDescription] = useState<string | null>(null);
-
-  const isClearButtonDisabled = drawingPoints.length === 0;
+  // ★ 1. 状態を分離
+  const [userDrawnPoints, setUserDrawnPoints] = useState<Point[]>([]); // ユーザーが描画した線
+  const [selectedShape, setSelectedShape] = useState<{ description: string; points: Point[] } | null>(null); // 選択されたおすすめ図形
+  const [clearTrigger, setClearTrigger] = useState(0); // Canvasクリア用
   const router = useRouter();
 
-  // --- カルーセルアイテムクリック時の処理 ---
+  // ★ 2. アクティブなポイントを決定するロジック
+  // おすすめが選択されていればそれを、そうでなければユーザー描画を使う
+  const activePoints = useMemo(() => selectedShape?.points ?? userDrawnPoints, [selectedShape, userDrawnPoints]);
+  const activeDescription = useMemo(() => selectedShape?.description ?? null, [selectedShape]);
+
+  // ★ 3. カルーセルアイテムクリック時の処理変更
   const handleSelectShape = useCallback((item: CarouselClickItem) => {
-    // ... (変更なし) ...
     if (!item.shapeData) {
       console.warn("選択されたアイテムに shapeData がありません:", item.description);
       return;
     }
-    if (drawingPoints.length > 0 && selectedItemDescription === null) {
-      if (!window.confirm("現在の描画内容はクリアされます。よろしいですか？")) {
-        return;
-      }
-    }
-    const shapeData = item.shapeData;
-    const shapeDescription = item.description;
+    // おすすめを選択したら、選択状態を更新（ユーザー描画データは保持）
+    setSelectedShape({ description: item.description, points: item.shapeData });
+    // localStorage にも保存（次のページで使うため）
     try {
-      console.log(`選択: ${shapeDescription}. localStorage に保存します。`);
-      localStorage.setItem('drawingPointsData', JSON.stringify(shapeData));
-      setDrawingPoints(shapeData);
-      setSelectedItemDescription(shapeDescription);
-      console.log('localStorage 保存完了、State 更新完了');
+      localStorage.setItem('drawingPointsData', JSON.stringify(item.shapeData));
+      console.log(`選択: ${item.description}. localStorage に保存しました。`);
     } catch (error) {
-      console.error("Failed to save drawing points to localStorage:", error);
+      console.error("Failed to save selected shape to localStorage:", error);
       alert('形状データの保存に失敗しました。');
-      localStorage.removeItem('drawingPointsData');
-      setDrawingPoints([]);
-      setSelectedItemDescription(null);
     }
-  }, [drawingPoints, selectedItemDescription]);
+  }, []);
 
-  // --- カルーセルアイテムの定義 ---
+  // --- カルーセルアイテムの定義 (変更なし) ---
   const items: CarouselClickItem[] = useMemo(() => [
     {
       src: '/images/Recommend/Heart.png',
@@ -94,33 +88,36 @@ export default function Draw() {
     },
   ], [handleSelectShape]);
 
-  // --- ページ読み込み時の処理 ---
+  // ★ 4. ページ読み込み時の処理変更
   useEffect(() => {
-    // ... (変更なし) ...
     console.log('初回レンダリング: localStorage を確認します');
     try {
       const savedData = localStorage.getItem('drawingPointsData');
       if (savedData) {
         console.log('localStorage にデータがありました:', savedData);
         const parsedPoints = JSON.parse(savedData) as Point[];
-        setDrawingPoints(parsedPoints);
-        let foundMatch = false;
+
+        // 保存データがおすすめ図形と一致するかチェック
+        let matchedShape: { description: string; points: Point[] } | null = null;
         if (JSON.stringify(heartShape) === JSON.stringify(parsedPoints)) {
-          console.log('マッチするおすすめ図形: ハート型');
-          setSelectedItemDescription('ハート型');
-          foundMatch = true;
+          matchedShape = { description: 'ハート型', points: heartShape };
         } else if (JSON.stringify(starShape) === JSON.stringify(parsedPoints)) {
-          console.log('マッチするおすすめ図形: 星型');
-          setSelectedItemDescription('星型');
-          foundMatch = true;
+          matchedShape = { description: '星型', points: starShape };
         } else if (JSON.stringify(circleShape) === JSON.stringify(parsedPoints)) {
-          console.log('マッチするおすすめ図形: 円型');
-          setSelectedItemDescription('円型');
-          foundMatch = true;
+          matchedShape = { description: '円型', points: circleShape };
         }
-        if (!foundMatch) {
+
+        if (matchedShape) {
+          // おすすめ図形として復元
+          console.log(`マッチするおすすめ図形: ${matchedShape.description}`);
+          setSelectedShape(matchedShape);
+          // ユーザー描画は空にする（もし復元したい場合は別途localStorageに保存が必要）
+          setUserDrawnPoints([]);
+        } else {
+          // 手描きデータとして復元
           console.log('手描きデータとして復元します');
-          setSelectedItemDescription(null);
+          setUserDrawnPoints(parsedPoints);
+          setSelectedShape(null);
         }
       } else {
         console.log('localStorage にデータはありませんでした');
@@ -128,39 +125,44 @@ export default function Draw() {
     } catch (error) {
       console.error("Failed to initialize drawing points from localStorage:", error);
       localStorage.removeItem('drawingPointsData');
+      setUserDrawnPoints([]);
+      setSelectedShape(null);
     }
   }, []);
 
-  // --- 手描き完了時の処理 ---
+  // ★ 5. 手描き完了時の処理変更
   const handleDrawEnd = useCallback((points: Point[]) => {
-    // ... (変更なし) ...
     if (points.length > 0) {
-      console.log('手描き完了: localStorage に保存します');
+      console.log('手描き完了: userDrawnPoints を更新し、おすすめ選択を解除します');
+      setUserDrawnPoints(points);
+      setSelectedShape(null); // おすすめ選択を解除
+      // localStorage にも保存
       try {
         localStorage.setItem('drawingPointsData', JSON.stringify(points));
-        setDrawingPoints(points);
-        setSelectedItemDescription(null);
         console.log('手描きデータ保存完了');
       } catch (error) {
         console.error("Failed to save drawn points to localStorage:", error);
         alert('描画データの保存に失敗しました。');
       }
-    } else if (selectedItemDescription === null) {
-      console.log('手描き完了 (空) または Canvasクリア: データをクリアします');
-      localStorage.removeItem('drawingPointsData');
-      setDrawingPoints([]);
     } else {
-      console.log('onDrawEnd([]) が呼ばれましたが、図形選択中のためデータは維持します');
+      // 描画が空の場合 (例: クリックのみ) は何もしないか、
+      // 必要なら userDrawnPoints をクリアする
+      console.log('手描き完了 (空)');
+      // setUserDrawnPoints([]); // 必要ならクリア
+      // localStorage.removeItem('drawingPointsData'); // localStorageもクリアする場合
     }
-  }, [selectedItemDescription]);
+  }, []);
 
-  // --- クリア処理 ---
-  const handleClear = useCallback(() => {
-    // ... (変更なし) ...
-    console.log('クリアボタンクリック: データをクリアします');
-    setClearTrigger(prev => prev + 1);
-    setDrawingPoints([]);
-    setSelectedItemDescription(null);
+  // ★ 6. やり直し（クリア）処理変更
+  const handleClearDrawing = useCallback(() => {
+    console.log('やり直しボタンクリック: userDrawnPoints のみをクリアします');
+    setUserDrawnPoints([]); // ユーザー描画のみクリア
+    setClearTrigger(prev => prev + 1); // Canvasにクリア信号を送る
+    setSelectedShape(null); // おすすめ選択も解除する（仕様に応じて変更可）
+
+    // localStorageもクリア（現在のアクティブデータが手描きだった場合）
+    // おすすめ選択中の場合はlocalStorageはそのままにしておく選択肢もある
+    // ここでは、アクティブが手描きでなくてもクリアする
     try {
       localStorage.removeItem('drawingPointsData');
       console.log('localStorage クリア完了');
@@ -169,81 +171,118 @@ export default function Draw() {
     }
   }, []);
 
-  // --- 次へ進む処理 ---
-  const navigateToCondition = useCallback(() => {
-    // ... (変更なし) ...
-    if (drawingPoints.length >= 2) {
-      console.log('条件設定へ進む: データがあるので遷移します', drawingPoints);
+  // ★ 7. おすすめ選択解除処理（Placeholderクリック時）
+  const handleDeselectShape = useCallback(() => {
+    console.log('おすすめ選択を解除');
+    setSelectedShape(null);
+    // localStorageをユーザー描画データに戻すか、クリアするか選択
+    // ここではユーザー描画データがあれば戻す
+    if (userDrawnPoints.length > 0) {
       try {
-        localStorage.setItem('drawingPointsData', JSON.stringify(drawingPoints));
+        localStorage.setItem('drawingPointsData', JSON.stringify(userDrawnPoints));
+        console.log('ユーザー描画データを localStorage に復元しました');
+      } catch (error) {
+        console.error("Failed to restore drawn points to localStorage:", error);
+      }
+    } else {
+      localStorage.removeItem('drawingPointsData');
+    }
+  }, [userDrawnPoints]);
+
+  // ★ 8. 次へ進む処理変更
+  const navigateToCondition = useCallback(() => {
+    // アクティブなポイント（おすすめ選択 or ユーザー描画）があるかチェック
+    if (activePoints.length >= 2) {
+      console.log('条件設定へ進む: データがあるので遷移します', activePoints);
+      try {
+        // 現在アクティブなデータをlocalStorageに保存
+        localStorage.setItem('drawingPointsData', JSON.stringify(activePoints));
       } catch (error) {
         console.error("Failed to save drawing points before navigating:", error);
+        // エラーがあっても遷移は試みる
       }
       router.push('/condition');
     } else {
       console.log('条件設定へ進む: データがないためアラートを表示');
       alert('コースの形を描くか、おすすめから選択してください。');
     }
-  }, [drawingPoints, router]);
+  }, [activePoints, router]);
 
   // デバッグ用 useEffect (変更なし)
   useEffect(() => {
-    console.log('State Updated:', { drawingPointsLength: drawingPoints.length, selectedItemDescription });
-  }, [drawingPoints, selectedItemDescription]);
+    console.log('State Updated:', {
+      userDrawnPointsLength: userDrawnPoints.length,
+      selectedShapeDescription: selectedShape?.description ?? 'None'
+    });
+  }, [userDrawnPoints, selectedShape]);
 
-  const isCanvasDisabled = selectedItemDescription !== null;
+  // ★ 9. UI制御ロジック変更
+  const isCanvasDisabled = selectedShape !== null; // おすすめ選択中ならCanvas無効
+  // やり直しボタンは、ユーザー描画がある場合のみ有効
+  const isClearButtonDisabled = userDrawnPoints.length === 0;
+  // 次へボタンは、アクティブなポイントがある場合のみ有効
+  const isNextButtonDisabled = activePoints.length < 2;
 
   return (
-    // ★★★ main 要素に p-4 を適用 ★★★
-    <main className="flex min-h-screen flex-col items-center justify-start p-4"> {/* justify-center を justify-start に変更 (任意) */}
-      {/* ★★★ max-w-5xl から max-w-md に変更 (スマホ想定) ★★★ */}
+    <main className="flex min-h-screen flex-col items-center justify-start p-4">
       <div className="z-10 w-full max-w-md items-center justify-center text-sm">
-        {/* ★★★ この div から px-4 を削除 ★★★ */}
         <div className="text-center mb-4">
           <Title title="コースの形を描く" />
-          <div className="z-10 w-full self-start mt-2"> {/* mt-2 を追加 */}
+          <div className="z-10 w-full self-start mt-2">
             <BackButton text="ホームに戻る" to="/home" />
           </div>
-          <div className="w-full aspect-[1] mt-4 flex justify-center">
-            {isCanvasDisabled ? (
-              <SelectedShapePlaceholder className="w-full h-full" />
-            ) : (
-              <DrawingCanvas
-                strokeWidth={6}
-                strokeColor="#FF0000"
-                onDrawEnd={handleDrawEnd}
-                initialPoints={undefined}
-                clearSignal={clearTrigger}
-                disabled={isCanvasDisabled}
-              />
+          <div className="w-full aspect-[1] mt-4 relative"> {/* relative はそのまま */}
+            {/* DrawingCanvas は常に表示 */}
+            <DrawingCanvas
+              strokeWidth={6}
+              strokeColor="#f4551fff"
+              onDrawEnd={handleDrawEnd}
+              initialPoints={undefined}
+              clearSignal={clearTrigger}
+              //disabled={isCanvasDisabled}
+            />
+            {/* isCanvasDisabled が true の場合にオーバーレイとプレースホルダーを表示 */}
+            {isCanvasDisabled && (
+              <>
+                {/* 薄暗いオーバーレイ */}
+                <div className="absolute inset-0 w-full h-full bg-gray-300 bg-opacity-300 rounded-lg mix-blend-multiply z-10"></div> {/* ★ 半透明の黒いオーバーレイを追加 (z-10) */}
+                {/* SelectedShapePlaceholder (オーバーレイより手前に表示) */}
+                <SelectedShapePlaceholder
+                  className="absolute inset-0 w-full h-full z-20" // ★ z-20 はそのまま
+                  message={`${activeDescription} を選択中`}
+                  onClick={handleDeselectShape}
+                />
+              </>
             )}
           </div>
 
-          <div className="mt-4 text-black"> {/* クリアボタンの下に移動 */}
+          {/* ★ やり直しボタン */}
+          <div className="flex justify-center space-x-4 mt-6">
+            <ClearCanvasButton
+              onClick={handleClearDrawing} // ★ 描画のみクリアする関数を呼ぶ
+              buttonText="描き直す"
+              disabled={isClearButtonDisabled} // ★ ユーザー描画がなければ無効
+            />
+          </div>
+
+          <div className="mt-4 text-black">
             <Header headerText="おすすめから選ぶ" />
           </div>
-          {/* ★★★ カルーセルのコンテナから p-4 を削除 ★★★ */}
           <div className="">
             <CarouselWithClick
               items={items}
-              selectedDescription={selectedItemDescription}
+              selectedDescription={activeDescription} // ★ アクティブな説明を渡す
             />
           </div>
 
-          {/* ★★★ クリアボタンをカルーセルの下に移動 ★★★ */}
-          <div className="flex justify-center space-x-4 mt-6"> {/* mt を調整 */}
-            <ClearCanvasButton
-              onClick={handleClear}
-              buttonText="やり直す"
-              disabled={isClearButtonDisabled}
-            />
-          </div>
 
+
+          {/* ★ 次へボタン */}
           <div className="mt-8 flex justify-center">
             <RoutingButton
               buttonText="条件設定へ進む"
               onClick={navigateToCondition}
-              disabled={drawingPoints.length < 2}
+              disabled={isNextButtonDisabled} // ★ アクティブなデータがなければ無効
             />
           </div>
         </div>

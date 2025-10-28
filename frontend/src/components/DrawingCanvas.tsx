@@ -14,7 +14,7 @@ interface DrawingCanvasProps {
 }
 
 const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
-  strokeColor = '#FF0000',
+  strokeColor = '#f4551fff',
   strokeWidth = 6,
   onDrawEnd,
   initialPoints,
