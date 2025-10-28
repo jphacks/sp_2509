@@ -189,12 +189,22 @@ export default function NavigationMap({ routeData }: NavigationMapProps) {
 
         {/* ルート線 */}
         {routePositions.length > 1 && (
-          <Polyline
-            positions={routePositions}
-            color="#ef4444"
+          <>
+            {/* 青い縁取り（外側） */}
+            <Polyline
+              positions={routePositions} 
+              color="#1E40CF"
+              weight={8}
+              opacity={0.6}
+            />
+            {/* 水色の本体（内側） */}
+            <Polyline
+              positions={routePositions}
+              color="#07D8F9" 
             weight={4}
-            opacity={0.8}
+              opacity={0.9}
           />
+          </>
         )}
 
         {/* 現在位置マーカー */}
