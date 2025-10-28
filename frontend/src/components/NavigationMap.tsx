@@ -10,6 +10,7 @@ import {
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import "leaflet-polylinedecorator";
 import { HiSun, HiMoon } from "react-icons/hi";
 import { MdOutlineTurnLeft, MdOutlineTurnRight, MdOutlineUTurnRight } from "react-icons/md";
 import { FaRunning } from "react-icons/fa";
@@ -44,6 +45,85 @@ const currentLocationIcon = L.divIcon({
   iconSize: [16, 16],
   iconAnchor: [8, 8],
 });
+
+// スタートピンアイコン（青 - コースの開始色）
+const startIcon = L.divIcon({
+  html: `
+    <svg width="48" height="60" viewBox="0 0 40 50">
+      <path d="M20 5c-6.5 0-12 5.5-12 12 0 8 10 18 11.5 19.5.3.3.7.3 1 0C22 35 32 25 32 17c0-6.5-5.5-12-12-12z"
+            fill="#1052F6" stroke="#0D47D1" stroke-width="2"/>
+      <circle cx="20" cy="17" r="8" fill="white"/>
+      <text x="20" y="21" text-anchor="middle" fill="#1052F6" font-size="12" font-weight="bold">S</text>
+    </svg>
+  `,
+  className: "",
+  iconSize: [48, 60],
+  iconAnchor: [24, 44],
+});
+
+// ゴールピンアイコン（緑 - コースの終了色）
+const goalIcon = L.divIcon({
+  html: `
+    <svg width="48" height="60" viewBox="0 0 40 50">
+      <path d="M20 5c-6.5 0-12 5.5-12 12 0 8 10 18 11.5 19.5.3.3.7.3 1 0C22 35 32 25 32 17c0-6.5-5.5-12-12-12z"
+            fill="#20B950" stroke="#16A34A" stroke-width="2"/>
+      <circle cx="20" cy="17" r="8" fill="white"/>
+      <text x="20" y="21" text-anchor="middle" fill="#20B950" font-size="12" font-weight="bold">G</text>
+    </svg>
+  `,
+  className: "",
+  iconSize: [48, 60],
+  iconAnchor: [24, 44],
+});
+
+// グラデーション付きPolylineを描画するコンポーネント
+function GradientPolyline({ positions }: { positions: [number, number][] }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (positions.length < 2) return;
+
+    // 複数のセグメントに分割してグラデーション効果を作成
+    const segments: L.Polyline[] = [];
+    const segmentCount = Math.min(positions.length - 1, 20); // 最大20セグメント
+
+    for (let i = 0; i < segmentCount; i++) {
+      const startIndex = Math.floor((i * (positions.length - 1)) / segmentCount);
+      const endIndex = Math.floor(((i + 1) * (positions.length - 1)) / segmentCount);
+
+      if (startIndex === endIndex) continue;
+
+      const segmentPositions = positions.slice(startIndex, endIndex + 1);
+
+      // グラデーション色の計算（青から緑へ）
+      const ratio = i / (segmentCount - 1);
+      const red = Math.round(16 + (16 * ratio)); // 16 → 32
+      const green = Math.round(82 + (103 * ratio)); // 82 → 185
+      const blue = Math.round(246 - (166 * ratio)); // 246 → 80
+
+      const color = `rgb(${red}, ${green}, ${blue})`;
+
+      const polyline = L.polyline(segmentPositions, {
+        color: color,
+        weight: 7,
+        opacity: 0.9,
+        lineCap: 'round',
+        lineJoin: 'round',
+      }).addTo(map);
+
+      segments.push(polyline);
+    }
+
+    // クリーンアップ関数
+    return () => {
+      segments.forEach(segment => {
+        map.removeLayer(segment);
+      });
+    };
+  }, [map, positions]);
+
+  return null;
+}
 
 // 現在位置を追跡してマップを更新するコンポーネント
 function LocationTracker({ currentPosition, energySaveMode }: {
@@ -187,27 +267,28 @@ export default function NavigationMap({ routeData }: NavigationMapProps) {
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
 
-        {/* ルート線 */}
+        {/* ゴールマーカー（最背面） */}
         {routePositions.length > 1 && (
-          <>
-            {/* 青い縁取り（外側） */}
-            <Polyline
-              positions={routePositions} 
-              color="#1E40CF"
-              weight={8}
-              opacity={0.6}
-            />
-            {/* 水色の本体（内側） */}
-            <Polyline
-              positions={routePositions}
-              color="#07D8F9" 
-            weight={4}
-              opacity={0.9}
+          <Marker
+            position={routePositions[routePositions.length - 1]}
+            icon={goalIcon}
           />
-          </>
         )}
 
-        {/* 現在位置マーカー */}
+        {/* グラデーション付きルート線 */}
+        {routePositions.length > 1 && (
+          <GradientPolyline positions={routePositions} />
+        )}
+
+        {/* スタートマーカー */}
+        {routePositions.length > 0 && (
+          <Marker
+            position={routePositions[0]}
+            icon={startIcon}
+          />
+        )}
+
+        {/* 現在位置マーカー（最前面） */}
         {currentPosition && (
           <Marker
             position={currentPosition}
