@@ -41,19 +41,23 @@ export default function Draw() {
   const activePoints = useMemo(() => selectedShape?.points ?? userDrawnPoints, [selectedShape, userDrawnPoints]);
   const activeDescription = useMemo(() => selectedShape?.description ?? null, [selectedShape]);
 
+// ★ 修正: localStorageへの保存処理を削除
   const handleSelectShape = useCallback((item: CarouselClickItem) => {
     if (!item.shapeData) {
       console.warn("選択されたアイテムに shapeData がありません:", item.description);
       return;
     }
+    // 状態の更新のみ行う
     setSelectedShape({ description: item.description, points: item.shapeData });
-    try {
-      localStorage.setItem('drawingPointsData', JSON.stringify(item.shapeData));
-      console.log(`選択: ${item.description}. localStorage に保存しました。`);
-    } catch (error) {
-      console.error("Failed to save selected shape to localStorage:", error);
-      alert('形状データの保存に失敗しました。');
-    }
+    // setUserDrawnPoints([]); // Optionally clear user drawn points when selecting a shape
+    console.log(`選択: ${item.description}. 状態を更新しました。(localStorageには保存しません)`);
+    // try {
+    //   localStorage.setItem('drawingPointsData', JSON.stringify(item.shapeData)); // ← この行を削除またはコメントアウト
+    //   console.log(`選択: ${item.description}. localStorage に保存しました。`);
+    // } catch (error) {
+    //   console.error("Failed to save selected shape to localStorage:", error);
+    //   alert('形状データの保存に失敗しました。');
+    // }
   }, []);
 
   const items: CarouselClickItem[] = useMemo(() => [
@@ -62,60 +66,79 @@ export default function Draw() {
       alt: 'Heart Shape',
       description: 'ハート',
       shapeData: heartShape,
-      onClick: () => handleSelectShape({ src: '/images/Recommend/Heart.png', alt: 'Heart Shape', description: 'ハート型', shapeData: heartShape }),
+      onClick: () => handleSelectShape({ src: '/images/Recommend/Heart.png', alt: 'Heart Shape', description: 'ハート', shapeData: heartShape }),
     },
     {
       src: '/images/Recommend/Star.png',
       alt: 'Star Shape',
       description: '星',
       shapeData: starShape,
-      onClick: () => handleSelectShape({ src: '/images/Recommend/Star.png', alt: 'Star Shape', description: '星型', shapeData: starShape }),
+      onClick: () => handleSelectShape({ src: '/images/Recommend/Star.png', alt: 'Star Shape', description: '星', shapeData: starShape }),
     },
     {
       src: '/images/Recommend/Circle.png',
       alt: 'Circle Shape',
       description: '円',
       shapeData: circleShape,
-      onClick: () => handleSelectShape({ src: '/images/Recommend/Circle.png', alt: 'Circle Shape', description: '円型', shapeData: circleShape }),
+      onClick: () => handleSelectShape({ src: '/images/Recommend/Circle.png', alt: 'Circle Shape', description: '円', shapeData: circleShape }),
     },
   ], [handleSelectShape]);
 
+// ★ 修正: ページ読み込み時のlocalStorage復元ロジック
   useEffect(() => {
     console.log('初回レンダリング: localStorage を確認します');
+    let needsClearLocalStorage = false;
     try {
       const savedData = localStorage.getItem('drawingPointsData');
       if (savedData) {
         console.log('localStorage にデータがありました:', savedData);
         const parsedPoints = JSON.parse(savedData) as Point[];
 
-        let matchedShape: { description: string; points: Point[] } | null = null;
-        if (JSON.stringify(heartShape) === JSON.stringify(parsedPoints)) {
-          matchedShape = { description: 'ハート', points: heartShape };
-        } else if (JSON.stringify(starShape) === JSON.stringify(parsedPoints)) {
-          matchedShape = { description: '星', points: starShape };
-        } else if (JSON.stringify(circleShape) === JSON.stringify(parsedPoints)) {
-          matchedShape = { description: '丸', points: circleShape };
-        }
+        // 保存データがおすすめ図形と一致するかチェック
+        const isHeart = JSON.stringify(heartShape) === JSON.stringify(parsedPoints);
+        const isStar = JSON.stringify(starShape) === JSON.stringify(parsedPoints);
+        const isCircle = JSON.stringify(circleShape) === JSON.stringify(parsedPoints);
 
-        if (matchedShape) {
-          console.log(`マッチするおすすめ図形: ${matchedShape.description}`);
-          setSelectedShape(matchedShape);
-          setUserDrawnPoints([]);
-        } else {
+        if (isHeart || isStar || isCircle) {
+          // おすすめ図形データだったので、選択状態は復元せず、localStorageをクリア対象にする
+          console.log('保存されていたのはおすすめ図形なので、選択状態はリセットします。');
+          needsClearLocalStorage = true; // localStorageを後でクリア
+          setUserDrawnPoints([]); // 手描きデータはクリア
+          setSelectedShape(null); // 選択状態もクリア
+        } else if (parsedPoints && parsedPoints.length > 0) {
+          // 手描きデータとして復元
           console.log('手描きデータとして復元します');
           setUserDrawnPoints(parsedPoints);
-          setSelectedShape(null);
+          setSelectedShape(null); // おすすめ選択は解除
+        } else {
+           // データが空または無効だった場合
+           setUserDrawnPoints([]);
+           setSelectedShape(null);
         }
       } else {
+        // localStorageにデータがなかった場合
         console.log('localStorage にデータはありませんでした');
+        setUserDrawnPoints([]);
+        setSelectedShape(null);
       }
     } catch (error) {
       console.error("Failed to initialize drawing points from localStorage:", error);
-      localStorage.removeItem('drawingPointsData');
+      needsClearLocalStorage = true; // エラー時もlocalStorageクリアを試みる
       setUserDrawnPoints([]);
       setSelectedShape(null);
+    } finally {
+       // おすすめ図形データがlocalStorageに残っていた場合、ここで削除
+       if (needsClearLocalStorage) {
+           try {
+               localStorage.removeItem('drawingPointsData');
+               console.log('不要なlocalStorageデータ（おすすめ図形）をクリアしました。');
+           } catch (clearError) {
+               console.error("Failed to clear localStorage:", clearError);
+           }
+       }
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // 初回マウント時のみ実行
 
   const handleDrawEnd = useCallback((points: Point[]) => {
     if (points.length > 0) {
