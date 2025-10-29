@@ -92,7 +92,7 @@ return (
                 relative flex-shrink-0 snap-start overflow-hidden focus:outline-none transition-all duration-150 ease-in-out
                 ${imageBorderRadius}
                 ${isSelected
-                  ? 'ring-offset-2 scale-120'
+                  ? 'ring-offset-2 scale-110'
                   : 'hover:scale-105'
                 }
               `}
