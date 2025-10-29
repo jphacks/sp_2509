@@ -13,24 +13,22 @@ export type CarouselClickItem = {
   shapeData?: Point[];
 };
 
-// ★★★ Props の型定義に selectedDescription を追加 ★★★
 type CarouselWithClickProps = {
   items: CarouselClickItem[];
   imageBorderRadius?: string;
   textClassName?: string;
-  selectedDescription?: string | null; // 現在選択されているアイテムの description
+  selectedDescription?: string | null;
 };
 
 const imageWidth = 125;
 const imageHeight = 125;
 const gap = 16;
 
-// ★★★ selectedDescription を Props で受け取る ★★★
 export default function CarouselWithClick({
   items,
   imageBorderRadius = 'rounded-lg',
   textClassName = 'text-black',
-  selectedDescription, // 追加
+  selectedDescription,
 }: CarouselWithClickProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -39,6 +37,7 @@ export default function CarouselWithClick({
 
   // ドラッグ関連の関数 (変更なし)
   const onMouseDown = (e: MouseEvent<HTMLDivElement>) => {
+    // ボタン要素上でのドラッグ開始を防ぐ
     if ((e.target as HTMLElement).closest('button')) {
       return;
     }
@@ -54,15 +53,23 @@ export default function CarouselWithClick({
     if (!isDragging || !scrollContainerRef.current) return;
     e.preventDefault();
     const x = e.pageX - scrollContainerRef.current.offsetLeft;
-    const walk = (x - startX) * 2;
+    const walk = (x - startX) * 2; // スクロール感度調整
     scrollContainerRef.current.scrollLeft = scrollLeft - walk;
   };
+
+  // クリック処理（ドラッグ中は発火させない）
   const handleItemClick = (itemOnClick: (() => void) | undefined, e: MouseEvent<HTMLButtonElement>) => {
-    if (isDragging) { e.stopPropagation(); return; }
+    // ドラッグ操作による意図しないクリックを防ぐ簡易的なチェック
+    // より厳密にする場合は、マウスダウン/アップ間の移動距離を見るなどの方法がある
+    if (isDragging) {
+      e.stopPropagation(); // イベントの伝播を止める
+      return;
+    }
     if (itemOnClick) itemOnClick();
   };
 
-  return (
+
+return (
     <div className="w-full">
       <div
         ref={scrollContainerRef}
@@ -74,20 +81,19 @@ export default function CarouselWithClick({
         onMouseMove={onMouseMove}
       >
         {items.map((item, index) => {
-          // ★★★ 現在のアイテムが選択されているかどうかのフラグ ★★★
           const isSelected = item.description === selectedDescription;
+          const isDimmed = selectedDescription != null && !isSelected;
 
           return (
             <button
               key={index}
               onClick={(e) => handleItemClick(item.onClick, e)}
-              // ★★★ 条件付きでスタイルを適用 ★★★
               className={`
                 relative flex-shrink-0 snap-start overflow-hidden focus:outline-none transition-all duration-150 ease-in-out
                 ${imageBorderRadius}
                 ${isSelected
-                  ? 'ring-offset-2 scale-120' // 選択中のスタイル
-                  : 'hover:ring-gray-400' // 非選択中のスタイル
+                  ? 'ring-offset-2 scale-120'
+                  : 'hover:scale-105'
                 }
               `}
               style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
@@ -98,6 +104,22 @@ export default function CarouselWithClick({
                 width={imageWidth}
                 height={imageHeight}
                 className="w-full h-full object-cover pointer-events-none"
+              />
+              {/* ★★★ 修正箇所: オーバーレイにtransitionを追加 ★★★ */}
+              {/* オーバーレイを常にレンダリングし、透明度で表示/非表示を制御 */}
+              <div
+                className={`
+                  absolute inset-0 w-full h-full
+                  bg-gray-300 // グレーの色自体は常に設定
+                  mix-blend-multiply
+                  ${imageBorderRadius}
+                  pointer-events-none
+                  transition-opacity duration-150 ease-in-out // ★ 透明度のトランジションを追加
+                  ${isDimmed
+                    ? 'bg-opacity-30 hover:bg-opacity-10' // ★ 暗くする場合の透明度
+                    : 'bg-opacity-0' // ★ 暗くしない場合は完全に透明
+                  }
+                `}
               />
             </button>
           );
