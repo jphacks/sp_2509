@@ -83,7 +83,7 @@ const DrawnShapeImage: React.FC<DrawnShapeImageProps> = ({
             ref={canvasRef}
             width={size}
             height={size}
-            className={`bg-white rounded-md`}
+            className={"bg-white rounded-xl shadow-md border-black"}
         />
   );
   // ★★★ 変更ここまで ★★★

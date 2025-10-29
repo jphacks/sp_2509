@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import MadeRouteCard_Big from "@/components/MadeRouteCard_Big";
 import Title from "@/components/Title";
 import RoutingButton from "@/components/RoutingButton";
+import Text from "../../components/Text";
 import { FaPencilAlt, FaCog, FaSave } from "react-icons/fa";
 
 const API_URL = "/api";
@@ -101,7 +102,7 @@ export default function CourseDetailPage() {
       <div className="bg-gray-50 min-h-screen">
         <main className="max-w-md mx-auto p-4">
           <div className="text-center py-8">
-            <p className="text-gray-600">データを読み込んでいます...</p>
+            <Text text="データを読み込んでいます..." />
           </div>
         </main>
       </div>

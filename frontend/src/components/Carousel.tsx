@@ -2,6 +2,7 @@
 
 import { useRef, useState, MouseEvent } from 'react';
 import Image from 'next/image';
+import Text from './Text';
 
 export type CarouselItem = {
   src: string;
@@ -82,8 +83,16 @@ export default function Carousel({
             />
             <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/70 to-transparent" />
             <div className={`absolute bottom-0 left-0 w-full p-2 text-left ${textClassName}`}>
-              <p className="font-bold text-lg">{index + 1}</p> {/* 画像の番号. font-bold text-lgで少し大きく */}
-              <p className="text-sm">{item.description}</p> {/* 画像の説明文. text-smで少し小さく */}
+              <Text 
+                text={`${index + 1}`}
+                color ="text-white"
+                font = ""
+              /> {/* 画像の番号. font-bold text-lgで少し大きく */}
+              <Text 
+                text={`${item.description}`}
+                color ="text-white" 
+                font = "" 
+              /> {/* 画像の説明文. text-smで少し小さく */}
             </div>
           </div>
         ))}

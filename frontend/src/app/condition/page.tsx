@@ -7,10 +7,14 @@ import { useEffect, useMemo, useState } from "react";
 import DrawnShapeImage from "../../components/DrawnShapeImage";
 import Slider from "../../components/Slider";
 import Loading from "../../components/Loading"; // ★ 追加
+import Text from "../../components/Text";
 import type { Point } from "../../types/types";
 import Title from "@/components/Title";
 import Header from "@/components/Header";
 import BackButton from "@/components/BackButton";
+import { FaMapMarkerAlt } from 'react-icons/fa'; // ★ アイコンを追加
+import RoutingButton from "../../components/RoutingButton";
+import { SlGraph } from "react-icons/sl";
 
 const CenterPinMap = dynamic(() => import("../../components/CenterPinMap"), {
   ssr: false,
@@ -128,9 +132,7 @@ export default function Condition() {
           animationDuration={2.2}
           pauseDuration={0.8}
         />
-        <div className="mt-2 text-sm text-gray-500">
-          <p>この処理は30秒程度かかる可能性があります。</p>
-        </div>
+        <Text text="この処理は30秒程度かかる可能性があります。" />
       </main>
     );
   }
@@ -147,7 +149,9 @@ export default function Condition() {
 
         {/* プレビュー：あなたの描いた絵 */}
         <section className="space-y-1">
-          <p className="font-semibold">あなたの描いた絵</p>
+          <div className="mt-4 text-black">
+            <Header headerText="あなたの描いた絵" />
+          </div>
           <DrawnShapeImage
             points={loadedDrawingPoints}
             size={160}
@@ -160,21 +164,37 @@ export default function Condition() {
 
         {/* スタート地点を選択 */}
         <section className="space-y-1">
-          <p className="font-semibold">スタート地点を選択</p>
-          <p className="text-gray-500 text-sm">
-            どこから走り始めますか？地図を動かして中央のピン位置を決めてください。
-          </p>
+          <Header headerText="スタート地点を選択" />
+
+          <Text text="どこから走り始めますか？地図を動かしてスタート地点を決めてください。" />
+
           <CenterPinMap height={220} onCenterChange={(c) => setCenter(c)} />
-          <p className="text-xs text-gray-500">
-            選択中の中心：
-            {center ? `${center[0].toFixed(6)}, ${center[1].toFixed(6)}` : "—"}
-          </p>
         </section>
 
-        {/* 距離スライダー */}
+
+          <div className="flex items-center space-x-4 text-xs text-gray-500 pt-1">
+            <div className="flex items-center space-x-1">
+              <FaMapMarkerAlt className="text-sky-500" />
+              <Text
+                text="現在位置"
+                font=""
+               />
+            </div>
+            <div className="flex items-center space-x-1">
+              <FaMapMarkerAlt className="text-red-500" />
+              <Text
+                text="スタート地点"
+                font=""
+               />
+            </div>
+          </div>
+
+
         <section className="space-y-1">
+          <Header headerText="おおよその走行距離" />
+          <Text text="どれくらいの距離のルートを作成しますか？" />
+
           <Slider
-            label="おおよその走行距離"
             value={distanceKm}
             onChange={setDistanceKm}
             min={1}
@@ -182,16 +202,17 @@ export default function Condition() {
             step={1}
             unit="km"
           />
-        </section>
+      </section>
 
-        {/* 送信ボタン */}
-        <button
-          onClick={goNext}
-          disabled={!canSubmit}
-          className="w-full mt-2 bg-black text-white py-3 rounded-lg shadow-md enabled:hover:bg-gray-800 disabled:opacity-50"
-        >
-          {submitting ? "送信中…" : "この内容でコースを作成"}
-        </button>
+        <div className="mt-8 flex justify-center">
+          <RoutingButton
+            buttonText={submitting ? "送信中…" : "この内容でコースを作成"}
+            onClick={goNext}
+            disabled={!canSubmit}
+            icon = {SlGraph}
+          />
+        </div>
+
       </div>
     </main>
   );

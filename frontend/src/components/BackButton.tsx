@@ -4,6 +4,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { FaChevronLeft } from 'react-icons/fa'; // 左向きのシェブロンアイコン
+import Text from './Text';
 
 // --- コンポーネントのプロパティ定義 ---
 interface BackButtonProps {
@@ -44,7 +45,7 @@ const BackButton: React.FC<BackButtonProps> = ({
       {/* 左向きアイコン */}
       <FaChevronLeft className="mr-1 h-3 w-3 transition-transform duration-150 ease-in-out group-hover:-translate-x-0.5" />
       {/* テキスト */}
-      <span>{text}</span>
+      <Text text={text} />
     </button>
   );
 };
