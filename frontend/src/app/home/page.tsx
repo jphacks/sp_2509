@@ -306,7 +306,7 @@ export default function Home() {
 
           {/* How to Use Section */}
           <div className="my-4">
-            <Header headerText="How to Use" />
+            <Header headerText="使い方" />
             <div className="my-4 -mx-4 mb-4">
               <Carousel
                 items={carouselItems}
