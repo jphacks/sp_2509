@@ -10,38 +10,41 @@ type Props = {
     /** 表示メッセージ（既定: おすすめを選択中） */
     message?: string;
     /** タップ時に実行される関数 */
-    onClick?: () => void; // ★: onClick プロパティを追加
+    onClick?: () => void;
 };
 
 export default function SelectedShapePlaceholder({
     className = "w-full h-full",
     message = "おすすめを選択中",
-    onClick, // ★: onClick プロパティを受け取る
+    onClick,
 }: Props) {
     return (
-        // ★: 外側の div に onClick を設定し、cursor-pointer を追加
+        // ★ 親Div: 背景を透明にし、クリックイベントを設定
         <div
-            className={`${className} flex flex-col items-center cursor-pointer bg-transparent justify-center`}
+            className={`${className} flex flex-col items-center justify-center cursor-pointer bg-transparent z-20`} // z-20 を維持
             onClick={onClick}
-            role="button" // ★: クリック可能であることを示す role 属性を追加
-            tabIndex={0} // ★: キーボード操作可能にするために tabIndex を追加
-            onKeyDown={(e) => { // ★: Enterキーでもクリックできるようにする
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
                 if (e.key === 'Enter' && onClick) {
                     onClick();
                 }
             }}
         >
-            <div
-                className="text-6xl
-          flex flex-col items-center 
-          select-none
-        "
-            >
-                <IoIosCloseCircle className="text-6xl text-gray-400 mb-3" aria-hidden />
-                {/* 既存のメッセージ */}
-                <span className="text-gray-600 text-base">{message}</span>
-                {/* 文字サイズを小さくする */}
-                <span className="text-gray-600 text-xs mt-1">ここをタップして解除</span>
+            {/* ★ 新しいDiv: テキストとアイコンを囲み、背景とスタイルを設定 */}
+            <div className="bg-white text-gray-800 p-6 rounded-lg shadow-md inline-block max-w-[80%] text-center">
+                {/* アイコンを背景Divの中に移動 */}
+                <IoIosCloseCircle className="text-4xl text-gray-400 mb-2 mx-auto" aria-hidden />
+
+                {/* メインメッセージ */}
+                <span className="block text-lg font-bold">
+                    {message}
+                </span>
+
+                {/* サブテキスト */}
+                <span className="block text-xs text-gray-500 mt-1">
+                    （タップして手描きモードに戻る）
+                </span>
             </div>
         </div>
     );

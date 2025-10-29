@@ -10,7 +10,7 @@ interface DrawingCanvasProps {
   onDrawEnd?: (points: Point[]) => void;
   initialPoints?: Point[];
   clearSignal?: number;
-  disabled?: boolean;
+  showGuideText?: boolean; // ★ 追加: ガイドテキスト表示制御用のprop
 }
 
 const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
@@ -19,7 +19,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
   onDrawEnd,
   initialPoints,
   clearSignal,
-  disabled = false
+  showGuideText = true, // ★ 追加: デフォルトは表示する
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -28,7 +28,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
   const [hasContent, setHasContent] = useState(false);
   const lastClearSignalRef = useRef<number | undefined>(undefined);
 
-  // initialPoints が与えられたときの処理
+  // initialPoints が与えられたときの処理 (変更なし)
   const redrawInitialPoints = useCallback(() => {
     // ... (redrawInitialPoints の中身は変更なし) ...
     const canvas = canvasRef.current;
@@ -135,19 +135,14 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       return { x, y };
   };
 
-  // 描画開始処理
+  // 描画開始処理 (変更なし)
   const startDrawing = useCallback((event: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
-    if (disabled) {
-        console.log('DrawingCanvas: Drawing disabled.');
-        return;
-    }
     if (hasContent) {
         console.log('DrawingCanvas: Canvas already has content or initial points.');
         return;
     }
 
     const canvas = canvasRef.current;
-    // ★★★ canvas の null チェックを追加 ★★★
     if (!canvas) {
         console.error('DrawingCanvas: Canvas element not found.');
         return;
@@ -158,13 +153,11 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         return;
     }
 
-    // Canvas を直接クリア
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    // ↓↓↓ canvas が null でないことを確認済みなので安全 ↓↓↓
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.restore();
-    setPoints([]); // ポイントデータもクリア
+    setPoints([]);
 
     const coords = getCoordinates(event);
     if (!coords) return;
@@ -178,7 +171,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     if ('touches' in event) event.preventDefault();
-  }, [disabled, hasContent, strokeColor, strokeWidth]); // performClear を削除した依存配列
+  }, [hasContent, strokeColor, strokeWidth]);
 
   // 描画終了処理 (変更なし)
   const stopDrawing = useCallback(() => {
@@ -216,7 +209,8 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 
   return (
     <div ref={containerRef} className="relative w-full h-full">
-      {!disabled && !isDrawing && !hasContent && (
+      {/* ★ 条件を変更: showGuideText が true の場合のみ表示 */}
+      {showGuideText && !isDrawing && !hasContent && (
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none space-y-4 z-10">
           <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center">
             <FaPencilAlt className="text-gray-500 text-4xl" />
@@ -239,7 +233,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         onTouchEnd={stopDrawing}
         onTouchCancel={stopDrawing}
         className={`touch-none bg-white rounded-lg shadow-md block w-full h-full ${
-          disabled || hasContent ? 'cursor-not-allowed opacity-70' : 'cursor-crosshair'
+          hasContent ? 'cursor-not-allowed opacity-70' : 'cursor-crosshair'
         }`}
       />
     </div>
