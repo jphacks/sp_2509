@@ -217,7 +217,7 @@ export default function Draw() {
           <div className="w-full aspect-[1] mt-4 relative">
             <DrawingCanvas
               strokeWidth={6}
-              strokeColor="#f4551fff"
+              strokeColor="#f4541fff"
               onDrawEnd={handleDrawEnd}
               initialPoints={undefined} // initialPoints は直接は使わず、useEffect で復元するため undefined のまま
               clearSignal={clearTrigger}
