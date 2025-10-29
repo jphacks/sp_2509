@@ -1,7 +1,7 @@
 // frontend/src/components/Carousel.tsx
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 
 // --- 型定義 ---
@@ -19,6 +19,7 @@ type CarouselProps = {
 
 const imageWidth = 200;
 const imageHeight = 200;
+
 export default function Carousel({
   items,
   imageBorderRadius = "rounded-lg",
@@ -30,38 +31,35 @@ export default function Carousel({
   const isDraggingRef = useRef(false);
 
   // --- ドラッグ中の pointer move ---
-  const handleGlobalPointerMove = (e: PointerEvent) => {
+  const handleGlobalPointerMove = useCallback((e: PointerEvent) => {
     if (!isDraggingRef.current || !scrollContainerRef.current) return;
-
-    // movementX がない環境もあるので差分計算も可能
     const deltaX = e.movementX ?? 0;
     scrollContainerRef.current.scrollLeft -= deltaX;
-  };
+  }, []);
 
   // --- ドラッグ終了 ---
-  const handleGlobalPointerUp = () => {
+  const handleGlobalPointerUp = useCallback(() => {
     if (isDraggingRef.current) {
       setIsDragging(false);
       isDraggingRef.current = false;
       window.removeEventListener("pointermove", handleGlobalPointerMove);
       window.removeEventListener("pointerup", handleGlobalPointerUp);
     }
-  };
+  }, [handleGlobalPointerMove]);
 
   // --- ドラッグ開始 ---
-  const onPointerDown = (e: PointerEvent) => {
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!scrollContainerRef.current) return;
 
     e.preventDefault();
     setIsDragging(true);
     isDraggingRef.current = true;
 
-    // クリック判定用の開始X
     const rect = scrollContainerRef.current.getBoundingClientRect();
     const currentX = e.clientX - rect.left;
     setStartX(currentX);
 
-    // グローバルリスナー登録
+    // ネイティブ PointerEvent での動き
     window.addEventListener("pointermove", handleGlobalPointerMove);
     window.addEventListener("pointerup", handleGlobalPointerUp);
   };
@@ -72,7 +70,7 @@ export default function Carousel({
       window.removeEventListener("pointermove", handleGlobalPointerMove);
       window.removeEventListener("pointerup", handleGlobalPointerUp);
     };
-  }, []);
+  }, [handleGlobalPointerMove, handleGlobalPointerUp]);
 
   // --- クリック防止（ドラッグ判定用） ---
   const handleClickCapture = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -90,13 +88,13 @@ export default function Carousel({
         className={`flex overflow-x-auto scrollbar-hide cursor-grab ${
           isDragging ? "cursor-grabbing" : ""
         } gap-4 px-4`}
-        onPointerDown={onPointerDown as any} // React は PointerEvent 型が異なるため any
+        onPointerDown={onPointerDown}
         onClickCapture={handleClickCapture}
         style={{ userSelect: "none" }}
       >
         {items.map((item, index) => (
           <div
-            key={index}
+            key={item.src}
             className={`relative flex-shrink-0 overflow-hidden ${imageBorderRadius}`}
             style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
           >
