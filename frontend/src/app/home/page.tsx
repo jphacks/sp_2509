@@ -259,7 +259,7 @@ export default function Home() {
     {
       src: "/images/sample3.png",
       alt: "Slide 3",
-      description: "システムがルートを生成",
+      description: "AshiArtがコースを生成",
     },
     { src: "/images/sample4.png", alt: "Slide 4", description: "走る！" },
   ];
