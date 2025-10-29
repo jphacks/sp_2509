@@ -3,6 +3,7 @@
 import React from "react";
 import type { LatLngExpression } from "leaflet";
 import dynamic from "next/dynamic";
+import RouteMapWithPoints from "./RouteMapWithPoints";
 
 const RouteMap = dynamic(() => import("./RouteMap"), { ssr: false });
 
@@ -52,7 +53,7 @@ export default function MadeRouteCard_Big({
       <div className="h-full flex flex-col">
         {/* 上:地図 */}
         <div className="flex-grow rounded-2xl overflow-hidden ring-1 ring-black/5 bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.02)]">
-          <RouteMap
+          <RouteMapWithPoints
             positions={routePositions}
             secondaryPositions={drawingPositions}
             height={MAP_HEIGHT}
