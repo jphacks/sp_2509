@@ -259,7 +259,7 @@ export default function Home() {
     {
       src: "/images/sample3.png",
       alt: "Slide 3",
-      description: "システムがルートを生成",
+      description: "AshiArtがコースを生成",
     },
     { src: "/images/sample4.png", alt: "Slide 4", description: "走る！" },
   ];
@@ -306,7 +306,7 @@ export default function Home() {
 
           {/* How to Use Section */}
           <div className="my-4">
-            <Header headerText="How to Use" />
+            <Header headerText="使い方" />
             <div className="my-4 -mx-4 mb-4">
               <Carousel
                 items={carouselItems}
