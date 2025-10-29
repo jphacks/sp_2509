@@ -19,17 +19,11 @@ export default function SelectedShapePlaceholder({
     onClick,
 }: Props) {
     return (
-        // ★ 親Div: 背景を透明にし、クリックイベントを設定
         <div
             className={`${className} flex flex-col items-center justify-center cursor-pointer bg-transparent z-20`} // z-20 を維持
             onClick={onClick}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => {
-                if (e.key === 'Enter' && onClick) {
-                    onClick();
-                }
-            }}
         >
             {/* ★ 新しいDiv: テキストとアイコンを囲み、背景とスタイルを設定 */}
             <div className="bg-white text-gray-800 p-6 rounded-lg shadow-md inline-block max-w-[80%] text-center">

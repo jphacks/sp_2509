@@ -49,15 +49,7 @@ export default function Draw() {
     }
     // 状態の更新のみ行う
     setSelectedShape({ description: item.description, points: item.shapeData });
-    // setUserDrawnPoints([]); // Optionally clear user drawn points when selecting a shape
     console.log(`選択: ${item.description}. 状態を更新しました。(localStorageには保存しません)`);
-    // try {
-    //   localStorage.setItem('drawingPointsData', JSON.stringify(item.shapeData)); // ← この行を削除またはコメントアウト
-    //   console.log(`選択: ${item.description}. localStorage に保存しました。`);
-    // } catch (error) {
-    //   console.error("Failed to save selected shape to localStorage:", error);
-    //   alert('形状データの保存に失敗しました。');
-    // }
   }, []);
 
   const items: CarouselClickItem[] = useMemo(() => [
@@ -208,7 +200,7 @@ export default function Draw() {
   }, [userDrawnPoints, selectedShape]);
 
   const isCanvasDisabled = selectedShape !== null;
-  const isClearButtonDisabled = userDrawnPoints.length === 0 && selectedShape === null; // ★ 修正: おすすめ選択中もクリアできるようにするなら条件変更
+  const isClearButtonDisabled = userDrawnPoints.length === 0 && selectedShape === null;
   const isNextButtonDisabled = activePoints.length < 2;
 
   // ★ 追加: ガイドテキストを表示するかどうかのフラグ
