@@ -105,26 +105,20 @@ export default function CarouselWithClick({
                   height={imageHeight}
                   className="w-full h-full object-cover pointer-events-none"
                 />
-                {/* オーバーレイを常にレンダリングし、透明度で表示/非表示を制御
-                    - bg-gray-300: グレーの色自体は常に設定
-                    - transition-opacity: 透明度のトランジションを追加
-                    - bg-opacity-30 hover:bg-opacity-10: 暗くする場合の透明度
-                    - bg-opacity-0: 暗くしない場合は完全に透明
-                */}
+              {/* ★★★ 修正箇所: 条件付きでオーバーレイを追加 ★★★ */}
+              {isDimmed && (
                 <div
                   className={`
                     absolute inset-0 w-full h-full
-                    bg-gray-300
-                    mix-blend-multiply
-                    ${imageBorderRadius}
-                    pointer-events-none
-                    transition-opacity duration-150 ease-in-out
-                    ${isDimmed
-                      ? 'bg-opacity-30 hover:bg-opacity-10'
-                      : 'bg-opacity-0'
-                    }
+                    bg-gray-300 bg-opacity-30 // 半透明のグレー背景
+                    mix-blend-multiply      // ブレンドモード
+                    ${imageBorderRadius}      // 画像と同じ角丸を適用
+                    pointer-events-none     // クリックイベントを透過させる
+                    transition-opacity duration-150 ease-in-out // フェード効果（任意）
+                    hover:bg-opacity-10 // ★ ホバー時に少し明るく（透明度を下げる）
                   `}
                 />
+              )}
               </button>
             );
           })}

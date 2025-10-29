@@ -4,6 +4,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Carousel from "../../components/Carousel";
 import Title from "../../components/Title";
+import Text from "../../components/Text";
 import RoutingButton from "../../components/RoutingButton";
 import EmptyCourse from "../../components/EmptyCourse";
 import CourseList from "../../components/CourseList";
@@ -270,7 +271,7 @@ export default function Home() {
 
   const renderCourses = () => {
     if (loading) return <Loading loadingText="コースを読み込み中..." />;
-    if (error) return <p>エラー: {error}</p>;
+    if (error) return <Text text={error} />;
     if (displayCourses.length === 0) return <EmptyCourse />;
     return (
       <CourseList
@@ -297,12 +298,8 @@ export default function Home() {
 
           </div>
 
-          {/* <hr className="border-black my-2" /> */}
-
-            <div className="mt-2 text-sm font-bold text-gray-500">
-            <p>好きな絵のコースで走ってみませんか？</p>
-            <p>GPSアートになるジョギングコースをデザインしましょう</p>
-              </div>
+          <Text text="好きな絵のコースで走ってみませんか？" />
+          <Text text="GPSアートになるジョギングコースをデザインしましょう" />
 
           {/* How to Use Section */}
           <div className="my-4">
