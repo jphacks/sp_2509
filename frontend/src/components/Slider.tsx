@@ -64,13 +64,13 @@ export default function Slider({
         {/* ★ 丸いつまみを追加 ★ */}
         <div
           className={`
-            absolute top-1/2 transform -translate-y-1/2 // 上下中央揃え
-            w-6 h-6 // サイズ指定 (thumbSizeに対応)
-            bg-black // 色
-            rounded-full // 円形にする
-            shadow-md // 影
-            pointer-events-none // input要素の操作を妨げないように
-            transition-all duration-100 ease-out // (任意) アニメーション
+            absolute top-1/2 transform -translate-y-1/2
+            w-6 h-6
+            bg-black
+            rounded-full
+            shadow-md
+            pointer-events-none
+            transition-all duration-100 ease-out
           `}
           style={{
             // ★ 位置計算: 左端からの割合 - つまみの半径分左にずらす

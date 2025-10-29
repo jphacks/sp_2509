@@ -45,7 +45,10 @@ const BackButton: React.FC<BackButtonProps> = ({
       {/* 左向きアイコン */}
       <FaChevronLeft className="mr-1 h-3 w-3 transition-transform duration-150 ease-in-out group-hover:-translate-x-0.5" />
       {/* テキスト */}
-      <Text text={text} />
+      <Text 
+        text={text} 
+        className="font-semibold"
+      />
     </button>
   );
 };

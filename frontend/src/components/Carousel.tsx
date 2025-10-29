@@ -85,14 +85,12 @@ export default function Carousel({
             <div className={`absolute bottom-0 left-0 w-full p-2 text-left ${textClassName}`}>
               <Text 
                 text={`${index + 1}`}
-                color ="text-white"
-                font = ""
-              /> {/* 画像の番号. font-bold text-lgで少し大きく */}
+                className ="text-white"
+              />
               <Text 
                 text={`${item.description}`}
-                color ="text-white" 
-                font = "" 
-              /> {/* 画像の説明文. text-smで少し小さく */}
+                className ="text-white" 
+              />
             </div>
           </div>
         ))}

@@ -177,14 +177,14 @@ export default function Condition() {
               <FaMapMarkerAlt className="text-sky-500" />
               <Text
                 text="現在位置"
-                font=""
+                className="text-gray-500"
                />
             </div>
             <div className="flex items-center space-x-1">
               <FaMapMarkerAlt className="text-red-500" />
               <Text
                 text="スタート地点"
-                font=""
+                className="text-gray-500"
                />
             </div>
           </div>
