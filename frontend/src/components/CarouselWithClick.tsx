@@ -69,7 +69,7 @@ export default function CarouselWithClick({
   };
 
 
-return (
+  return (
     <div className="w-full">
       <div
         ref={scrollContainerRef}
