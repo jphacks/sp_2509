@@ -125,19 +125,28 @@ def list_user_courses(
     db: Session = Depends(get_db),
     current_lat: Optional[float] = None,
     current_lng: Optional[float] = None,
-    sort_by: str = "distance",
+    sort_by: str = "distance_asc",
     favorites_only: bool = False,
 ):
     """
     指定ユーザーが保存したコース一覧を返す。
     drawing_points は一覧では返さないため null を返却。
-    ソート: created_at(新しい順) | distance(近い順)
+    ソート: 
+      - created_at_desc(新しい順) | created_at_asc(古い順)
+      - distance_asc(近い順) | distance_desc(遠い順)
+      - total_distance_asc(短い順) | total_distance_desc(長い順)
     フィルター: favorites_only=true でお気に入りのコースのみを返す
     """
-
-    if sort_by not in ("created_at", "distance"):
-        raise HTTPException(status_code=400, detail="sort_by must be 'created_at' or 'distance'")
     
+    valid_sort_options = (
+        "created_at_desc", "created_at_asc",
+        "distance_asc", "distance_desc",
+        "total_distance_asc", "total_distance_desc"
+    )
+
+    if sort_by not in valid_sort_options:
+        raise HTTPException(status_code=400, detail=f"sort_by must be one of {valid_sort_options}")
+
     # user_id はパスパラメータで文字列として受け取るため、UUID に変換してクエリする
     try:
         user_uuid = uuid.UUID(user_id)
@@ -173,10 +182,19 @@ def list_user_courses(
         )
 
 
-    if sort_by == "created_at":
+    # ソート処理
+    if sort_by == "created_at_desc":
         response_courses.sort(key=lambda x: x.created_at, reverse=True)
-    else:
-        response_courses.sort(key=lambda x: x.distance_to_start_km)
+    elif sort_by == "created_at_asc":
+        response_courses.sort(key=lambda x: x.created_at, reverse=False)
+    elif sort_by == "distance_asc":
+        response_courses.sort(key=lambda x: x.distance_to_start_km, reverse=False)
+    elif sort_by == "distance_desc":
+        response_courses.sort(key=lambda x: x.distance_to_start_km, reverse=True)
+    elif sort_by == "total_distance_asc":
+        response_courses.sort(key=lambda x: x.total_distance_km, reverse=False)
+    elif sort_by == "total_distance_desc":
+        response_courses.sort(key=lambda x: x.total_distance_km, reverse=True)
 
     return response_courses
 
