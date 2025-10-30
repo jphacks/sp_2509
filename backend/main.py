@@ -152,7 +152,7 @@ def list_user_courses(
     # コースをクエリ (お気に入りフィルターを適用)
     query = db.query(models.Course).filter(models.Course.user_id == user_uuid)
     if favorites_only:
-        query = query.filter(models.Course.is_favorite == True)
+        query = query.filter(models.Course.is_favorite.is_(True))
     courses = query.all()
     response_courses = []
     for course in courses:
