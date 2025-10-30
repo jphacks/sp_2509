@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   MapContainer,
   TileLayer,
-  Polyline,
   Marker,
   useMap,
 } from "react-leaflet";
@@ -88,32 +87,56 @@ function GradientPolyline({ positions }: { positions: [number, number][] }) {
     const segments: L.Polyline[] = [];
     const segmentCount = Math.min(positions.length - 1, 20); // 最大20セグメント
 
-    for (let i = 0; i < segmentCount; i++) {
+    // パス1: 縁取りを先にすべて描画 (終点から描画して重なり順を調整)
+    for (let i = segmentCount - 1; i >= 0; i--) {
       const startIndex = Math.floor((i * (positions.length - 1)) / segmentCount);
       const endIndex = Math.floor(((i + 1) * (positions.length - 1)) / segmentCount);
-
       if (startIndex === endIndex) continue;
-
       const segmentPositions = positions.slice(startIndex, endIndex + 1);
 
-      // グラデーション色の計算（緑から黒へ）
       const ratio = i / (segmentCount - 1);
       const red = Math.round(32 * (1 - ratio));
       const green = Math.round(185 * (1 - ratio));
       const blue = Math.round(80 * (1 - ratio));
+      const darkColor = `rgb(${red}, ${green}, ${blue})`;
+      const opacity = 1 - ratio * 0.5;
 
-      const color = `rgb(${red}, ${green}, ${blue})`;
-      const opacity = 1 - ratio * 0.4; // 徐々に透明に
+      const borderPolyline = L.polyline(segmentPositions, {
+        color: darkColor,
+        weight: 11,
+        opacity: opacity,
+        lineCap: 'round',
+        lineJoin: 'round',
+      }).addTo(map);
+      segments.push(borderPolyline);
+    }
 
-      const polyline = L.polyline(segmentPositions, {
-        color: color,
+    // パス2: 内側の線を次にすべて描画 (終点から描画)
+    for (let i = segmentCount - 1; i >= 0; i--) {
+      const startIndex = Math.floor((i * (positions.length - 1)) / segmentCount);
+      const endIndex = Math.floor(((i + 1) * (positions.length - 1)) / segmentCount);
+      if (startIndex === endIndex) continue;
+      const segmentPositions = positions.slice(startIndex, endIndex + 1);
+
+      const ratio = i / (segmentCount - 1);
+      const red = Math.round(32 * (1 - ratio));
+      const green = Math.round(185 * (1 - ratio));
+      const blue = Math.round(80 * (1 - ratio));
+      const opacity = 1 - ratio * 0.5;
+
+      const brighterRed = Math.min(255, red + 50);
+      const brighterGreen = Math.min(255, green + 50);
+      const brighterBlue = Math.min(255, blue + 50);
+      const lightColor = `rgb(${brighterRed}, ${brighterGreen}, ${brighterBlue})`;
+
+      const innerPolyline = L.polyline(segmentPositions, {
+        color: lightColor,
         weight: 7,
         opacity: opacity,
         lineCap: 'round',
         lineJoin: 'round',
       }).addTo(map);
-
-      segments.push(polyline);
+      segments.push(innerPolyline);
     }
 
     // クリーンアップ関数
