@@ -116,10 +116,10 @@ export default function MadeRoute({
     Number.isFinite(toNum(v)) ? toNum(v).toFixed(1) : "—";
   const dateLabel = created_at
     ? new Date(created_at).toLocaleDateString("ja-JP", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      })
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    })
     : "—";
 
   // 地図サムネ：実描画サイズは大きめ（ズームは RouteMap に任せる）
@@ -139,27 +139,20 @@ export default function MadeRoute({
   };
 
   const handleCardClick = () => {
-    const query: {
-      [key: string]: string | number | boolean | undefined | null;
-    } = {
+    // SessionStorageにコース詳細データを保存
+    const courseDetailData = {
       id,
-      positions: JSON.stringify(positions),
-      course_distance: course_distance,
-      start_distance: start_distance,
-      created_at: created_at,
-      isFavorite: isFavorite,
+      positions,
+      course_distance,
+      start_distance,
+      created_at,
+      isFavorite,
     };
 
-    const filteredQuery: { [key: string]: string } = {};
-    for (const key in query) {
-      const value = query[key];
-      if (value !== undefined && value !== null) {
-        filteredQuery[key] = String(value);
-      }
-    }
+    sessionStorage.setItem('courseDetailData', JSON.stringify(courseDetailData));
 
-    const queryString = new URLSearchParams(filteredQuery).toString();
-    router.push(`/courseDetail?${queryString}`);
+    // コース詳細ページに遷移（クエリパラメータなし）
+    router.push('/courseDetail');
   };
 
   return (
