@@ -3,6 +3,7 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { FaPencilAlt } from 'react-icons/fa';
 import type { Point } from '../types/types';
+import Text from './Text'; // ★ 追加
 
 interface DrawingCanvasProps {
   strokeColor?: string;
@@ -211,15 +212,12 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     <div ref={containerRef} className="relative w-full h-full">
       {/* ★ 条件を変更: showGuideText が true の場合のみ表示 */}
       {showGuideText && !isDrawing && !hasContent && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none space-y-4 z-10">
-          <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center">
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none space-y-2 z-10">
+          <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mb-4">
             <FaPencilAlt className="text-gray-500 text-4xl" />
           </div>
-          <span className="text-gray-500 text-center px-4">
-            画面をタッチして
-            <br />
-            一筆書きで絵を描いてください
-          </span>
+          <Text text="画面をタッチして" />
+          <Text text="一筆書きで絵を描いてください" />
         </div>
       )}
       <canvas

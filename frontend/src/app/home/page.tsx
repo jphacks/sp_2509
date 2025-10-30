@@ -4,6 +4,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Carousel from "../../components/Carousel";
 import Title from "../../components/Title";
+import Text from "../../components/Text";
 import RoutingButton from "../../components/RoutingButton";
 import EmptyCourse from "../../components/EmptyCourse";
 import CourseList from "../../components/CourseList";
@@ -74,9 +75,8 @@ export default function Home() {
   const [uuid, setUuid] = useState<string | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(!isTestMode); // テストモード時はローディング不要
-  const [sortBy, setSortBy] = useState<"created_at" | "distance">(
-    "created_at"
-  );
+  const [sortBy, setSortBy] = useState<"created_at" | "distance">("created_at");
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<{
     lat: number;
     lng: number;
@@ -150,7 +150,7 @@ export default function Home() {
       setError(null);
       try {
         const res = await fetch(
-          `${API_URL}/users/${uuid}/courses?current_lat=${currentLocation.lat}&current_lng=${currentLocation.lng}&sort_by=${sortBy}`
+          `${API_URL}/users/${uuid}/courses?current_lat=${currentLocation.lat}&current_lng=${currentLocation.lng}&sort_by=${sortBy}&favorites_only=${showFavoritesOnly}`
         );
         if (!res.ok) {
           if (res.status === 404) {
@@ -174,7 +174,7 @@ export default function Home() {
     };
 
     fetchCourses();
-  }, [uuid, currentLocation, sortBy, initializeUser]);
+  }, [uuid, currentLocation, sortBy, showFavoritesOnly, initializeUser]);
 
   // 表示するコースリストを決定
   const displayCourses = isTestMode ? testCourses : courses;
@@ -270,7 +270,7 @@ export default function Home() {
 
   const renderCourses = () => {
     if (loading) return <Loading loadingText="コースを読み込み中..." />;
-    if (error) return <p>エラー: {error}</p>;
+    if (error) return <Text text={error} />;
     if (displayCourses.length === 0) return <EmptyCourse />;
     return (
       <CourseList
@@ -290,19 +290,20 @@ export default function Home() {
           {/* Top Text */}
           {/* ↓↓↓ 変更箇所: flexコンテナでアイコンとタイトルを囲む ↓↓↓ */}
           <div className="flex items-center my-2">
-            <Image src="/Title.png" alt="AshiArt icon" width={280} height={280} /> {/* アイコンを追加 */}
+            <Image
+              src="/Title.png"
+              alt="AshiArt icon"
+              width={280}
+              height={280}
+            />{" "}
+            {/* アイコンを追加 */}
             {/* <div className="text-left">
               <Title title="AshiArt" />
             </div> */}
-
           </div>
 
-          {/* <hr className="border-black my-2" /> */}
-
-            <div className="mt-2 text-sm font-bold text-gray-500">
-            <p>好きな絵のコースで走ってみませんか？</p>
-            <p>GPSアートになるジョギングコースをデザインしましょう</p>
-              </div>
+          <Text text="好きな絵のコースで走ってみませんか？" />
+          <Text text="GPSアートになるジョギングコースをデザインしましょう" />
 
           {/* How to Use Section */}
           <div className="my-4">
@@ -321,16 +322,28 @@ export default function Home() {
             <div className="flex justify-between items-center mb-4">
               <Header headerText="作成したコース" />
               {!isTestMode && (
-                <select
-                  value={sortBy}
-                  onChange={(e) =>
-                    setSortBy(e.target.value as "created_at" | "distance")
-                  }
-                  className="p-2 rounded-[8px] font-semibold"
-                >
-                  <option value="created_at">作成順</option>
-                  <option value="distance">近さ順</option>
-                </select>
+                <div className="flex gap-4">
+                  <select
+                    value={sortBy}
+                    onChange={(e) =>
+                      setSortBy(e.target.value as "created_at" | "distance")
+                    }
+                    className="p-2 rounded-[8px] font-semibold"
+                  >
+                    <option value="created_at">作成順</option>
+                    <option value="distance">近さ順</option>
+                  </select>
+                  <select
+                    value={showFavoritesOnly ? "favorites" : "all"}
+                    onChange={(e) =>
+                      setShowFavoritesOnly(e.target.value === "favorites")
+                    }
+                    className="p-2 rounded-[8px] font-semibold"
+                  >
+                    <option value="all">すべてのコース</option>
+                    <option value="favorites">お気に入りのみ</option>
+                  </select>
+                </div>
               )}
             </div>
             {renderCourses()}

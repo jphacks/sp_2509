@@ -1,8 +1,8 @@
 // frontend/src/components/Carousel.tsx
 "use client";
-
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useRef, useState, MouseEvent, useEffect, useCallback } from "react";
 import Image from "next/image";
+import Text from "./Text";
 
 // --- 型定義 ---
 export type CarouselItem = {
@@ -107,12 +107,12 @@ export default function Carousel({
               draggable={false}
               style={{ userSelect: "none" }}
             />
-            <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/70 to-transparent" />
             <div
-              className={`absolute bottom-0 left-0 w-full p-2 text-left ${textClassName} pointer-events-none`}
+              className={`absolute bottom-0 left-0 w-full p-2 text-left ${textClassName}`}
             >
-              <p className="font-bold text-lg">{index + 1}</p>
-              <p className="text-sm">{item.description}</p>
+              <Text text={`${index + 1}`} className="text-white" />
+              <Text text={`${item.description}`} className="text-white" />
             </div>
           </div>
         ))}

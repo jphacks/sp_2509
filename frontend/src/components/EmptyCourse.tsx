@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Text from './Text';
 
 
 const mapIcon = '/images/map_icon.png';
@@ -8,10 +9,8 @@ const EmptyCourse = () => {
       <div>
         <Image src={mapIcon} alt="Map Icon" width={96} height={96} />
       </div>
-      <div>
-        <p className="text-gray-500">まだコースがありません</p>
-        <p className="text-gray-500">絵を描いて最初のコースを作りましょう</p>
-      </div>
+      <Text text="まだコースがありません。" />
+      <Text text="絵を描いて最初のコースを作りましょう" />
     </div>
   );
 };

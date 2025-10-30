@@ -230,3 +230,68 @@ def test_toggle_course_favorite_not_found(client: TestClient, db_session: Sessio
     response = client.post(f"/users/{user_id}/courses/{non_existent_course_id}/toggle_favorite")
     assert response.status_code == 404
     assert response.json()["detail"] == "Course not found."
+
+@pytest.fixture
+def setup_user_with_favorites(db_session: Session):
+    """お気に入りと非お気に入りのコースを持つユーザーを作成"""
+    user = models.User()
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+
+    # お気に入りのコース
+    favorite_course = models.Course(
+        user_id=user.id,
+        total_distance_km=5.0,
+        is_favorite=True,
+        route_points=[{"lat": 35.0, "lng": 139.0}],
+        drawing_points=[{"lat": 35.1, "lng": 139.1}]
+    )
+    db_session.add(favorite_course)
+    
+    # お気に入りでないコース
+    non_favorite_course = models.Course(
+        user_id=user.id,
+        total_distance_km=3.0,
+        is_favorite=False,
+        route_points=[{"lat": 35.2, "lng": 139.2}],
+        drawing_points=[{"lat": 35.3, "lng": 139.3}]
+    )
+    db_session.add(non_favorite_course)
+    db_session.commit()
+    db_session.refresh(favorite_course)
+    db_session.refresh(non_favorite_course)
+    
+    return user, favorite_course, non_favorite_course
+
+def test_list_user_courses_favorites_only_true(client: TestClient, setup_user_with_favorites):
+    # favorites_only=true でお気に入りのコースのみが返ることを検証する
+    user, favorite_course, non_favorite_course = setup_user_with_favorites
+    user_id = str(user.id)
+
+    response = client.get(f"/users/{user_id}/courses?favorites_only=true")
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 1  # お気に入りのコースのみが返る
+    assert data[0]["id"] == str(favorite_course.id)
+    assert data[0]["is_favorite"] is True
+
+def test_list_user_courses_favorites_only_false(client: TestClient, setup_user_with_favorites):
+    # favorites_only=false で全てのコースが返ることを検証する
+    user, favorite_course, non_favorite_course = setup_user_with_favorites
+    user_id = str(user.id)
+
+    response = client.get(f"/users/{user_id}/courses?favorites_only=false")
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 2  # 全てのコースが返る
+
+def test_list_user_courses_favorites_only_default(client: TestClient, setup_user_with_favorites):
+    # favorites_only パラメータがない場合、全てのコースが返ることを検証する
+    user, favorite_course, non_favorite_course = setup_user_with_favorites
+    user_id = str(user.id)
+
+    response = client.get(f"/users/{user_id}/courses")
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 2  # デフォルトでは全てのコースが返る

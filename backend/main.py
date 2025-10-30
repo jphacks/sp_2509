@@ -126,11 +126,13 @@ def list_user_courses(
     current_lat: Optional[float] = None,
     current_lng: Optional[float] = None,
     sort_by: str = "distance",
+    favorites_only: bool = False,
 ):
     """
     指定ユーザーが保存したコース一覧を返す。
     drawing_points は一覧では返さないため null を返却。
-    ソート: created_at(新しい順) | distance(近い順) 
+    ソート: created_at(新しい順) | distance(近い順)
+    フィルター: favorites_only=true でお気に入りのコースのみを返す
     """
 
     if sort_by not in ("created_at", "distance"):
@@ -147,7 +149,11 @@ def list_user_courses(
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
 
-    courses = db.query(models.Course).filter(models.Course.user_id == user_uuid).all()
+    # コースをクエリ (お気に入りフィルターを適用)
+    query = db.query(models.Course).filter(models.Course.user_id == user_uuid)
+    if favorites_only:
+        query = query.filter(models.Course.is_favorite.is_(True))
+    courses = query.all()
     response_courses = []
     for course in courses:
         distance_to_start_km = 0.0
