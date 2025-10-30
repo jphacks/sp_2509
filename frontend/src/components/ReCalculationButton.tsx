@@ -1,16 +1,17 @@
-// frontend/src/components/RecalculationButton.tsx
 "use client";
 import React from "react";
-import { FaSyncAlt } from "react-icons/fa"; // 再計算に適した更新アイコン
+import { FaSyncAlt } from "react-icons/fa";
 
 type RecalculationButtonProps = {
     onClick?: () => void;
     disabled?: boolean;
+    children?: React.ReactNode;
 };
 
 export default function RecalculationButton({
     onClick,
     disabled = false,
+    children,
 }: RecalculationButtonProps) {
     return (
         <button
@@ -29,7 +30,7 @@ export default function RecalculationButton({
       `}
         >
             <FaSyncAlt size={20} />
-            <span>再計算</span>
+            <span>{children || "再計算"}</span>
         </button>
     );
 }

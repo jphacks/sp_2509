@@ -1,4 +1,3 @@
-// frontend/src/app/route/page.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -11,7 +10,8 @@ import { LatLngExpression } from "leaflet";
 import RecalculationButton from "@/components/ReCalculationButton";
 import Loading from "@/components/Loading";
 import type { Point } from "@/types/types";
-
+import UndoButton from "@/components/UndoButton";
+import CancelEditButton from "@/components/CancelEditButton";
 
 // RouteMapWithPointsを動的にインポート
 const RouteMapWithPoints = dynamic(() => import("../../components/RouteMapWithPoints"), {
@@ -36,9 +36,15 @@ export default function CourseDetailPage() {
   const [isRecalculating, setIsRecalculating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const router = useRouter();
+  const [isEditing, setIsEditing] = useState(false);
 
   const [updatedDrawingPoints, setUpdatedDrawingPoints] = useState<RoutePoint[]>([]);
+  const [updatedRoutePoints, setUpdatedRoutePoints] = useState<RoutePoint[]>([]);
   const [originalDrawingXY, setOriginalDrawingXY] = useState<Point[]>([]);
+
+  // Undo/Cancel用のState
+  const [history, setHistory] = useState<RoutePoint[][]>([]);
+  const [originalPointsBeforeEdit, setOriginalPointsBeforeEdit] = useState<RoutePoint[]>([]);
 
   useEffect(() => {
     const responsePointsDataStr = localStorage.getItem("responsePointsData");
@@ -50,6 +56,7 @@ export default function CourseDetailPage() {
         const parsedOriginalXY: Point[] = JSON.parse(originalDrawingXYStr);
 
         setRouteData(parsedResponseData);
+        setUpdatedRoutePoints(parsedResponseData.route_points);
         setUpdatedDrawingPoints(parsedResponseData.drawing_points);
         setOriginalDrawingXY(parsedOriginalXY);
 
@@ -65,11 +72,11 @@ export default function CourseDetailPage() {
   }, [router]);
 
   const handleRecalculate = async () => {
-    if (isRecalculating || updatedDrawingPoints.length === 0) return;
+    if (isRecalculating || updatedRoutePoints.length === 0) return;
     setIsRecalculating(true);
 
     let minLat = Infinity, maxLat = -Infinity, minLng = Infinity, maxLng = -Infinity;
-    updatedDrawingPoints.forEach(p => {
+    updatedRoutePoints.forEach(p => {
       minLat = Math.min(minLat, p.lat);
       maxLat = Math.max(maxLat, p.lat);
       minLng = Math.min(minLng, p.lng);
@@ -79,10 +86,9 @@ export default function CourseDetailPage() {
     const latRange = maxLat - minLat;
     const lngRange = maxLng - minLng;
     const maxRange = Math.max(latRange, lngRange);
-
     const CANVAS_SIZE = 400;
 
-    const newDisplayPoints = updatedDrawingPoints.map(p => {
+    const newDisplayPoints = updatedRoutePoints.map(p => {
       const x = lngRange > 0 ? ((p.lng - minLng) / maxRange) * CANVAS_SIZE : CANVAS_SIZE / 2;
       const y = latRange > 0 ? ((maxLat - p.lat) / maxRange) * CANVAS_SIZE : CANVAS_SIZE / 2;
       return { x, y };
@@ -90,7 +96,7 @@ export default function CourseDetailPage() {
 
     const payload = {
       drawing_display_points: newDisplayPoints,
-      start_location: updatedDrawingPoints[0],
+      start_location: updatedRoutePoints[0],
       target_distance_km: routeData?.total_distance_km || 10,
     };
 
@@ -104,6 +110,7 @@ export default function CourseDetailPage() {
       if (res.ok) {
         const newData: ResponseData = await res.json();
         setRouteData(newData);
+        setUpdatedRoutePoints(newData.route_points);
         setUpdatedDrawingPoints(newData.drawing_points);
         localStorage.setItem("responsePointsData", JSON.stringify(newData));
       } else {
@@ -115,6 +122,8 @@ export default function CourseDetailPage() {
       alert("再計算中にエラーが発生しました");
     } finally {
       setIsRecalculating(false);
+      setIsEditing(false);
+      setHistory([]); // 再計算後は履歴をクリア
     }
   };
 
@@ -135,7 +144,7 @@ export default function CourseDetailPage() {
         },
         body: JSON.stringify({
           total_distance_km: routeData.total_distance_km,
-          route_points: routeData.route_points,
+          route_points: updatedRoutePoints,
           drawing_points: updatedDrawingPoints,
           is_favorite: false,
         }),
@@ -166,15 +175,42 @@ export default function CourseDetailPage() {
     setUpdatedDrawingPoints(newRoutePoints);
   };
 
-  // ★★★ 変更点 ★★★
-  // ローディングアニメーション用に、更新された緯度経度から描画用の{x,y}座標を計算する
+  const handlePrimaryPointsChange = (newPositions: LatLngExpression[]) => {
+    const newRoutePoints: RoutePoint[] = newPositions.map(pos => {
+      if (Array.isArray(pos)) {
+        return { lat: pos[0], lng: pos[1] };
+      }
+      return pos as RoutePoint;
+    });
+    setHistory(prev => [...prev, updatedRoutePoints]);
+    setUpdatedRoutePoints(newRoutePoints);
+  };
+
+  const handleUndo = () => {
+    if (history.length === 0) return;
+    const previousPoints = history[history.length - 1];
+    setUpdatedRoutePoints(previousPoints);
+    setHistory(prev => prev.slice(0, prev.length - 1));
+  };
+
+  const handleEnterEditMode = () => {
+    setOriginalPointsBeforeEdit(updatedRoutePoints);
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setUpdatedRoutePoints(originalPointsBeforeEdit);
+    setIsEditing(false);
+    setHistory([]);
+  };
+
   const loadingAnimationPoints = useMemo(() => {
-    if (updatedDrawingPoints.length === 0) {
-      return originalDrawingXY; // フォールバックとして元の図形を使う
+    if (updatedRoutePoints.length === 0) {
+      return originalDrawingXY;
     }
 
     let minLat = Infinity, maxLat = -Infinity, minLng = Infinity, maxLng = -Infinity;
-    updatedDrawingPoints.forEach(p => {
+    updatedRoutePoints.forEach(p => {
       minLat = Math.min(minLat, p.lat);
       maxLat = Math.max(maxLat, p.lat);
       minLng = Math.min(minLng, p.lng);
@@ -184,24 +220,20 @@ export default function CourseDetailPage() {
     const latRange = maxLat - minLat;
     const lngRange = maxLng - minLng;
     const maxRange = Math.max(latRange, lngRange);
-
     const CANVAS_SIZE = 400;
 
-    return updatedDrawingPoints.map(p => {
+    return updatedRoutePoints.map(p => {
       const x = lngRange > 0 ? ((p.lng - minLng) / maxRange) * CANVAS_SIZE : CANVAS_SIZE / 2;
       const y = latRange > 0 ? ((maxLat - p.lat) / maxRange) * CANVAS_SIZE : CANVAS_SIZE / 2;
       return { x, y };
     });
-  }, [updatedDrawingPoints, originalDrawingXY]);
+  }, [updatedRoutePoints, originalDrawingXY]);
 
-
-  // データ読み込み中または再計算中の表示
   if (!routeData || isRecalculating) {
     return (
       <div className="bg-gray-50 min-h-screen flex flex-col items-center justify-center p-8">
         <Loading
           loadingText={isRecalculating ? "コースを再計算中…" : "データを読み込み中..."}
-          // ★★★ 変更点 ★★★
           points={isRecalculating ? loadingAnimationPoints : originalDrawingXY}
           size={120}
         />
@@ -214,8 +246,7 @@ export default function CourseDetailPage() {
     );
   }
 
-  // LatLngExpression形式に変換
-  const routePositions: LatLngExpression[] = routeData.route_points.map(p => [p.lat, p.lng]);
+  const routePositions: LatLngExpression[] = updatedRoutePoints.map(p => [p.lat, p.lng]);
   const drawingPositions: LatLngExpression[] = updatedDrawingPoints.map(p => [p.lat, p.lng]);
 
   return (
@@ -230,9 +261,12 @@ export default function CourseDetailPage() {
             positions={routePositions}
             secondaryPositions={drawingPositions}
             onPointsChange={handlePointsChange}
+            onPrimaryPointsChange={handlePrimaryPointsChange}
             height={300}
+            isEditable={isEditing}
           />
         </div>
+
         <div className="px-4 pt-4 text-left">
           <div className="flex justify-between items-baseline">
             <div className="text-[15px] text-neutral-600">コース距離</div>
@@ -243,25 +277,47 @@ export default function CourseDetailPage() {
         </div>
 
         <div className="px-4 mt-6 space-y-4">
-          <div className="flex gap-2">
-            <RoutingButton buttonText="条件変更" to="/condition" icon={FaCog} />
-            <RoutingButton
-              buttonText="描きなおす"
-              to="/draw"
-              icon={FaPencilAlt}
-            />
-          </div>
+          {isEditing ? (
+            <>
+              <div className="flex gap-2">
+                <UndoButton onClick={handleUndo} disabled={history.length === 0} />
+                <CancelEditButton onClick={handleCancelEdit} />
+              </div>
+              <RecalculationButton
+                onClick={handleRecalculate}
+                disabled={isRecalculating}
+              >
+                再計算して完了
+              </RecalculationButton>
+            </>
+          ) : (
+            <>
+              <div className="flex gap-2">
+                <RoutingButton buttonText="条件変更" to="/condition" icon={FaCog} />
+                <RoutingButton
+                  buttonText="描きなおす"
+                  to="/draw"
+                  icon={FaPencilAlt}
+                />
+              </div>
 
-          <RecalculationButton onClick={handleRecalculate} disabled={isSaving || isRecalculating} />
+              <RecalculationButton
+                onClick={handleEnterEditMode}
+                disabled={isRecalculating}
+              >
+                コースを編集
+              </RecalculationButton>
 
-          <button
-            onClick={handleSaveCourse}
-            disabled={isSaving || isRecalculating}
-            className="w-full flex items-center justify-center gap-2 bg-green-500 text-white py-3 text-lg font-semibold tracking-wide rounded-2xl shadow-md hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 ease-out select-none font-sans"
-          >
-            <FaSave size={22} />
-            <span>{isSaving ? "保存中..." : "保存してホームに戻る"}</span>
-          </button>
+              <button
+                onClick={handleSaveCourse}
+                disabled={isSaving || isRecalculating}
+                className="w-full flex items-center justify-center gap-2 bg-green-500 text-white py-3 text-lg font-semibold tracking-wide rounded-2xl shadow-md hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 ease-out select-none font-sans"
+              >
+                <FaSave size={22} />
+                <span>{isSaving ? "保存中..." : "保存してホームに戻る"}</span>
+              </button>
+            </>
+          )}
         </div>
       </main>
     </div>

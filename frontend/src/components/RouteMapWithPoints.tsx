@@ -1,4 +1,3 @@
-// frontend/src/components/RouteMapWithPoints.tsx
 "use client";
 
 import { MapContainer, TileLayer, Polyline, Marker, useMap } from "react-leaflet";
@@ -8,10 +7,10 @@ import { useEffect, useState, useMemo } from "react";
 
 type CSSSize = number | string;
 
-interface RouteMapProps {
-    /** route_points用の座標（青い線） */
+interface RouteMapWithPointsProps {
+    /** route_points用の座標（青い線・ドラッグ可能な点） */
     positions?: LatLngExpression[];
-    /** drawing_points用の座標（赤い線）。これがドラッグ可能になります */
+    /** drawing_points用の座標（赤い線・ドラッグ可能な点） */
     secondaryPositions?: LatLngExpression[];
     /** 実コンテナの高さ（fitBoundsのズーム決定に影響） */
     height?: CSSSize;
@@ -25,13 +24,16 @@ interface RouteMapProps {
     interactive?: boolean; // default: true
     /** ズームコントロールボタンを表示するか */
     showZoomControl?: boolean; // default: true
-    /** 点の位置が変更されたときに親コンポーネントに通知するコールバック */
+    /** 赤い点の位置が変更されたときに親コンポーネントに通知するコールバック */
     onPointsChange?: (newPositions: LatLngExpression[]) => void;
+    /** 【追加】青い点の位置が変更されたときに親コンポーネントに通知するコールバック */
+    onPrimaryPointsChange?: (newPositions: LatLngExpression[]) => void;
+    /** 編集可能かどうかを親から受け取るためのプロパティ */
+    isEditable?: boolean;
 }
 
 /**
  * 地図の表示範囲を自動調整するコンポーネント。
- * ドラッグによる座標更新では再調整が走らないように、依存関係を工夫しています。
  */
 const MapController = ({
     positions,
@@ -55,8 +57,7 @@ const MapController = ({
             map.fitBounds(bounds, { padding: [padding, padding], maxZoom });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [map, positions, padding, maxZoom, JSON.stringify(secondaryPositions)]);
-    // secondaryPositions は文字列化して渡すことで、参照ではなく値の変更時のみeffectが実行されるようにする
+    }, []); // 依存配列を空にして、初回マウント時に一度だけ実行
 
     return null;
 };
@@ -71,31 +72,43 @@ const RouteMapWithPoints = ({
     interactive = true,
     showZoomControl = true,
     onPointsChange,
-}: RouteMapProps) => {
+    onPrimaryPointsChange,
+    isEditable = false,
+}: RouteMapWithPointsProps) => {
     const h = typeof height === "number" ? `${height}px` : height;
     const w = typeof width === "number" ? `${width}px` : width;
 
-    // ドラッグ可能な点の位置情報を内部で管理するState
-    const [draggablePositions, setDraggablePositions] = useState<LatLngExpression[]>([]);
+    const [draggableRedPositions, setDraggableRedPositions] = useState<LatLngExpression[]>([]);
+    const [draggableBluePositions, setDraggableBluePositions] = useState<LatLngExpression[]>([]);
 
-    // propsとして渡された座標が変更されたら、内部のStateも更新する
     useEffect(() => {
-        setDraggablePositions(secondaryPositions || []);
+        setDraggableRedPositions(secondaryPositions || []);
     }, [secondaryPositions]);
 
-    // マーカーのドラッグ終了時のイベントハンドラ
-    const handleMarkerDragEnd = (e: LeafletEvent, index: number) => {
+    useEffect(() => {
+        setDraggableBluePositions(positions || []);
+    }, [positions]);
+
+    const handleRedMarkerDragEnd = (e: LeafletEvent, index: number) => {
         const { lat, lng } = e.target.getLatLng();
-        const newPositions = [...draggablePositions];
+        const newPositions = [...draggableRedPositions];
         newPositions[index] = [lat, lng];
-        setDraggablePositions(newPositions);
-        // 親コンポーネントに変更を通知
+        setDraggableRedPositions(newPositions);
         if (onPointsChange) {
             onPointsChange(newPositions);
         }
     };
 
-    // スタート地点のマーカーアイコン
+    const handleBlueMarkerDragEnd = (e: LeafletEvent, index: number) => {
+        const { lat, lng } = e.target.getLatLng();
+        const newPositions = [...draggableBluePositions];
+        newPositions[index] = [lat, lng];
+        setDraggableBluePositions(newPositions);
+        if (onPrimaryPointsChange) {
+            onPrimaryPointsChange(newPositions);
+        }
+    };
+
     const startIcon = useMemo(() => divIcon({
         html: `<div style="background-color:#4A90E2;color:white;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-weight:bold;border:2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">S</div>`,
         className: "",
@@ -103,15 +116,14 @@ const RouteMapWithPoints = ({
         iconAnchor: [15, 15],
     }), []);
 
-    // ドラッグ可能な赤い点のアイコン
-    const redDotIcon = useMemo(() => divIcon({
-        html: `<div style="background-color:red; border-radius:50%; width:14px; height:14px; border: 2px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5); cursor: grab;"></div>`,
-        className: 'red-dot-icon',
+    const blueDotIcon = useMemo(() => divIcon({
+        html: `<div style="background-color:#4A90E2; border-radius:50%; width:14px; height:14px; border: 2px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5); cursor: grab;"></div>`,
+        className: 'blue-dot-icon',
         iconSize: [14, 14],
         iconAnchor: [7, 7],
     }), []);
 
-    const startPosition = positions?.[0] || draggablePositions?.[0];
+    const startPosition = positions?.[0] || secondaryPositions?.[0];
 
     return (
         <MapContainer
@@ -122,36 +134,35 @@ const RouteMapWithPoints = ({
             touchZoom={interactive}
             doubleClickZoom={interactive}
             scrollWheelZoom={interactive}
-            boxZoom={interactive}
             keyboard={interactive}
         >
             <TileLayer
                 url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
             />
 
-            {/* drawing_points: 赤い線とドラッグ可能な点 */}
-            {draggablePositions && draggablePositions.length > 0 && (
+            {/* drawing_points: 赤い線 */}
+            {draggableRedPositions.length > 0 && (
+                <Polyline positions={draggableRedPositions} color="red" weight={3} />
+            )}
+
+            {/* route_points: 水色の線（グラデーション風）とドラッグ可能な点 */}
+            {draggableBluePositions.length > 0 && (
                 <>
-                    <Polyline positions={draggablePositions} color="red" weight={3} />
-                    {draggablePositions.map((pos, idx) => (
+                    <Polyline positions={draggableBluePositions} color="#1E40CF" weight={8} opacity={0.6} />
+                    <Polyline positions={draggableBluePositions} color="#07D8F9" weight={4} opacity={0.9} />
+
+                    {/* isEditableがtrueの場合のみ、青い点をレンダリングする */}
+                    {isEditable && draggableBluePositions.map((pos, idx) => (
                         <Marker
-                            key={idx}
+                            key={`blue-marker-${idx}`}
                             position={pos}
-                            icon={redDotIcon}
-                            draggable={true}
+                            icon={blueDotIcon}
+                            draggable={isEditable}
                             eventHandlers={{
-                                dragend: (e) => handleMarkerDragEnd(e, idx),
+                                dragend: (e) => handleBlueMarkerDragEnd(e, idx),
                             }}
                         />
                     ))}
-                </>
-            )}
-
-            {/* route_points: 水色の線（グラデーション風） */}
-            {positions && positions.length > 0 && (
-                <>
-                    <Polyline positions={positions} color="#1E40CF" weight={8} opacity={0.6} />
-                    <Polyline positions={positions} color="#07D8F9" weight={4} opacity={0.9} />
                 </>
             )}
 
