@@ -322,7 +322,7 @@ export default function Home() {
             <div className="flex justify-between items-center mb-4">
               <Header headerText="作成したコース" />
               {!isTestMode && (
-                <div className="flex gap-2">
+                <div className="flex gap-4">
                   <select
                     value={sortBy}
                     onChange={(e) =>
