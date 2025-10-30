@@ -15,6 +15,7 @@ import { HiSun, HiMoon } from "react-icons/hi";
 import { MdOutlineTurnLeft, MdOutlineTurnRight, MdOutlineUTurnRight } from "react-icons/md";
 import { FaRunning } from "react-icons/fa";
 import { useRouter } from "next/navigation";
+import RoutingButton from "./RoutingButton";
 
 type RouteData = {
   id: string;
@@ -51,9 +52,9 @@ const startIcon = L.divIcon({
   html: `
     <svg width="48" height="60" viewBox="0 0 40 50">
       <path d="M20 5c-6.5 0-12 5.5-12 12 0 8 10 18 11.5 19.5.3.3.7.3 1 0C22 35 32 25 32 17c0-6.5-5.5-12-12-12z"
-            fill="#1052F6" stroke="#0D47D1" stroke-width="2"/>
+            fill="#20B950" stroke="#16A34A" stroke-width="2"/>
       <circle cx="20" cy="17" r="8" fill="white"/>
-      <text x="20" y="21" text-anchor="middle" fill="#1052F6" font-size="12" font-weight="bold">S</text>
+      <text x="20" y="21" text-anchor="middle" fill="#20B950" font-size="12" font-weight="bold">S</text>
     </svg>
   `,
   className: "",
@@ -66,9 +67,9 @@ const goalIcon = L.divIcon({
   html: `
     <svg width="48" height="60" viewBox="0 0 40 50">
       <path d="M20 5c-6.5 0-12 5.5-12 12 0 8 10 18 11.5 19.5.3.3.7.3 1 0C22 35 32 25 32 17c0-6.5-5.5-12-12-12z"
-            fill="#20B950" stroke="#16A34A" stroke-width="2"/>
+            fill="#444444" stroke="#222222" stroke-width="2"/>
       <circle cx="20" cy="17" r="8" fill="white"/>
-      <text x="20" y="21" text-anchor="middle" fill="#20B950" font-size="12" font-weight="bold">G</text>
+      <text x="20" y="21" text-anchor="middle" fill="#222222" font-size="12" font-weight="bold">G</text>
     </svg>
   `,
   className: "",
@@ -95,18 +96,19 @@ function GradientPolyline({ positions }: { positions: [number, number][] }) {
 
       const segmentPositions = positions.slice(startIndex, endIndex + 1);
 
-      // グラデーション色の計算（青から緑へ）
+      // グラデーション色の計算（緑から黒へ）
       const ratio = i / (segmentCount - 1);
-      const red = Math.round(16 + (16 * ratio)); // 16 → 32
-      const green = Math.round(82 + (103 * ratio)); // 82 → 185
-      const blue = Math.round(246 - (166 * ratio)); // 246 → 80
+      const red = Math.round(32 * (1 - ratio));
+      const green = Math.round(185 * (1 - ratio));
+      const blue = Math.round(80 * (1 - ratio));
 
       const color = `rgb(${red}, ${green}, ${blue})`;
+      const opacity = 1 - ratio * 0.4; // 徐々に透明に
 
       const polyline = L.polyline(segmentPositions, {
         color: color,
         weight: 7,
-        opacity: 0.9,
+        opacity: opacity,
         lineCap: 'round',
         lineJoin: 'round',
       }).addTo(map);
@@ -356,13 +358,7 @@ export default function NavigationMap({ routeData }: NavigationMapProps) {
 
       {/* 最下部: ランニング終了ボタン */}
       <div className="absolute bottom-6 left-4 right-4 z-[1000]">
-        <button
-          onClick={handleBack}
-          className="w-full bg-black rounded-2xl py-4 shadow-lg flex items-center justify-center gap-2"
-        >
-          <FaRunning size={24} className="text-white" />
-          <span className="text-white font-medium">ランニングを終了する</span>
-        </button>
+        <RoutingButton buttonText="ランニングを終了する" icon={FaRunning} onClick={handleBack} />
       </div>
     </div>
   );
