@@ -1,9 +1,10 @@
+// frontend/src/components/Carousel.tsx
 "use client";
+import { useRef, useState, MouseEvent, useEffect, useCallback } from "react";
+import Image from "next/image";
+import Text from "./Text";
 
-import { useRef, useState, MouseEvent } from 'react';
-import Image from 'next/image';
-import Text from './Text';
-
+// --- 型定義 ---
 export type CarouselItem = {
   src: string;
   alt: string;
@@ -18,60 +19,83 @@ type CarouselProps = {
 
 const imageWidth = 200;
 const imageHeight = 200;
-const gap = 16; // 画像間の余白 (px)
 
 export default function Carousel({
   items,
-  // 画像の角丸
-  // 例: 'rounded-md', 'rounded-xl', 'rounded-2xl', 'rounded-full'
-  imageBorderRadius = 'rounded-lg',
-  // テキスト全体のスタイル (Tailwind CSSクラス)
-  // 例: 'font-sans text-yellow-300'
-  textClassName = 'text-white',
+  imageBorderRadius = "rounded-lg",
+  textClassName = "text-white",
 }: CarouselProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
+  const isDraggingRef = useRef(false);
 
-  const onMouseDown = (e: MouseEvent<HTMLDivElement>) => {
-    setIsDragging(true);
-    if (scrollContainerRef.current) {
-      setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
-      setScrollLeft(scrollContainerRef.current.scrollLeft);
+  // --- ドラッグ中の pointer move ---
+  const handleGlobalPointerMove = useCallback((e: PointerEvent) => {
+    if (!isDraggingRef.current || !scrollContainerRef.current) return;
+    const deltaX = e.movementX ?? 0;
+    scrollContainerRef.current.scrollLeft -= deltaX;
+  }, []);
+
+  // --- ドラッグ終了 ---
+  const handleGlobalPointerUp = useCallback(() => {
+    if (isDraggingRef.current) {
+      setIsDragging(false);
+      isDraggingRef.current = false;
+      window.removeEventListener("pointermove", handleGlobalPointerMove);
+      window.removeEventListener("pointerup", handleGlobalPointerUp);
     }
-  };
+  }, [handleGlobalPointerMove]);
 
-  const onMouseLeave = () => {
-    setIsDragging(false);
-  };
+  // --- ドラッグ開始 ---
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!scrollContainerRef.current) return;
 
-  const onMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const onMouseMove = (e: MouseEvent<HTMLDivElement>) => {
-    if (!isDragging || !scrollContainerRef.current) return;
     e.preventDefault();
-    const x = e.pageX - scrollContainerRef.current.offsetLeft;
-    const walk = (x - startX) * 2; // スクロール速度を調整
-    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+    setIsDragging(true);
+    isDraggingRef.current = true;
+
+    const rect = scrollContainerRef.current.getBoundingClientRect();
+    const currentX = e.clientX - rect.left;
+    setStartX(currentX);
+
+    // ネイティブ PointerEvent での動き
+    window.addEventListener("pointermove", handleGlobalPointerMove);
+    window.addEventListener("pointerup", handleGlobalPointerUp);
+  };
+
+  // --- クリーンアップ ---
+  useEffect(() => {
+    return () => {
+      window.removeEventListener("pointermove", handleGlobalPointerMove);
+      window.removeEventListener("pointerup", handleGlobalPointerUp);
+    };
+  }, [handleGlobalPointerMove, handleGlobalPointerUp]);
+
+  // --- クリック防止（ドラッグ判定用） ---
+  const handleClickCapture = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!scrollContainerRef.current) return;
+    const currentX =
+      e.clientX - scrollContainerRef.current.getBoundingClientRect().left;
+    const movedDistance = Math.abs(currentX - startX);
+    if (movedDistance > 2) e.stopPropagation();
   };
 
   return (
     <div className="w-full">
       <div
         ref={scrollContainerRef}
-        className={`flex overflow-x-auto snap-x snap-mandatory scrollbar-hide cursor-grab ${isDragging ? 'cursor-grabbing' : ''} gap-4 px-4 scroll-px-4`}
-        onMouseDown={onMouseDown}
-        onMouseLeave={onMouseLeave}
-        onMouseUp={onMouseUp}
-        onMouseMove={onMouseMove}
+        className={`flex overflow-x-auto scrollbar-hide cursor-grab ${
+          isDragging ? "cursor-grabbing" : ""
+        } gap-4 px-4`}
+        onPointerDown={onPointerDown}
+        onClickCapture={handleClickCapture}
+        style={{ userSelect: "none" }}
       >
         {items.map((item, index) => (
           <div
-            key={index}
-            className={`relative flex-shrink-0 snap-start overflow-hidden ${imageBorderRadius}`}
+            key={item.src}
+            className={`relative flex-shrink-0 overflow-hidden ${imageBorderRadius}`}
             style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
           >
             <Image
@@ -79,18 +103,16 @@ export default function Carousel({
               alt={item.alt}
               width={imageWidth}
               height={imageHeight}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover pointer-events-none"
+              draggable={false}
+              style={{ userSelect: "none" }}
             />
             <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/70 to-transparent" />
-            <div className={`absolute bottom-0 left-0 w-full p-2 text-left ${textClassName}`}>
-              <Text 
-                text={`${index + 1}`}
-                className ="text-white"
-              />
-              <Text 
-                text={`${item.description}`}
-                className ="text-white" 
-              />
+            <div
+              className={`absolute bottom-0 left-0 w-full p-2 text-left ${textClassName}`}
+            >
+              <Text text={`${index + 1}`} className="text-white" />
+              <Text text={`${item.description}`} className="text-white" />
             </div>
           </div>
         ))}
