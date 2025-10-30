@@ -145,7 +145,6 @@ export default function NavigationMap({ routeData }: NavigationMapProps) {
   const router = useRouter();
   const [currentPosition, setCurrentPosition] = useState<[number, number] | null>(null);
   const [energySaveMode, setEnergySaveMode] = useState(false);
-  const [navigationInstruction, setNavigationInstruction] = useState("コースに沿って進んでください");
   const watchIdRef = useRef<number | null>(null);
 
   // 位置情報の取得
