@@ -340,8 +340,8 @@ export default function Home() {
                     }
                     className="p-2 rounded-[8px] font-semibold"
                   >
-                    <option value="all">すべてのコース</option>
-                    <option value="favorites">お気に入りのみ</option>
+                    <option value="all">すべて</option>
+                    <option value="favorites">お気に入り</option>
                   </select>
                 </div>
               )}
