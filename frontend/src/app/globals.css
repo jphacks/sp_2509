@@ -12,7 +12,6 @@
   --font-mono: var(--font-geist-mono);
 }
 
-
 /* 
 ダークモードを無効化
 @media (prefers-color-scheme: dark) {
@@ -25,5 +24,15 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: -apple-system, 'BlinkMacSystemFont', 'Hiragino Kaku Gothic ProN', 'メイリオ', Sans-Serif;
+  font-family: -apple-system, "BlinkMacSystemFont", "Hiragino Kaku Gothic ProN",
+    "メイリオ", Sans-Serif;
+}
+
+@keyframes fill-up {
+  from {
+    background-position: 100% 0%;
+  }
+  to {
+    background-position: 100% 100%;
+  }
 }
