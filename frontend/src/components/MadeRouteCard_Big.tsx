@@ -33,6 +33,12 @@ export default function MadeRouteCard_Big({
     point.lng,
   ]);
 
+  // drawing_points を LatLngExpression の配列に変換
+  const drawingPositions: LatLngExpression[] = drawing_points.map((point) => [
+    point.lat,
+    point.lng,
+  ]);
+
   const fmtKm = (v: number) => (Number.isFinite(v) ? v.toFixed(1) : "—");
 
   const MAP_HEIGHT = 300;
@@ -48,6 +54,7 @@ export default function MadeRouteCard_Big({
         <div className="flex-grow rounded-2xl overflow-hidden ring-1 ring-black/5 bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.02)]">
           <RouteMap
             positions={routePositions}
+            secondaryPositions={drawingPositions}
             height={MAP_HEIGHT}
             width="100%"
             padding={15}
