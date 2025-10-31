@@ -13,24 +13,8 @@ import type { Point } from '../../types/types';
 import SelectedShapePlaceholder from '../../components/SelectedShapePlaceholder';
 import { GrConfigure } from "react-icons/gr";
 
-// --- 図形データ定義 --- (変更なし)
-const heartShape: Point[] = [
-  { x: 175, y: 100 }, { x: 205, y: 70 }, { x: 235, y: 80 }, { x: 250, y: 110 },
-  { x: 235, y: 140 }, { x: 175, y: 210 }, { x: 115, y: 140 }, { x: 100, y: 110 },
-  { x: 115, y: 80 }, { x: 145, y: 70 }, { x: 175, y: 100 }
-];
-const starShape: Point[] = [
-  { x: 175, y: 50 }, { x: 209, y: 150 }, { x: 300, y: 150 }, { x: 227, y: 209 },
-  { x: 259, y: 300 }, { x: 175, y: 250 }, { x: 91, y: 300 }, { x: 123, y: 209 },
-  { x: 50, y: 150 }, { x: 141, y: 150 }, { x: 175, y: 50 }
-];
-const circleShape: Point[] = Array.from({ length: 105 }, (_, i) => {
-  const angle = (i / 100) * 2 * Math.PI;
-  return {
-    x: 175 + 100 * Math.cos(angle),
-    y: 175 + 100 * Math.sin(angle)
-  };
-});
+// ★ 修正: 形状データを外部ファイルからインポート
+import { heartShape, starShape, circleShape, musicNoteShape } from '../../recommendShape/shapes';
 
 // --- Draw コンポーネント本体 ---
 export default function Draw() {
@@ -42,7 +26,7 @@ export default function Draw() {
   const activePoints = useMemo(() => selectedShape?.points ?? userDrawnPoints, [selectedShape, userDrawnPoints]);
   const activeDescription = useMemo(() => selectedShape?.description ?? null, [selectedShape]);
 
-// ★ 修正: localStorageへの保存処理を削除
+// ★ 修正: localStorageへの保存処理を削除 (変更なし)
   const handleSelectShape = useCallback((item: CarouselClickItem) => {
     if (!item.shapeData) {
       console.warn("選択されたアイテムに shapeData がありません:", item.description);
@@ -75,9 +59,22 @@ export default function Draw() {
       shapeData: circleShape,
       onClick: () => handleSelectShape({ src: '/images/Recommend/Circle.png', alt: 'Circle Shape', description: '円', shapeData: circleShape }),
     },
+    // ★ 修正: 音符データをリストに追加 (画像パスは適宜調整してください)
+    {
+      src: '/images/Recommend/Circle.png', // 例: /images/Recommend/MusicNote.png
+      alt: 'Music Note Shape',
+      description: '音符',
+      shapeData: musicNoteShape,
+      onClick: () => handleSelectShape({ 
+        src: '/images/Recommend/Circle.png', 
+        alt: 'Music Note Shape', 
+        description: '音符', 
+        shapeData: musicNoteShape 
+      }),
+    },
   ], [handleSelectShape]);
 
-// ★ 修正: ページ読み込み時のlocalStorage復元ロジック
+// ★ 修正: ページ読み込み時のlocalStorage復元ロジック (変更なし)
   useEffect(() => {
     console.log('初回レンダリング: localStorage を確認します');
     let needsClearLocalStorage = false;
@@ -91,8 +88,10 @@ export default function Draw() {
         const isHeart = JSON.stringify(heartShape) === JSON.stringify(parsedPoints);
         const isStar = JSON.stringify(starShape) === JSON.stringify(parsedPoints);
         const isCircle = JSON.stringify(circleShape) === JSON.stringify(parsedPoints);
+        // ★ 修正: 音符もチェック対象に追加
+        const isMusicNote = JSON.stringify(musicNoteShape) === JSON.stringify(parsedPoints);
 
-        if (isHeart || isStar || isCircle) {
+        if (isHeart || isStar || isCircle || isMusicNote) { // ★ 修正
           // おすすめ図形データだったので、選択状態は復元せず、localStorageをクリア対象にする
           console.log('保存されていたのはおすすめ図形なので、選択状態はリセットします。');
           needsClearLocalStorage = true; // localStorageを後でクリア
@@ -204,7 +203,7 @@ export default function Draw() {
   const isClearButtonDisabled = userDrawnPoints.length === 0 && selectedShape === null;
   const isNextButtonDisabled = activePoints.length < 2;
 
-  // ★ 追加: ガイドテキストを表示するかどうかのフラグ
+  // ★ 追加: ガイドテキストを表示するかどうかのフラグ (変更なし)
   const shouldShowGuideText = selectedShape === null;
 
   return (
