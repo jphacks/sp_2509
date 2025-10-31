@@ -73,17 +73,18 @@ export function GradientPolyline({ positions }: { positions: [number, number][] 
 }
 
 // 現在位置を追跡してマップを更新するコンポーネント
-export function LocationTracker({ currentPosition, energySaveMode }: {
+export function LocationTracker({ currentPosition, energySaveMode, isFollowing }: {
   currentPosition: [number, number] | null;
   energySaveMode: boolean;
+  isFollowing: boolean;
 }) {
   const map = useMap();
 
   useEffect(() => {
-    if (currentPosition && !energySaveMode) {
-      map.setView(currentPosition, 16, { animate: true });
+    if (currentPosition && !energySaveMode && isFollowing) {
+      map.setView(currentPosition, map.getZoom(), { animate: true });
     }
-  }, [currentPosition, map, energySaveMode]);
+  }, [currentPosition, map, energySaveMode, isFollowing]);
 
   return null;
 }

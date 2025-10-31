@@ -7,15 +7,88 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-polylinedecorator";
 import { HiMoon } from "react-icons/hi";
-import { MdOutlineTurnLeft, MdOutlineTurnRight, MdOutlineUTurnRight } from "react-icons/md";
+import { MdOutlineTurnLeft, MdOutlineTurnRight, MdOutlineUTurnRight, MdGpsFixed, MdGpsNotFixed } from "react-icons/md";
 import { FaRunning } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import RoutingButton from "./RoutingButton";
 import { useLocation } from "../hooks/useLocation";
 import { currentLocationIcon, startIcon, goalIcon } from "./MapIcons";
 import EnergySaveMode from "./EnergySaveMode";
+import { useMapEvents } from "react-leaflet";
 import { GradientPolyline, LocationTracker } from "./MapComponents";
 import { TurnPoint } from "../app/navigation/page"; // page.tsxから型をインポート
+
+// Haversine formula for distance calculation
+function getDistance(p1: { lat: number; lng: number }, p2: { lat: number; lng: number }): number {
+  const R = 6371e3; // metres
+  const toRad = (deg: number) => deg * Math.PI / 180;
+
+  const lat1 = toRad(p1.lat);
+  const lat2 = toRad(p2.lat);
+  const deltaLat = toRad(p2.lat - p1.lat);
+  const deltaLon = toRad(p2.lng - p1.lng);
+
+  const a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+    Math.cos(lat1) * Math.cos(lat2) *
+    Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return R * c;
+}
+
+// --- Custom Hook for Navigation Logic ---
+const useNavigation = (turnPoints: TurnPoint[], currentPosition: { lat: number; lng: number } | null) => {
+  const { useState, useEffect } = React;
+  const [nextTurnIndex, setNextTurnIndex] = useState(0);
+  const [upcomingTurnsWithDistances, setUpcomingTurnsWithDistances] = useState<Array<TurnPoint & { distance: number | null }>>([]);
+  const [isApproaching, setIsApproaching] = useState(false); //ターンポイント30m以内に入ったかどうか
+
+
+  useEffect(() => {
+    if (!currentPosition || turnPoints.length === 0 || nextTurnIndex >= turnPoints.length) {
+      setUpcomingTurnsWithDistances(turnPoints.slice(nextTurnIndex, nextTurnIndex + 3).map(turn => ({ ...turn, distance: null })));
+      return;
+    }
+
+    const nextTurnPoint = turnPoints[nextTurnIndex];
+    const distanceToFirst = getDistance(currentPosition, nextTurnPoint);
+
+    const approachingThreshold = 30; // 30m以内
+    const isCurrentlyApproaching = distanceToFirst < approachingThreshold;
+
+    if (isCurrentlyApproaching) {
+      if (!isApproaching) {
+        setIsApproaching(true);
+      }
+    } else {
+      if (isApproaching) {
+        setNextTurnIndex(nextTurnIndex + 1);
+        setIsApproaching(false);
+        return; // Indexが更新されるので、次のレンダリングで再計算
+      }
+    }
+
+    const turns = turnPoints.slice(nextTurnIndex, nextTurnIndex + 3);
+    let cumulativeDistance = distanceToFirst;
+    const turnsWithDistances = turns.map((turn, index) => {
+      if (index === 0) {
+        return { ...turn, distance: distanceToFirst };
+      }
+      if (index > 0) {
+        const prevTurn = turns[index - 1];
+        cumulativeDistance += getDistance(prevTurn, turn);
+        return { ...turn, distance: cumulativeDistance };
+      }
+      return { ...turn, distance: null }; // Should not happen
+    });
+
+    setUpcomingTurnsWithDistances(turnsWithDistances);
+
+  }, [currentPosition, turnPoints, nextTurnIndex, isApproaching]);
+
+  return { upcomingTurns: upcomingTurnsWithDistances };
+};
+
 
 type Point = { lat: number; lng: number };
 
@@ -42,17 +115,28 @@ const turnIcons: { [key in 'left' | 'right' | 'u-turn']: IconType } = {
   'u-turn': MdOutlineUTurnRight,
 };
 
+function MapEvents({ setIsFollowing }: { setIsFollowing: (isFollowing: boolean) => void }) {
+  useMapEvents({
+    dragstart: () => {
+      setIsFollowing(false);
+    },
+  });
+  return null;
+}
 
 export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }: NavigationMapProps) {
   const router = useRouter();
-  const currentPosition = useLocation();
+  const currentPositionArray = useLocation();
+  const currentPosition = currentPositionArray ? { lat: currentPositionArray[0], lng: currentPositionArray[1] } : null;
+  const { upcomingTurns } = useNavigation(turnPoints, currentPosition);
   const [energySaveMode, setEnergySaveMode] = useState(false);
   const [showSimplifiedRoute, setShowSimplifiedRoute] = useState(false); // デバッグ用フラグ
+  const [isFollowing, setIsFollowing] = useState(true);
 
   const routePositions: [number, number][] = routeData.route_points.map(p => [p.lat, p.lng]);
   const simplifiedRoutePositions: [number, number][] = simplifiedRoute.map(p => [p.lat, p.lng]);
 
-  const initialCenter: [number, number] = currentPosition ||
+  const initialCenter: [number, number] = currentPosition ? [currentPosition.lat, currentPosition.lng] :
     (routePositions.length > 0 ? routePositions[0] : [43.0621, 141.3544]);
 
   const handleBack = () => {
@@ -65,6 +149,10 @@ export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }
 
   const toggleShowSimplifiedRoute = () => {
     setShowSimplifiedRoute(!showSimplifiedRoute);
+  };
+
+  const toggleFollowing = () => {
+    setIsFollowing(!isFollowing);
   };
 
   if (energySaveMode) {
@@ -84,6 +172,7 @@ export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }
         style={{ height: "100%", width: "100%" }}
         zoomControl={false}
       >
+        <MapEvents setIsFollowing={setIsFollowing} />
         <TileLayer
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
@@ -96,7 +185,7 @@ export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }
           const IconComponent = turnIcons[turn.turn];
           const iconHtml = ReactDOMServer.renderToString(
             <div className="p-1 bg-white rounded shadow-lg">
-              <IconComponent size={24} className="text-black" />
+              <IconComponent size={24} className="text-blue-600" />
             </div>
           );
           return (
@@ -127,8 +216,9 @@ export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }
           />
         )}
         <LocationTracker
-          currentPosition={currentPosition}
+          currentPosition={currentPosition ? [currentPosition.lat, currentPosition.lng] : null}
           energySaveMode={energySaveMode}
+          isFollowing={isFollowing}
         />
       </MapContainer>
 
@@ -138,7 +228,13 @@ export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }
         <h1 className="text-black text-3xl font-bold drop-shadow-md">コース案内中</h1>
       </div>
 
-      <div className="absolute top-6 right-4 z-[1000] flex gap-2">
+      <div className="absolute top-6 right-4 z-[1000] flex flex-col gap-2">
+        <button
+          onClick={toggleFollowing}
+          className="flex items-center justify-center w-12 h-12 bg-white/80 rounded-full shadow-md"
+        >
+          {isFollowing ? <MdGpsFixed size={24} className="text-blue-600" /> : <MdGpsNotFixed size={24} className="text-black" />}
+        </button>
         <button
           onClick={toggleShowSimplifiedRoute}
           className="flex items-center justify-center w-12 h-12 bg-white/80 rounded-full shadow-md"
@@ -166,35 +262,24 @@ export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }
               animation: "fill-up 3s ease-out infinite",
             }}
           ></div>
-
           <div className="space-y-4">
-            <div className="flex items-center gap-3 relative z-10">
-              <div className="w-8 h-8 flex justify-center items-center">
-                <MdOutlineTurnRight size={32} className="bg-white rounded-sm p-1" />
-              </div>
-              <div>
-                <span className="text-black font-bold text-2xl">320</span>
-                <span className="text-black text-base ml-1">m</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 relative z-10">
-              <div className="w-8 h-8 flex justify-center items-center">
-                <MdOutlineTurnLeft size={32} className="bg-white rounded-sm p-1" />
-              </div>
-              <div>
-                <span className="text-black font-bold text-2xl">240</span>
-                <span className="text-black text-base ml-1">m</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 relative z-10">
-              <div className="w-8 h-8 flex justify-center items-center">
-                <MdOutlineUTurnRight size={32} className="bg-white rounded-sm p-1" />
-              </div>
-              <div>
-                <span className="text-black font-bold text-2xl">100</span>
-                <span className="text-black text-base ml-1">m</span>
-              </div>
-            </div>
+            {[...upcomingTurns].reverse().map((turn, index) => {
+              if (!turn) return null;
+              const IconComponent = turn.turn !== 'straight' ? turnIcons[turn.turn] : FaRunning;
+              return (
+                <div key={index} className="flex items-center gap-3 relative z-10">
+                  <div className="w-8 h-8 flex justify-center items-center">
+                    <IconComponent size={32} className="bg-white rounded-sm p-1" />
+                  </div>
+                  <div>
+                    <span className="text-black font-bold text-2xl">
+                      {turn.distance !== null ? Math.round(turn.distance / 10) * 10 : '...'}
+                    </span>
+                    <span className="text-black text-base ml-1">m</span>
+                  </div>
+                </div>
+              );
+            })}
             <div className="flex items-center gap-4 mt-2 relative z-10">
               <div className="w-8 h-8 flex justify-center items-center">
                 <div className="w-6 h-6 bg-blue-500 rounded-full border-4 border-white shadow-md"></div>

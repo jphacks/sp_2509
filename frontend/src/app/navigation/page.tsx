@@ -125,39 +125,50 @@ function getBearing(start: Point, end: Point): number {
 
 // ターンを抽出する関数
 function extractTurns(points: Point[]): TurnPoint[] {
-  if (points.length < 3) {
+  if (points.length === 0) {
     return [];
   }
 
   const turns: TurnPoint[] = [];
 
-  for (let i = 1; i < points.length - 1; i++) {
-    const p_current = points[i - 1];
-    const p_next = points[i];
-    const p_future = points[i + 1];
+  // スタート地点を追加
+  turns.push({ ...points[0], turn: 'straight' }); // 'start' の代わりに 'straight' を使う
 
-    const bearing1 = getBearing(p_current, p_next);
-    const bearing2 = getBearing(p_next, p_future);
+  if (points.length >= 3) {
+    for (let i = 1; i < points.length - 1; i++) {
+      const p_current = points[i - 1];
+      const p_next = points[i];
+      const p_future = points[i + 1];
 
-    let angleDiff = bearing2 - bearing1;
+      const bearing1 = getBearing(p_current, p_next);
+      const bearing2 = getBearing(p_next, p_future);
 
-    // 角度を-180度から180度の範囲に正規化
-    if (angleDiff > 180) angleDiff -= 360;
-    if (angleDiff < -180) angleDiff += 360;
+      let angleDiff = bearing2 - bearing1;
 
-    let turnType: TurnType = 'straight';
-    if (Math.abs(angleDiff) > TURN_THRESHOLDS.U_TURN) {
-      turnType = 'u-turn';
-    } else if (angleDiff > TURN_THRESHOLDS.TURN) {
-      turnType = 'right';
-    } else if (angleDiff < -TURN_THRESHOLDS.TURN) {
-      turnType = 'left';
-    }
+      // 角度を-180度から180度の範囲に正規化
+      if (angleDiff > 180) angleDiff -= 360;
+      if (angleDiff < -180) angleDiff += 360;
 
-    if (turnType !== 'straight') {
-      turns.push({ ...p_next, turn: turnType });
+      let turnType: TurnType = 'straight';
+      if (Math.abs(angleDiff) > TURN_THRESHOLDS.U_TURN) {
+        turnType = 'u-turn';
+      } else if (angleDiff > TURN_THRESHOLDS.TURN) {
+        turnType = 'right';
+      } else if (angleDiff < -TURN_THRESHOLDS.TURN) {
+        turnType = 'left';
+      }
+
+      if (turnType !== 'straight') {
+        turns.push({ ...p_next, turn: turnType });
+      }
     }
   }
+
+  // ゴール地点を追加
+  if (points.length > 1) {
+    turns.push({ ...points[points.length - 1], turn: 'straight' }); // 'goal' の代わりに 'straight' を使う
+  }
+
 
   return turns;
 }
