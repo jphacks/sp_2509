@@ -11,6 +11,7 @@ import CourseList from "../../components/CourseList";
 import Loading from "../../components/Loading";
 import Image from "next/image"; // Image コンポーネントをインポート
 import Header from "@/components/Header";
+import { FaPlus } from "react-icons/fa";
 
 const API_URL = "/api";
 
@@ -318,7 +319,7 @@ export default function Home() {
           </div>
 
           {/* Created Course Section */}
-          <div>
+          <div className="mb-12">
             <div className="flex justify-between items-center mb-4">
               <Header headerText="作成したコース" />
               {!isTestMode && (
@@ -355,9 +356,15 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Create New Route Button */}
-        <div className={`mt-auto ${paddingX} w-full pt-10`}>
-          <RoutingButton buttonText="新しいコースを作る" to="/draw" />
+
+        <div className="fixed bottom-4 left-0 right-0">
+            <div className="max-w-md mx-auto p-4">
+                <RoutingButton
+                    buttonText="新しいコースを作る"
+                    icon={FaPlus}
+                    to={"/draw"}
+                />
+            </div>
         </div>
       </main>
     </div>
