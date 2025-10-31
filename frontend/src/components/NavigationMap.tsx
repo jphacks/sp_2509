@@ -109,6 +109,12 @@ type NavigationMapProps = {
 
 import { IconType } from "react-icons";
 
+const turnColors = [
+  { color: '#FBBF24', borderColor: '#F59E0B' }, // amber-400, amber-500
+  { color: '#F97316', borderColor: '#EA580C' }, // orange-500, orange-600
+  { color: '#EF4444', borderColor: '#DC2626' }, // red-500, red-600
+];
+
 // スタート文字アイコン
 const StartCharacter = ({ size, className }: { size?: number; className?: string }) => (
   <span className={`font-bold text-xl text-green-500 ${className || ''}`}>S</span>
@@ -228,6 +234,32 @@ export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }
             icon={currentLocationIcon}
           />
         )}
+        {upcomingTurns.map((turn, index) => {
+          if (!turn) return null;
+          const isStart = turnPoints.length > 0 && turn.lat === turnPoints[0].lat && turn.lng === turnPoints[0].lng;
+          const isGoal = turnPoints.length > 0 && turn.lat === turnPoints[turnPoints.length - 1].lat && turn.lng === turnPoints[turnPoints.length - 1].lng;
+
+          if (isStart || isGoal) {
+            return null;
+          }
+
+          const colorInfo = turnColors[index];
+
+          return (
+            <CircleMarker
+              key={`upcoming-turn-${index}`}
+              center={[turn.lat, turn.lng]}
+              pathOptions={{
+                color: 'white',
+                weight: 2,
+                fillColor: colorInfo.borderColor,
+                fillOpacity: 0.8
+              }}
+              radius={8}
+              pane="markerPane"
+            />
+          );
+        })}
         <LocationTracker
           currentPosition={currentPosition ? [currentPosition.lat, currentPosition.lng] : null}
           energySaveMode={energySaveMode}
@@ -276,8 +308,11 @@ export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }
             }}
           ></div>
           <div className="space-y-4">
-            {[...upcomingTurns].reverse().map((turn, index) => {
+            {[...upcomingTurns].reverse().map((turn, i) => {
               if (!turn) return null;
+
+              const reversedIndex = upcomingTurns.length - 1 - i;
+              const colorInfo = turnColors[reversedIndex];
 
               let IconComponent;
               const iconProps: { size: number; className: string } = {
@@ -285,27 +320,31 @@ export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }
                 className: "bg-[#FCFCFC] rounded-sm p-0.5",
               };
 
-              if (turn.turn === 'straight') {
-                const isStart = turnPoints.length > 0 && turn.lat === turnPoints[0].lat && turn.lng === turnPoints[0].lng;
-                const isGoal = turnPoints.length > 0 && turn.lat === turnPoints[turnPoints.length - 1].lat && turn.lng === turnPoints[turnPoints.length - 1].lng;
+              const isStart = turnPoints.length > 0 && turn.lat === turnPoints[0].lat && turn.lng === turnPoints[0].lng;
+              const isGoal = turnPoints.length > 0 && turn.lat === turnPoints[turnPoints.length - 1].lat && turn.lng === turnPoints[turnPoints.length - 1].lng;
 
-                if (isStart) {
-                  IconComponent = StartCharacter;
-                } else if (isGoal) {
-                  IconComponent = GoalCharacter;
-                } else {
-                  IconComponent = FaRunning;
-                }
+              if (turn.turn === 'straight') {
+                if (isStart) IconComponent = StartCharacter;
+                else if (isGoal) IconComponent = GoalCharacter;
+                else IconComponent = FaRunning;
               } else {
                 IconComponent = turnIcons[turn.turn];
               }
 
+              const showColorCircle = !isStart && !isGoal;
+
               return (
-                <div key={index} className="flex items-center gap-3 relative z-10">
+                <div key={i} className="flex items-center gap-2 relative z-10">
                   <div className="w-8 h-8 flex justify-center items-center">
                     <IconComponent {...iconProps} />
                   </div>
-                  <div>
+                  {showColorCircle && (
+                    <div
+                      className="w-4 h-4 rounded-full border-2 border-white shadow-md"
+                      style={{ backgroundColor: colorInfo.borderColor }}
+                    />
+                  )}
+                  <div className={showColorCircle ? "" : "ml-6"}>
                     <span className="text-black font-bold text-2xl">
                       {turn.distance !== null ? Math.round(turn.distance / 10) * 10 : '...'}
                     </span>
