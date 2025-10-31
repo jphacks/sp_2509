@@ -4,6 +4,13 @@ import { MapContainer, TileLayer, Polyline, Marker, useMap } from "react-leaflet
 import "leaflet/dist/leaflet.css";
 import { LatLngExpression, divIcon, LatLngBounds } from "leaflet";
 import { useEffect } from "react";
+import dynamic from "next/dynamic";
+import { startIcon, goalIcon } from "./MapIcons";
+
+const GradientPolyline = dynamic(
+  () => import("./MapComponents").then((mod) => mod.GradientPolyline),
+  { ssr: false }
+);
 
 type CSSSize = number | string;
 
@@ -62,15 +69,9 @@ const RouteMap = ({
   const h = typeof height === "number" ? `${height}px` : height;
   const w = typeof width === "number" ? `${width}px` : width;
 
-  const startIcon = divIcon({
-    html: `<div style="background-color:#4A90E2;color:white;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-weight:bold;border:2px solid white;">S</div>`,
-    className: "",
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-  });
-
-  // スタート位置は positions または secondaryPositions の最初
+  // スタートとゴールの位置を決定
   const startPosition = positions?.[0] || secondaryPositions?.[0];
+  const goalPosition = positions && positions.length > 1 ? positions[positions.length - 1] : null;
 
   return (
     <MapContainer
@@ -92,31 +93,18 @@ const RouteMap = ({
       {secondaryPositions && secondaryPositions.length > 0 && (
         <Polyline positions={secondaryPositions} color="red" weight={3} />
       )}
-      
-      {/* route_points: 水色の線（グラデーション風） */}
+
+      {/* route_points: 緑→黒のグラデーション */}
       {positions && positions.length > 0 && (
-        <>
-          {/* 青い縁取り（外側） */}
-          <Polyline 
-            positions={positions} 
-            color="#1E40CF" 
-            weight={8}
-            opacity={0.6}
-          />
-          {/* 水色の本体（内側） */}
-          <Polyline 
-            positions={positions} 
-            color="#07D8F9" 
-            weight={4}
-            opacity={0.9}
-          />
-        </>
+        <GradientPolyline positions={positions as [number, number][]} />
       )}
 
-      
+      {/* ゴールマーカー */}
+      {goalPosition && <Marker position={goalPosition} icon={goalIcon} />}
 
       {/* スタートマーカー */}
       {startPosition && <Marker position={startPosition} icon={startIcon} />}
+
 
       <FitBounds
         positions={positions}

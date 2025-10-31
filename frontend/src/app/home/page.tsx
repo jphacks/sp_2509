@@ -76,7 +76,7 @@ export default function Home() {
   const [uuid, setUuid] = useState<string | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(!isTestMode); // テストモード時はローディング不要
-  const [sortBy, setSortBy] = useState<"created_at" | "distance">("created_at");
+  const [sortBy, setSortBy] = useState<string>("created_at_desc");
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<{
     lat: number;
@@ -331,8 +331,13 @@ export default function Home() {
                     }
                     className="p-2 rounded-[8px] font-semibold"
                   >
-                    <option value="created_at">作成順</option>
-                    <option value="distance">近さ順</option>
+                    <option value="created_at_desc">新しい順</option>
+                    <option value="created_at_asc">古い順</option>
+                    <option value="distance_asc">近い順</option>
+                    <option value="distance_desc">遠い順</option>
+                    <option value="total_distance_asc">短い順</option>
+                    <option value="total_distance_desc">長い順</option>
+                 
                   </select>
                   <select
                     value={showFavoritesOnly ? "favorites" : "all"}
@@ -341,8 +346,8 @@ export default function Home() {
                     }
                     className="p-2 rounded-[8px] font-semibold"
                   >
-                    <option value="all">すべてのコース</option>
-                    <option value="favorites">お気に入りのみ</option>
+                    <option value="all">すべて</option>
+                    <option value="favorites">お気に入り</option>
                   </select>
                 </div>
               )}
