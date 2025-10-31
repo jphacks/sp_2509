@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { MapContainer, TileLayer, Marker } from "react-leaflet";
+import ReactDOMServer from 'react-dom/server';
+import { MapContainer, TileLayer, Marker, CircleMarker } from "react-leaflet";
+import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-polylinedecorator";
 import { HiMoon } from "react-icons/hi";
@@ -13,11 +15,14 @@ import { useLocation } from "../hooks/useLocation";
 import { currentLocationIcon, startIcon, goalIcon } from "./MapIcons";
 import EnergySaveMode from "./EnergySaveMode";
 import { GradientPolyline, LocationTracker } from "./MapComponents";
+import { TurnPoint } from "../app/navigation/page"; // page.tsxから型をインポート
+
+type Point = { lat: number; lng: number };
 
 type RouteData = {
   id: string;
   total_distance_km: number;
-  route_points: Array<{ lat: number; lng: number }>;
+  route_points: Point[];
   start_distance: number;
   created_at: string;
   isFavorite: boolean;
@@ -25,14 +30,27 @@ type RouteData = {
 
 type NavigationMapProps = {
   routeData: RouteData;
+  simplifiedRoute: Point[];
+  turnPoints: TurnPoint[];
 };
 
-export default function NavigationMap({ routeData }: NavigationMapProps) {
+import { IconType } from "react-icons";
+
+const turnIcons: { [key in 'left' | 'right' | 'u-turn']: IconType } = {
+  left: MdOutlineTurnLeft,
+  right: MdOutlineTurnRight,
+  'u-turn': MdOutlineUTurnRight,
+};
+
+
+export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }: NavigationMapProps) {
   const router = useRouter();
   const currentPosition = useLocation();
   const [energySaveMode, setEnergySaveMode] = useState(false);
+  const [showSimplifiedRoute, setShowSimplifiedRoute] = useState(false); // デバッグ用フラグ
 
   const routePositions: [number, number][] = routeData.route_points.map(p => [p.lat, p.lng]);
+  const simplifiedRoutePositions: [number, number][] = simplifiedRoute.map(p => [p.lat, p.lng]);
 
   const initialCenter: [number, number] = currentPosition ||
     (routePositions.length > 0 ? routePositions[0] : [43.0621, 141.3544]);
@@ -43,6 +61,10 @@ export default function NavigationMap({ routeData }: NavigationMapProps) {
 
   const toggleEnergySaveMode = () => {
     setEnergySaveMode(!energySaveMode);
+  };
+
+  const toggleShowSimplifiedRoute = () => {
+    setShowSimplifiedRoute(!showSimplifiedRoute);
   };
 
   if (energySaveMode) {
@@ -65,14 +87,32 @@ export default function NavigationMap({ routeData }: NavigationMapProps) {
         <TileLayer
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
+        {routePositions.length > 1 && !showSimplifiedRoute && (
+          <GradientPolyline positions={routePositions} />
+        )}
+
+        {showSimplifiedRoute && turnPoints.map((turn, index) => {
+          if (turn.turn === 'straight') return null;
+          const IconComponent = turnIcons[turn.turn];
+          const iconHtml = ReactDOMServer.renderToString(
+            <div className="p-1 bg-white rounded shadow-lg">
+              <IconComponent size={24} className="text-black" />
+            </div>
+          );
+          return (
+            <Marker key={`turn-${index}`} position={[turn.lat, turn.lng]} icon={L.divIcon({
+              html: iconHtml,
+              className: '', // important to clear default styles
+              iconSize: [32, 32],
+              iconAnchor: [16, 16]
+            })} />
+          )
+        })}
         {routePositions.length > 1 && (
           <Marker
             position={routePositions[routePositions.length - 1]}
             icon={goalIcon}
           />
-        )}
-        {routePositions.length > 1 && (
-          <GradientPolyline positions={routePositions} />
         )}
         {routePositions.length > 0 && (
           <Marker
@@ -98,7 +138,16 @@ export default function NavigationMap({ routeData }: NavigationMapProps) {
         <h1 className="text-black text-3xl font-bold drop-shadow-md">コース案内中</h1>
       </div>
 
-      <div className="absolute top-6 right-4 z-[1000]">
+      <div className="absolute top-6 right-4 z-[1000] flex gap-2">
+        <button
+          onClick={toggleShowSimplifiedRoute}
+          className="flex items-center justify-center w-12 h-12 bg-white/80 rounded-full shadow-md"
+        >
+          {/* デバッグ用のシンプルなアイコン */}
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 16v-2m8-6h2M4 12H2m15.364 6.364l1.414 1.414M4.222 4.222l1.414 1.414m12.728 0l-1.414 1.414M5.636 18.364l-1.414 1.414" />
+          </svg>
+        </button>
         <button
           onClick={toggleEnergySaveMode}
           className="flex items-center justify-center w-12 h-12 bg-white/80 rounded-full shadow-md"
