@@ -327,7 +327,7 @@ export default function Home() {
                   <select
                     value={sortBy}
                     onChange={(e) =>
-                      setSortBy(e.target.value as "created_at" | "distance")
+                      setSortBy(e.target.value)
                     }
                     className="p-2 rounded-[8px] font-semibold"
                   >
