@@ -109,6 +109,16 @@ type NavigationMapProps = {
 
 import { IconType } from "react-icons";
 
+// スタート文字アイコン
+const StartCharacter = ({ size, className }: { size?: number; className?: string }) => (
+  <span className={`font-bold text-xl text-green-500 ${className || ''}`}>S</span>
+);
+
+// ゴール文字アイコン
+const GoalCharacter = ({ size, className }: { size?: number; className?: string }) => (
+  <span className={`font-bold text-xl text-black ${className || ''}`}>G</span>
+);
+
 const turnIcons: { [key in 'left' | 'right' | 'u-turn']: IconType } = {
   left: MdOutlineTurnLeft,
   right: MdOutlineTurnRight,
@@ -255,7 +265,7 @@ export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }
       <div className="absolute bottom-24 left-4 z-[1000] bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-4 w-60">
         <div className="relative">
           <div
-            className="absolute left-[15px] top-[24px] w-1 h-[calc(100%-48px)] bg-gray-300"
+            className="absolute left-[14px] top-[24px] w-1 h-[calc(100%-48px)] bg-gray-300"
             style={{
               background: "linear-gradient(to top, black 50%, #E5E7EB 50%)",
               backgroundSize: "100% 200%",
@@ -265,11 +275,32 @@ export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }
           <div className="space-y-4">
             {[...upcomingTurns].reverse().map((turn, index) => {
               if (!turn) return null;
-              const IconComponent = turn.turn !== 'straight' ? turnIcons[turn.turn] : FaRunning;
+
+              let IconComponent;
+              const iconProps: { size: number; className: string } = {
+                size: 32,
+                className: "bg-[#FCFCFC] rounded-sm p-0.5",
+              };
+
+              if (turn.turn === 'straight') {
+                const isStart = turnPoints.length > 0 && turn.lat === turnPoints[0].lat && turn.lng === turnPoints[0].lng;
+                const isGoal = turnPoints.length > 0 && turn.lat === turnPoints[turnPoints.length - 1].lat && turn.lng === turnPoints[turnPoints.length - 1].lng;
+
+                if (isStart) {
+                  IconComponent = StartCharacter;
+                } else if (isGoal) {
+                  IconComponent = GoalCharacter;
+                } else {
+                  IconComponent = FaRunning;
+                }
+              } else {
+                IconComponent = turnIcons[turn.turn];
+              }
+
               return (
                 <div key={index} className="flex items-center gap-3 relative z-10">
                   <div className="w-8 h-8 flex justify-center items-center">
-                    <IconComponent size={32} className="bg-white rounded-sm p-1" />
+                    <IconComponent {...iconProps} />
                   </div>
                   <div>
                     <span className="text-black font-bold text-2xl">
