@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import ReactDOMServer from 'react-dom/server';
 import { MapContainer, TileLayer, Marker, CircleMarker } from "react-leaflet";
 import L from "leaflet";
@@ -137,7 +137,10 @@ function MapEvents({ setIsFollowing }: { setIsFollowing: (isFollowing: boolean) 
 export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }: NavigationMapProps) {
   const router = useRouter();
   const currentPositionArray = useLocation();
-  const currentPosition = currentPositionArray ? { lat: currentPositionArray[0], lng: currentPositionArray[1] } : null;
+  const currentPosition = useMemo(() =>
+    currentPositionArray ? { lat: currentPositionArray[0], lng: currentPositionArray[1] } : null,
+    [currentPositionArray]
+  );
   const { upcomingTurns } = useNavigation(turnPoints, currentPosition);
   const [energySaveMode, setEnergySaveMode] = useState(false);
   const [showSimplifiedRoute, setShowSimplifiedRoute] = useState(false); // デバッグ用フラグ

@@ -190,7 +190,7 @@ function NavigationContent() {
         setRouteData(parsedData);
         if (parsedData.route_points) {
           // 経路を単純化する (epsilonの値は調整が必要)
-          const simplified = rdp(parsedData.route_points, 0.0003);
+          const simplified = rdp(parsedData.route_points, 0.00025);
           setSimplifiedRoute(simplified);
           // ターンを抽出する
           const turns = extractTurns(simplified);

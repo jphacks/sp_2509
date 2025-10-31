@@ -10,11 +10,16 @@ export const useLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const pos: [number, number] = [
+          const newPos: [number, number] = [
             position.coords.latitude,
             position.coords.longitude,
           ];
-          setCurrentPosition(pos);
+          setCurrentPosition(prevPos => {
+            if (prevPos && prevPos[0] === newPos[0] && prevPos[1] === newPos[1]) {
+              return prevPos;
+            }
+            return newPos;
+          });
         },
         (error) => {
           console.error("位置情報の取得に失敗しました:", error);
@@ -24,11 +29,16 @@ export const useLocation = () => {
 
       watchIdRef.current = navigator.geolocation.watchPosition(
         (position) => {
-          const pos: [number, number] = [
+          const newPos: [number, number] = [
             position.coords.latitude,
             position.coords.longitude,
           ];
-          setCurrentPosition(pos);
+          setCurrentPosition(prevPos => {
+            if (prevPos && prevPos[0] === newPos[0] && prevPos[1] === newPos[1]) {
+              return prevPos;
+            }
+            return newPos;
+          });
         },
         (error) => {
           console.error("位置情報の更新に失敗しました:", error);
