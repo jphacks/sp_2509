@@ -88,8 +88,8 @@ function CourseDetailContent() {
                 />
             </main>
 
-            <div className="fixed bottom-4 left-0 right-0 px-4">
-                <div className="max-w-md mx-auto">
+            <div className="fixed bottom-4 left-0 right-0">
+                <div className="max-w-md mx-auto px-4">
                     <RoutingButton
                         buttonText="ランニングを開始"
                         icon={FaRunning}
