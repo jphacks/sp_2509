@@ -91,7 +91,7 @@ function CourseDetailContent() {
             <div className="fixed bottom-4 left-0 right-0 px-4">
                 <div className="max-w-md mx-auto p-4">
                     <RoutingButton
-                        buttonText="ランニングを開始"
+                        buttonText="案内を開始"
                         icon={FaRunning}
                         onClick={handleStartNavigation}
                     />
