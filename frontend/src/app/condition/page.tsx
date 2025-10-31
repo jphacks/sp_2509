@@ -192,7 +192,7 @@ export default function Condition() {
 
         <section className="space-y-1">
           <Header headerText="おおよその走行距離" />
-          <Text text="どれくらいの距離のルートを作成しますか？" />
+          <Text text="どれくらいの距離のコースを作成しますか？" />
 
           <Slider
             value={distanceKm}
