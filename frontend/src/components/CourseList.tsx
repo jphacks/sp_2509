@@ -47,9 +47,7 @@ const Pagination = ({
 
   // 開始側の ...
   if (showEllipsisStart) {
-    if (currentPage > MAX_VISIBLE_PAGES) {
-      pageNumbers.push("...");
-    }
+    pageNumbers.push("...");
   }
 
   // 中間のページ
@@ -71,9 +69,7 @@ const Pagination = ({
 
   // 終了側の ...
   if (showEllipsisEnd) {
-    if (currentPage < totalPages - (MAX_VISIBLE_PAGES - 1)) {
-      pageNumbers.push("...");
-    }
+    pageNumbers.push("...");
   }
 
   // 最後のページ (1ページしかない場合は追加しない)

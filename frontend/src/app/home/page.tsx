@@ -357,7 +357,7 @@ export default function Home() {
         </div>
 
 
-        <div className="fixed bottom-4 left-0 right-0 px-4">
+        <div className="fixed bottom-4 left-0 right-0">
             <div className="max-w-md mx-auto p-4">
                 <RoutingButton
                     buttonText="新しいコースを作る"
