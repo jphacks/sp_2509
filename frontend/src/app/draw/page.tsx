@@ -11,6 +11,7 @@ import RoutingButton from '../../components/RoutingButton';
 import ClearCanvasButton from '../../components/ClearCanvasButton';
 import type { Point } from '../../types/types';
 import SelectedShapePlaceholder from '../../components/SelectedShapePlaceholder';
+import { GrConfigure } from "react-icons/gr";
 
 // --- 図形データ定義 --- (変更なし)
 const heartShape: Point[] = [
@@ -258,6 +259,7 @@ export default function Draw() {
               buttonText="条件設定へ進む"
               onClick={navigateToCondition}
               disabled={isNextButtonDisabled}
+              icon={GrConfigure}
             />
           </div>
         </div>
