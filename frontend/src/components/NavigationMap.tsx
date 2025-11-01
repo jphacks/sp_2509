@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import ReactDOMServer from 'react-dom/server';
 import { MapContainer, TileLayer, Marker, CircleMarker } from "react-leaflet";
 import L from "leaflet";
@@ -8,11 +8,12 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-polylinedecorator";
 import { HiMoon } from "react-icons/hi";
 import { MdOutlineTurnLeft, MdOutlineTurnRight, MdOutlineUTurnRight, MdGpsFixed, MdGpsNotFixed } from "react-icons/md";
-import { FaRunning } from "react-icons/fa";
+import { FaCompass, FaRunning } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import RoutingButton from "./RoutingButton";
 import { useLocation } from "../hooks/useLocation";
-import { currentLocationIcon, startIcon, goalIcon } from "./MapIcons";
+import { useHeading } from "../hooks/useHeading";
+import { startIcon, goalIcon } from "./MapIcons";
 import EnergySaveMode from "./EnergySaveMode";
 import { useMapEvents } from "react-leaflet";
 import { GradientPolyline, LocationTracker } from "./MapComponents";
@@ -24,7 +25,7 @@ const speak = (text: string) => {
     window.speechSynthesis.cancel(); // 以前の発話をキャンセル
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'ja-JP';
-    utterance.rate = 0.9; // 少し早口に
+    utterance.rate = 0.9;
     window.speechSynthesis.speak(utterance);
   } else {
     console.error("Web Speech API is not supported in this browser.");
@@ -203,9 +204,35 @@ function MapEvents({ setIsFollowing }: { setIsFollowing: (isFollowing: boolean) 
   return null;
 }
 
+// コンパス付き現在地アイコンを生成する関数
+const createCurrentLocationIcon = (heading: number | null) => {
+  const rotation = heading ?? 0;
+  return L.divIcon({
+    html: `
+      <div style="
+          transform: rotate(${rotation}deg);
+          width: 32px;
+          height: 32px;
+          transition: transform 0.3s ease-out;
+      ">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 -8 L10 14 L22 14 Z" fill="#3b82f6" stroke="white" stroke-width="2"/>
+          <circle cx="16" cy="16" r="10" fill="#3b82f6" stroke="white" stroke-width="2.5"/>
+        </svg>
+      </div>
+    `,
+    className: "",
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+  });
+};
+
+
 export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }: NavigationMapProps) {
   const router = useRouter();
   const currentPositionArray = useLocation();
+  const { heading } = useHeading();
+
   const currentPosition = useMemo(() =>
     currentPositionArray ? { lat: currentPositionArray[0], lng: currentPositionArray[1] } : null,
     [currentPositionArray]
@@ -214,6 +241,8 @@ export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }
   const [energySaveMode, setEnergySaveMode] = useState(false);
   const [showSimplifiedRoute, setShowSimplifiedRoute] = useState(false); // デバッグ用フラグ
   const [isFollowing, setIsFollowing] = useState(true);
+
+  const currentLocationIcon = createCurrentLocationIcon(heading);
 
   const routePositions: [number, number][] = routeData.route_points.map(p => [p.lat, p.lng]);
   const simplifiedRoutePositions: [number, number][] = simplifiedRoute.map(p => [p.lat, p.lng]);
