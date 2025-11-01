@@ -247,10 +247,28 @@ export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }
   const currentPositionArray = useLocation();
   const { heading } = useHeading();
 
-  // 初期音声案内のためのuseEffect
+  // ナビゲーションページ用のスタイルと音声案内を管理
   useEffect(() => {
+    // 初期音声案内
     speak("スタート地点に向かってください");
-  }, []); // 空の依存配列で、マウント時に一度だけ実行
+
+    // スタイルを適用
+    const originalStyle = {
+      overscrollBehavior: document.body.style.overscrollBehavior,
+      touchAction: document.body.style.touchAction,
+      backgroundColor: document.body.style.backgroundColor,
+    };
+    document.body.style.overscrollBehavior = 'none';
+    document.body.style.touchAction = 'none';
+    document.body.style.backgroundColor = 'black';
+
+    // クリーンアップ関数でスタイルを元に戻す
+    return () => {
+      document.body.style.overscrollBehavior = originalStyle.overscrollBehavior;
+      document.body.style.touchAction = originalStyle.touchAction;
+      document.body.style.backgroundColor = originalStyle.backgroundColor;
+    };
+  }, []); // マウント時に一度だけ実行
 
   const currentPosition = useMemo(() =>
     currentPositionArray ? { lat: currentPositionArray[0], lng: currentPositionArray[1] } : null,
@@ -296,7 +314,7 @@ export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }
   }
 
   return (
-    <div className="w-full h-screen relative">
+    <div className="fixed inset-0 w-full h-full">
       <MapContainer
         center={initialCenter}
         zoom={16}
