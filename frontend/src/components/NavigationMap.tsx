@@ -18,6 +18,19 @@ import { useMapEvents } from "react-leaflet";
 import { GradientPolyline, LocationTracker } from "./MapComponents";
 import { TurnPoint } from "../app/navigation/page"; // page.tsxから型をインポート
 
+// 音声合成の関数
+const speak = (text: string) => {
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    window.speechSynthesis.cancel(); // 以前の発話をキャンセル
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'ja-JP';
+    utterance.rate = 0.9; // 少し早口に
+    window.speechSynthesis.speak(utterance);
+  } else {
+    console.error("Web Speech API is not supported in this browser.");
+  }
+};
+
 // Haversine formula for distance calculation
 function getDistance(p1: { lat: number; lng: number }, p2: { lat: number; lng: number }): number {
   const R = 6371e3; // metres
@@ -38,10 +51,20 @@ function getDistance(p1: { lat: number; lng: number }, p2: { lat: number; lng: n
 
 // --- Custom Hook for Navigation Logic ---
 const useNavigation = (turnPoints: TurnPoint[], currentPosition: { lat: number; lng: number } | null) => {
-  const { useState, useEffect } = React;
+  const { useState, useEffect, useRef } = React;
   const [nextTurnIndex, setNextTurnIndex] = useState(0);
   const [upcomingTurnsWithDistances, setUpcomingTurnsWithDistances] = useState<Array<TurnPoint & { distance: number | null }>>([]);
   const [isApproaching, setIsApproaching] = useState(false); //ターンポイント30m以内に入ったかどうか
+
+  // オフコース検知用の状態
+  const minDistanceRef = useRef(Infinity);
+  const offRouteAlertedRef = useRef(false);
+
+  // ターゲットとなる交差点が変わったら、オフコース検知の状態をリセット
+  useEffect(() => {
+    minDistanceRef.current = Infinity;
+    offRouteAlertedRef.current = false;
+  }, [nextTurnIndex]);
 
 
   useEffect(() => {
@@ -53,11 +76,51 @@ const useNavigation = (turnPoints: TurnPoint[], currentPosition: { lat: number; 
     const nextTurnPoint = turnPoints[nextTurnIndex];
     const distanceToFirst = getDistance(currentPosition, nextTurnPoint);
 
+    // --- オフコース検知 ---
+    if (distanceToFirst < minDistanceRef.current) {
+      minDistanceRef.current = distanceToFirst;
+    } else {
+      if (!offRouteAlertedRef.current && distanceToFirst > minDistanceRef.current + 50) { // 最短から50m以上離れたら警告
+        speak('コースから外れている可能性があります');
+        offRouteAlertedRef.current = true; // 同じ逸脱で何度も警告しないようにする
+      }
+    }
+    // --- オフコース検知ここまで ---
+
     const approachingThreshold = 30; // 30m以内
     const isCurrentlyApproaching = distanceToFirst < approachingThreshold;
 
     if (isCurrentlyApproaching) {
       if (!isApproaching) {
+        let speechText = '';
+        const currentTurn = nextTurnPoint.turn;
+
+        if (currentTurn === 'left') speechText = '左です。';
+        else if (currentTurn === 'right') speechText = '右です。';
+        else if (currentTurn === 'u-turn') speechText = '折り返しです。';
+
+        // 次の次のターンの情報を取得
+        const nextNextTurnIndex = nextTurnIndex + 1;
+        if (nextNextTurnIndex < turnPoints.length) {
+          const nextNextTurnPoint = turnPoints[nextNextTurnIndex];
+          const distanceToNextNext = getDistance(nextTurnPoint, nextNextTurnPoint);
+          const roundedDistance = Math.round(distanceToNextNext / 10) * 10;
+
+          const nextTurnDirection = nextNextTurnPoint.turn;
+          let nextTurnText = '';
+          if (nextTurnDirection === 'left') nextTurnText = '左です。';
+          else if (nextTurnDirection === 'right') nextTurnText = '右です。';
+          else if (nextTurnDirection === 'u-turn') nextTurnText = '折り返しです。';
+          else if (nextTurnDirection === 'straight') nextTurnText = '直進です。';
+
+          if (roundedDistance > 0 && nextTurnText) {
+            speechText += `その先、およそ${roundedDistance}メートルで、${nextTurnText}`;
+          }
+        }
+
+        if (speechText) {
+          speak(speechText);
+        }
         setIsApproaching(true);
       }
     } else {
