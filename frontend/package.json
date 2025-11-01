@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node ./scripts/convert-svgs.mjs",
+    "prebuild": "node ./scripts/convert-svgs.mjs",
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
@@ -36,6 +38,8 @@
     "eslint-config-next": "15.5.4",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.3",
+    "sharp": "^0.34.4",
+    "svg-path-parser": "^1.1.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
