@@ -1,17 +1,12 @@
-// frontend/src/components/MadeRouteCard_Big.tsx
 "use client";
 
 import React from "react";
-// ★ 修正: import type
 import type { LatLngExpression } from "leaflet";
 import dynamic from "next/dynamic";
 
 const RouteMap = dynamic(() => import("./RouteMap"), { ssr: false });
 
-type RoutePoint = {
-  lat: number;
-  lng: number;
-};
+type RoutePoint = { lat: number; lng: number };
 
 type RouteData = {
   total_distance_km: number;
@@ -20,39 +15,29 @@ type RouteData = {
 };
 
 type MadeRouteCardBigProps = {
-  /** ルートデータ */
   routeData: RouteData;
-  /** ★ 描画モード（trueならfitBoundsを無効化） */
   isDrawingMode?: boolean;
-  /** ★ 新しい prop: 描画完了時にLatLngの配列を返す */
   onDrawOnMap?: (points: LatLngExpression[]) => void;
+  /** ★ 追加：外部からの「初期縮尺に戻す」シグナル */
+  resetViewSignal?: number;
 };
 
 export default function MadeRouteCard_Big({
   routeData,
   isDrawingMode = false,
-  onDrawOnMap, // ★ prop を受け取る
+  onDrawOnMap,
+  resetViewSignal = 0,
 }: MadeRouteCardBigProps) {
   const { total_distance_km, route_points } = routeData;
 
-  // route_points を LatLngExpression の配列に変換
-  const routePositions: LatLngExpression[] = route_points.map((point) => [
-    point.lat,
-    point.lng,
-  ]);
-
+  const routePositions: LatLngExpression[] = route_points.map((p) => [p.lat, p.lng]);
   const secondaryPositions: LatLngExpression[] = [];
 
   const fmtKm = (v: number) => (Number.isFinite(v) ? v.toFixed(1) : "—");
-
   const MAP_HEIGHT = 300;
 
-  // ★★★ ここでロジックを実行 ★★★
-  // isDrawingMode が true なら、地図の操作を無効にする (interactive = false)
   const mapInteractive = !isDrawingMode;
-  // isDrawingMode が true なら、ズームコントロールも無効にする
   const showZoom = !isDrawingMode;
-  // ★★★ ロジックここまで ★★★
 
   return (
     <article
@@ -61,7 +46,6 @@ export default function MadeRouteCard_Big({
       aria-label="RouteCard"
     >
       <div className="h-full flex flex-col">
-        {/* 上:地図 */}
         <div className="flex-grow rounded-2xl overflow-hidden ring-1 ring-black/5 bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.02)]">
           <RouteMap
             positions={routePositions}
@@ -70,14 +54,16 @@ export default function MadeRouteCard_Big({
             width="100%"
             padding={15}
             maxZoom={16}
-            interactive={mapInteractive} // ★ 修正後の値（mapInteractive）を渡す
-            showZoomControl={showZoom} // ★ 修正後の値（showZoom）を渡す
-            isDrawingMode={isDrawingMode} // ★ ズーム維持のためにフラグは渡す
-            onDrawOnMap={onDrawOnMap} // ★ prop を渡す
+            interactive={mapInteractive}
+            showZoomControl={showZoom}
+            isDrawingMode={isDrawingMode}
+            onDrawOnMap={onDrawOnMap}
+            fitOnMountOnly={true}
+            /** ★ 渡す：この値が変わったら初期fitBoundsを再実行 */
+            resetViewSignal={resetViewSignal}
           />
         </div>
 
-        {/* 下:テキスト */}
         <div className="shrink-0 pt-4 text-left">
           <div className="flex justify-between items-baseline">
             <div className="text-[15px] text-neutral-600">コース距離</div>

@@ -1,14 +1,11 @@
-// frontend/src/components/RouteMap.tsx
 "use client";
 
 import { MapContainer, TileLayer, Polyline, Marker, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-// ★ 修正: LatLngBounds と LatLngExpression を型としてインポート
 import { LatLngBounds, type LatLngExpression } from "leaflet";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { startIcon, goalIcon } from "./MapIcons";
-// ★ 新しくインポート
 import MapDrawingHandler from "./MapDrawingHandler";
 
 const GradientPolyline = dynamic(
@@ -19,18 +16,20 @@ const GradientPolyline = dynamic(
 type CSSSize = number | string;
 
 interface RouteMapProps {
-  positions?: LatLngExpression[];         // 青い線（route_points）
-  secondaryPositions?: LatLngExpression[]; // 赤い線（drawing_points）
+  positions?: LatLngExpression[];
+  secondaryPositions?: LatLngExpression[];
   height?: CSSSize;
   width?: CSSSize;
   padding?: number;
   maxZoom?: number;
-  interactive?: boolean; // 初期化用のフラグ（後からは LockInteractions で制御）
+  interactive?: boolean;
   showZoomControl?: boolean;
-  /** 描画モード：true の間は fitBounds 無効 & 地図操作を完全ロック */
   isDrawingMode?: boolean;
-  /** ★ 新しい prop: 描画完了時にLatLngの配列を返す */
   onDrawOnMap?: (points: LatLngExpression[]) => void;
+  /** 初回だけ fitBounds する（通常時はズームを維持） */
+  fitOnMountOnly?: boolean;
+  /** ★ 追加：この値が変わったら「初期fitBounds」を再実行 */
+  resetViewSignal?: number;
 }
 
 const FitBounds = ({
@@ -39,36 +38,57 @@ const FitBounds = ({
   padding = 5,
   maxZoom = 16,
   isDrawingMode = false,
+  fitOnMountOnly = false,
+  resetViewSignal,
 }: {
   positions?: LatLngExpression[];
   secondaryPositions?: LatLngExpression[];
   padding?: number;
   maxZoom?: number;
   isDrawingMode?: boolean;
+  fitOnMountOnly?: boolean;
+  resetViewSignal?: number;
 }) => {
   const map = useMap();
+  const didFitOnce = useRef(false);
+  const lastReset = useRef<number | undefined>(undefined);
 
   useEffect(() => {
-    // 描画モード中は視点を動かさない
     if (isDrawingMode) return;
+
+    const resetChanged =
+      resetViewSignal !== undefined && resetViewSignal !== lastReset.current;
+
+    // 初回のみ or リセットシグナル時だけ fitBounds
+    if (fitOnMountOnly && didFitOnce.current && !resetChanged) return;
 
     const all = [...(positions || []), ...(secondaryPositions || [])];
     if (all.length === 0) return;
+
     const bounds = new LatLngBounds(all);
     map.fitBounds(bounds, { padding: [padding, padding], maxZoom });
-  }, [positions, secondaryPositions, padding, maxZoom, map, isDrawingMode]);
+
+    if (fitOnMountOnly) didFitOnce.current = true;
+    if (resetChanged) lastReset.current = resetViewSignal;
+  }, [
+    positions,
+    secondaryPositions,
+    padding,
+    maxZoom,
+    map,
+    isDrawingMode,
+    fitOnMountOnly,
+    resetViewSignal,
+  ]);
 
   return null;
 };
 
-// ★ 修正: LockInteractions にカーソル変更機能を追加
 function LockInteractions({ lock }: { lock: boolean }) {
   const map = useMap();
-
   useEffect(() => {
     if (!map) return;
-    const container = map.getContainer(); // ★ mapコンテナを取得
-
+    const container = map.getContainer();
     const methods = [
       "dragging",
       "scrollWheelZoom",
@@ -77,18 +97,16 @@ function LockInteractions({ lock }: { lock: boolean }) {
       "boxZoom",
       "keyboard",
     ] as const;
-
     if (lock) {
       methods.forEach((m) => (map as any)[m]?.disable?.());
       container.style.touchAction = "none";
-      container.style.cursor = "crosshair"; // ★ 描画モードのカーソル
+      container.style.cursor = "crosshair";
     } else {
       methods.forEach((m) => (map as any)[m]?.enable?.());
       container.style.touchAction = "";
-      container.style.cursor = ""; // ★ 通常のカーソル
+      container.style.cursor = "";
     }
   }, [map, lock]);
-
   return null;
 }
 
@@ -102,7 +120,9 @@ export default function RouteMap({
   interactive = true,
   showZoomControl = true,
   isDrawingMode = false,
-  onDrawOnMap, // ★ prop を受け取る
+  onDrawOnMap,
+  fitOnMountOnly = false,
+  resetViewSignal,
 }: RouteMapProps) {
   const h = typeof height === "number" ? `${height}px` : height;
   const w = typeof width === "number" ? `${width}px` : width;
@@ -115,8 +135,7 @@ export default function RouteMap({
     <MapContainer
       style={{ height: h, width: w }}
       attributionControl={false}
-      zoomControl={showZoomControl && !isDrawingMode} // 描画中はズーム UI も隠す
-      // 初期化時の設定（切替は LockInteractions が担当）
+      zoomControl={showZoomControl && !isDrawingMode}
       dragging={interactive && !isDrawingMode}
       touchZoom={interactive && !isDrawingMode}
       doubleClickZoom={interactive && !isDrawingMode}
@@ -126,17 +145,14 @@ export default function RouteMap({
     >
       <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
 
-      {/* drawing_points: 赤 */}
       {secondaryPositions && secondaryPositions.length > 0 && (
         <Polyline positions={secondaryPositions} color="red" weight={3} />
       )}
 
-      {/* route_points: 緑→黒グラデーション */}
       {positions && positions.length > 0 && (
         <GradientPolyline positions={positions as [number, number][]} />
       )}
 
-      {/* マーカー */}
       {goalPosition && <Marker position={goalPosition} icon={goalIcon} />}
       {startPosition && <Marker position={startPosition} icon={startIcon} />}
 
@@ -146,17 +162,14 @@ export default function RouteMap({
         padding={padding}
         maxZoom={maxZoom}
         isDrawingMode={isDrawingMode}
+        fitOnMountOnly={fitOnMountOnly}
+        resetViewSignal={resetViewSignal}
       />
 
-      {/* ★ 描画モード時に地図操作を完全ロック */}
       <LockInteractions lock={isDrawingMode} />
 
-      {/* ★ 新しい描画ハンドラーを追加 */}
       {onDrawOnMap && (
-        <MapDrawingHandler
-          isDrawingMode={isDrawingMode}
-          onDrawEnd={onDrawOnMap}
-        />
+        <MapDrawingHandler isDrawingMode={isDrawingMode} onDrawEnd={onDrawOnMap} />
       )}
     </MapContainer>
   );
