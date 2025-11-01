@@ -79,10 +79,9 @@ export default function CarouselWithClick({
     <div className="w-full">
       <div
         ref={scrollContainerRef}
-        className={`flex overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden 
-          [-ms-overflow-style:none] [scrollbar-width:none] cursor-grab py-4 ${
-            isDragging ? "cursor-grabbing" : ""
-          }`}
+        className={`flex overflow-x-auto snap-x snap-mandatory scrollbar-hide cursor-grab py-4 ${
+          isDragging ? "cursor-grabbing" : ""
+        }`}
         style={{
           gap: `${gap}px`,
           paddingLeft: `${gap}px`,
