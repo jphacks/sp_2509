@@ -179,6 +179,7 @@ export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }
       <EnergySaveMode
         total_distance_km={routeData.total_distance_km}
         toggleEnergySaveMode={toggleEnergySaveMode}
+        upcomingTurn={upcomingTurns[0]}
       />
     );
   }
