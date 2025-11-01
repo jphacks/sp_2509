@@ -103,7 +103,7 @@ export default function CarouselWithClick({
                   alt={item.alt}
                   width={imageWidth}
                   height={imageHeight}
-                  className="w-full h-full object-cover pointer-events-none"
+                  className="w-full h-full object-contain pointer-events-none"
                 />
               {/* ★★★ 修正箇所: 条件付きでオーバーレイを追加 ★★★ */}
               {isDimmed && (

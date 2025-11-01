@@ -136,7 +136,7 @@ const CourseList = ({
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
     return courses.slice(startIndex, endIndex);
-  }, [ currentPage, courses]);
+  }, [currentPage, courses]);
 
   // ページ変更時
   const handlePageChange = (page: number) => {
