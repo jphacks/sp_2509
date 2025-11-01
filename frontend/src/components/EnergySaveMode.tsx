@@ -9,7 +9,7 @@ import { TurnPoint } from "../app/navigation/page";
 import { IconType } from "react-icons";
 
 type EnergySaveModeProps = {
-  total_distance_km: number;
+  remaining_distance_km: number;
   toggleEnergySaveMode: () => void;
   upcomingTurn: (TurnPoint & { distance: number | null }) | undefined;
 };
@@ -21,7 +21,7 @@ const turnIcons: { [key in 'left' | 'right' | 'u-turn']: IconType } = {
 };
 
 export default function EnergySaveMode({
-  total_distance_km,
+  remaining_distance_km,
   toggleEnergySaveMode,
   upcomingTurn,
 }: EnergySaveModeProps) {
@@ -39,7 +39,7 @@ export default function EnergySaveMode({
       <div className="flex justify-between items-center p-6">
         <div className="text-center">
           <p className="text-white text-lg font-bold">省エネモード</p>
-          <p className="text-gray-400 text-sm">残り {total_distance_km.toFixed(1)}km</p>
+          <p className="text-gray-400 text-sm">残り {remaining_distance_km.toFixed(1)}km</p>
         </div>
 
         <button

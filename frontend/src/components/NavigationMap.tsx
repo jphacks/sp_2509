@@ -150,7 +150,21 @@ const useNavigation = (turnPoints: TurnPoint[], currentPosition: { lat: number; 
 
   }, [currentPosition, turnPoints, nextTurnIndex, isApproaching]);
 
-  return { upcomingTurns: upcomingTurnsWithDistances };
+  const remainingDistance = useMemo(() => {
+    if (!currentPosition || turnPoints.length === 0 || nextTurnIndex >= turnPoints.length) {
+      return 0;
+    }
+    // 現在地から次のターンポイントまでの距離
+    let distance = getDistance(currentPosition, turnPoints[nextTurnIndex]);
+
+    // 次のターンポイントからゴールまでの距離を合算
+    for (let i = nextTurnIndex; i < turnPoints.length - 1; i++) {
+      distance += getDistance(turnPoints[i], turnPoints[i + 1]);
+    }
+    return distance / 1000; // kmに変換
+  }, [currentPosition, turnPoints, nextTurnIndex]);
+
+  return { upcomingTurns: upcomingTurnsWithDistances, remainingDistance };
 };
 
 
@@ -242,7 +256,7 @@ export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }
     currentPositionArray ? { lat: currentPositionArray[0], lng: currentPositionArray[1] } : null,
     [currentPositionArray]
   );
-  const { upcomingTurns } = useNavigation(turnPoints, currentPosition);
+  const { upcomingTurns, remainingDistance } = useNavigation(turnPoints, currentPosition);
   const [energySaveMode, setEnergySaveMode] = useState(false);
   const [showSimplifiedRoute, setShowSimplifiedRoute] = useState(false); // デバッグ用フラグ
   const [isFollowing, setIsFollowing] = useState(true);
@@ -274,7 +288,7 @@ export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }
   if (energySaveMode) {
     return (
       <EnergySaveMode
-        total_distance_km={routeData.total_distance_km}
+        remaining_distance_km={remainingDistance}
         toggleEnergySaveMode={toggleEnergySaveMode}
         upcomingTurn={upcomingTurns[0]}
       />
