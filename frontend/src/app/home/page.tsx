@@ -76,7 +76,8 @@ export default function Home() {
   const [uuid, setUuid] = useState<string | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(!isTestMode); // テストモード時はローディング不要
-  const [sortBy, setSortBy] = useState<string>("created_at_desc");
+  const [sortField, setSortField] = useState<string>("created_at");
+  const [sortOrder, setSortOrder] = useState<string>("desc");
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<{
     lat: number;
@@ -149,6 +150,7 @@ export default function Home() {
     const fetchCourses = async () => {
       setLoading(true);
       setError(null);
+      const sortBy = `${sortField}_${sortOrder}`;
       try {
         const res = await fetch(
           `${API_URL}/users/${uuid}/courses?current_lat=${currentLocation.lat}&current_lng=${currentLocation.lng}&sort_by=${sortBy}&favorites_only=${showFavoritesOnly}`
@@ -175,7 +177,14 @@ export default function Home() {
     };
 
     fetchCourses();
-  }, [uuid, currentLocation, sortBy, showFavoritesOnly, initializeUser]);
+  }, [
+    uuid,
+    currentLocation,
+    sortField,
+    sortOrder,
+    showFavoritesOnly,
+    initializeUser,
+  ]);
 
   // 表示するコースリストを決定
   const displayCourses = isTestMode ? testCourses : courses;
@@ -319,52 +328,55 @@ export default function Home() {
           </div>
 
           {/* Created Course Section */}
-          <div className="mb-12">
+          <div className="mb-4">
             <div className="flex justify-between items-center mb-4">
               <Header headerText="作成したコース" />
-              {!isTestMode && (
-                <div className="flex gap-4">
-                  <select
-                    value={sortBy}
-                    onChange={(e) =>
-                      setSortBy(e.target.value)
-                    }
-                    className="p-2 rounded-[8px] font-semibold"
-                  >
-                    <option value="created_at_desc">新しい順</option>
-                    <option value="created_at_asc">古い順</option>
-                    <option value="distance_asc">近い順</option>
-                    <option value="distance_desc">遠い順</option>
-                    <option value="total_distance_asc">短い順</option>
-                    <option value="total_distance_desc">長い順</option>
-                 
-                  </select>
-                  <select
-                    value={showFavoritesOnly ? "favorites" : "all"}
-                    onChange={(e) =>
-                      setShowFavoritesOnly(e.target.value === "favorites")
-                    }
-                    className="p-2 rounded-[8px] font-semibold"
-                  >
-                    <option value="all">すべて</option>
-                    <option value="favorites">お気に入り</option>
-                  </select>
-                </div>
-              )}
             </div>
-            {renderCourses()}
+            {!isTestMode && (
+              <div className="flex gap-4">
+                <select
+                  value={sortField} // ★ 変更
+                  onChange={(e) => {
+                    setSortField(e.target.value); // ★ 変更
+                  }}
+                  className="p-2 rounded-[8px] font-semibold text-sm min-w-[90px]"
+                >
+                  <option value="created_at">作成日</option>
+                  <option value="distance">現在地からの距離</option>
+                  <option value="total_distance">コース全長</option>
+                </select>
+
+                <button
+                  onClick={() =>
+                    setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+                  }
+                  className="p-2 rounded-[8px] font-semibold text-sm min-w-[70px] hover:bg-gray-200"
+                >
+                  {sortOrder === "asc" ? "▲ 昇順" : "▼ 降順"}
+                </button>
+                <button
+                  onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                  className="flex items-center gap-1 p-2 rounded-[8px] font-semibold text-sm min-w-[90px] hover:bg-gray-200 text-black"
+                >
+                  <span className={showFavoritesOnly ? "text-amber-500" : ""}>
+                    {showFavoritesOnly ? "★" : "☆"}
+                  </span>
+                  <span>{showFavoritesOnly ? "お気に入り" : "全て"}</span>
+                </button>
+              </div>
+            )}
           </div>
+          {renderCourses()}
         </div>
 
-
         <div className="fixed bottom-4 left-0 right-0">
-            <div className="max-w-md mx-auto px-4">
-                <RoutingButton
-                    buttonText="新しいコースを作る"
-                    icon={FaPlus}
-                    to={"/draw"}
-                />
-            </div>
+          <div className="max-w-md mx-auto px-4">
+            <RoutingButton
+              buttonText="新しいコースを作る"
+              icon={FaPlus}
+              to={"/draw"}
+            />
+          </div>
         </div>
       </main>
     </div>
