@@ -36,3 +36,16 @@ body {
     background-position: 100% 100%;
   }
 }
+
+/* --- カルーセルのスクロールバーを非表示にする --- */
+.scrollbar-hide {
+  /* IE, Edge */
+  -ms-overflow-style: none;
+  /* Firefox */
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  /* Chrome, Safari, Opera */
+  display: none;
+}
