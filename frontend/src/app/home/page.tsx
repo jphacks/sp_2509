@@ -350,7 +350,7 @@ export default function Home() {
                   onClick={() =>
                     setSortOrder(sortOrder === "asc" ? "desc" : "asc")
                   }
-                  className="p-2 rounded-[8px] font-semibold text-sm min-w-[70px]  hover:bg-gray-200"
+                  className="p-2 rounded-[8px] font-semibold text-sm min-w-[70px] hover:bg-gray-200"
                 >
                   {sortOrder === "asc" ? "▲ 昇順" : "▼ 降順"}
                 </button>
