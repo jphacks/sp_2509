@@ -189,8 +189,10 @@ function NavigationContent() {
         const parsedData: RouteData = JSON.parse(storedData);
         setRouteData(parsedData);
         if (parsedData.route_points) {
-          // 経路を単純化する (epsilonの値は調整が必要)
-          const simplified = rdp(parsedData.route_points, 0.00025);
+          // 経路を単純化する
+          // epsilon値は経路の細かさに応じて調整が必要。現状は都市部の徒歩経路を想定して0.00025としています。
+          const EPSILON = 0.00025;
+          const simplified = rdp(parsedData.route_points, EPSILON);
           setSimplifiedRoute(simplified);
           // ターンを抽出する
           const turns = extractTurns(simplified);
