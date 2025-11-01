@@ -233,6 +233,11 @@ export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }
   const currentPositionArray = useLocation();
   const { heading } = useHeading();
 
+  // 初期音声案内のためのuseEffect
+  useEffect(() => {
+    speak("スタート地点に向かってください");
+  }, []); // 空の依存配列で、マウント時に一度だけ実行
+
   const currentPosition = useMemo(() =>
     currentPositionArray ? { lat: currentPositionArray[0], lng: currentPositionArray[1] } : null,
     [currentPositionArray]
