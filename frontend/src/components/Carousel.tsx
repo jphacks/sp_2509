@@ -85,9 +85,10 @@ export default function Carousel({
     <div className="w-full">
       <div
         ref={scrollContainerRef}
-        className={`flex overflow-x-auto scrollbar-hide cursor-grab ${
-          isDragging ? "cursor-grabbing" : ""
-        } gap-4 px-4`}
+        className={`flex overflow-x-auto [&::-webkit-scrollbar]:hidden 
+          [-ms-overflow-style:none] [scrollbar-width:none] cursor-grab ${
+            isDragging ? "cursor-grabbing" : ""
+          } gap-4 px-4`}
         onPointerDown={onPointerDown}
         onClickCapture={handleClickCapture}
         style={{ userSelect: "none" }}
