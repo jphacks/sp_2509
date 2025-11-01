@@ -32,7 +32,7 @@ export const useLocation = () => {
         });
       };
       window.addEventListener('keydown', handleKeyDown);
-      console.log('[Debug] Location mocking is enabled. Use arrow keys or `debug_setLocation(lat, lng)`.');
+      console.log('[Debug] Location mocking is enabled. Use w, a, s, d keys or `debug_setLocation(lat, lng)`.');
 
       // Get initial position for dev
       if (navigator.geolocation) {
