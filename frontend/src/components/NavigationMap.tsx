@@ -159,7 +159,7 @@ export default function NavigationMap({ routeData }: NavigationMapProps) {
       </div>
 
       <div className="absolute bottom-6 left-4 right-4 z-[1000]">
-        <RoutingButton buttonText="ランニングを終了する" icon={FaRunning} onClick={handleBack} />
+        <RoutingButton buttonText="案内を終了する" icon={FaRunning} onClick={handleBack} />
       </div>
     </div>
   );
