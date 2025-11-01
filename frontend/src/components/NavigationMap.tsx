@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import ReactDOMServer from 'react-dom/server';
 import { MapContainer, TileLayer, Marker, CircleMarker } from "react-leaflet";
 import L from "leaflet";
@@ -15,6 +15,7 @@ import { useLocation } from "../hooks/useLocation";
 import { useHeading } from "../hooks/useHeading";
 import { startIcon, goalIcon } from "./MapIcons";
 import EnergySaveMode from "./EnergySaveMode";
+import InfoModal from "./InfoModal";
 import { useMapEvents } from "react-leaflet";
 import { GradientPolyline, LocationTracker } from "./MapComponents";
 import { TurnPoint } from "../app/navigation/page"; // page.tsxから型をインポート
@@ -246,12 +247,30 @@ export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }
   const router = useRouter();
   const currentPositionArray = useLocation();
   const { heading } = useHeading();
+  const initialSpeechDone = useRef(false);
+  const [showModal, setShowModal] = useState(true);
+
+  // --- iOS Safari音声対応 ---
+  const [ableVoiceOutput, setAbleVoiceOutput] = useState(false);
+
+  const handleModalConfirm = useCallback(() => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.speak(new SpeechSynthesisUtterance(""));
+    }
+    setAbleVoiceOutput(true);
+    setShowModal(false);
+  }, []);
+
+  useEffect(() => {
+    if (ableVoiceOutput && !initialSpeechDone.current) {
+      speak("スタート地点に向かってください");
+      initialSpeechDone.current = true;
+    }
+  }, [ableVoiceOutput]);
+  // --- ここまで ---
 
   // ナビゲーションページ用のスタイルと音声案内を管理
   useEffect(() => {
-    // 初期音声案内
-    speak("スタート地点に向かってください");
-
     // スタイルを適用
     const originalStyle = {
       overscrollBehavior: document.body.style.overscrollBehavior,
@@ -315,6 +334,21 @@ export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }
 
   return (
     <div className="fixed inset-0 w-full h-full">
+      {showModal && (
+        <InfoModal
+          show={showModal}
+          title="ナビゲーション開始"
+          buttonLabel="OK"
+          onConfirm={handleModalConfirm}
+        >
+          <p>
+            作ったコースを地図と音声で案内します！
+          </p>
+          <p>
+            <span className="font-bold">普段お使いのワークアウトアプリ</span>（Nike Run Club, Stravaなど）をバックグラウンドで起動すると、走った軌跡でGPSアートの記録を残すことができます！
+          </p>
+        </InfoModal>
+      )}
       <MapContainer
         center={initialCenter}
         zoom={16}
