@@ -4,6 +4,8 @@ import pkg from 'svg-path-parser';
 const { parseSVG, makeAbsolute } = pkg;
 import sharp from 'sharp'; // sharp をインポート
 
+const DEFAULT_SVG_SIZE = 125; // SVGのデフォルトサイズ（幅・高さ）
+
 // --- 設定項目 ---
 
 // SVGファイルが格納されているフォルダのパス
@@ -138,7 +140,7 @@ import type { Point } from '@/types/types';
       const pathData = pathMatch[1];
       const rawPoints = parseSvgPath(pathData);
       const finalPoints = scaleAndCenter(rawPoints);
-      const shapeName = baseName.replace(/[^a-zA-Z0-9]/g, '_') + 'Shape';
+      const shapeName = baseName.replace(/[^a-zA-Z0-9]/g, '_').replace(/^[^a-zA-Z_]+/, '') + 'Shape'; 
       
       // --- 2. PNGへの変換 (1:1比率) ---
       try {
@@ -148,7 +150,7 @@ import type { Point } from '@/types/types';
         // ★ SVGのメタデータを読み込んで最大辺を取得
         const metadata = await sharp(filePath).metadata();
         // metadata.width や height が取れない場合を考慮し、デフォルト値(125)も設定
-        const size = Math.max(metadata.width || 125, metadata.height || 125);
+        const size = Math.max(metadata.width || DEFAULT_SVG_SIZE, metadata.height || DEFAULT_SVG_SIZE);
 
         await sharp(filePath)
           .resize(size, size, { // ★ resize オプションを追加
