@@ -146,7 +146,7 @@ const CourseList = ({
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 mb-12">
       {/* --- コースアイテム --- */}
       {coursesToShow.map((course) => {
         const positions: LatLngExpression[] = course.route_points.map(
