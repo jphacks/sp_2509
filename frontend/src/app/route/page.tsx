@@ -145,7 +145,8 @@ export default function CourseDetailPage() {
             <RoutingButton
               buttonText={isSaving ? "保存中..." : "保存してホームに戻る"}
               icon={FaSave}
-              to="/home"
+              onClick={handleSaveCourse}
+              disabled={isSaving}
             />
           </div>
         </div>
