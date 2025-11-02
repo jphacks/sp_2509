@@ -312,8 +312,8 @@ export default function Draw() {
               onClick={handleClearDrawing}
               buttonText="描き直す"
               disabled={isClearButtonDisabled} // ★ やり直しボタンのdisabled条件も見直しが必要なら修正
-              buttonColor="#ffffffff"
-              textColor="black"
+              buttonColor="#ffffff"
+              textColor="#000000"
             />
           </div>
 
