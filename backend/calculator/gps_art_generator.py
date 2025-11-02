@@ -6,6 +6,7 @@ from shapely.geometry import Point
 from scipy.spatial import KDTree
 from typing import List, Dict, Tuple
 from simplification.cutil import simplify_coords
+import threading
 
 class GPSArtGenerator:
     """
@@ -34,6 +35,7 @@ class GPSArtGenerator:
         self._road_network = None
         self._road_network_latlon = None
         self._anchor_point = None
+        self._network_lock = threading.Lock()
 
     def get_road_network(self):
         """投影された道路ネットワーク(UTM)を返します。"""
@@ -72,18 +74,21 @@ class GPSArtGenerator:
         if distance is not None:
             self.network_distance = distance
 
-    def _load_road_network(self, center_lat: float, center_lon: float):
+    def _load_road_network(self, center_lat: float, center_lon: float, force_reload: bool = False):
         """
         指定された中心点の周囲の道路ネットワークを取得・投影します。
+        この処理はスレッドセーフです。
         
         Args:
             center_lat (float): 中心点の緯度
             center_lon (float): 中心点の経度
+            force_reload (bool): 既存のキャッシュを無視して強制的に再取得するか
         """
-        if (self._anchor_point is None or 
-            self._anchor_point != (center_lat, center_lon) or 
-            self._road_network is None):
-            
+        with self._network_lock:
+            if not force_reload and self._anchor_point == (center_lat, center_lon) and self._road_network is not None:
+                print("既存の道路ネットワークデータを再利用します。")
+                return
+
             print("道路ネットワークデータを取得中...")
             self._anchor_point = (center_lat, center_lon)
             
@@ -397,11 +402,8 @@ class GPSArtGenerator:
         raw_shape_points = [(point["x"], point["y"]) for point in drawing_display_points]
         anchor_lat = float(round(start_location["lat"], 3))
         anchor_lon = float(round(start_location["lng"], 3))
-
-        if target_distance_km <= 10:
-            self.network_distance = 3000
-        else:
-            self.network_distance = 4000
+            
+        self.network_distance = 4000
         
         self._load_road_network(anchor_lat, anchor_lon)
         

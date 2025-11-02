@@ -72,7 +72,6 @@ export default function Draw() {
     [selectedShape]
   );
 
-  // handleSelectShape は変更なし
   const handleSelectShape = useCallback((item: CarouselClickItem) => {
     if (!item.shapeData) {
       console.warn(
@@ -113,7 +112,6 @@ export default function Draw() {
     });
   }, [handleSelectShape]); // handleSelectShape は useCallback でラップされているのでOK
 
-  // ★ 変更点 4: useEffect の localStorage チェックも動的に修正
   useEffect(() => {
     console.log("初回レンダリング: localStorage を確認します");
     let needsClearLocalStorage = false;
@@ -284,7 +282,7 @@ export default function Draw() {
         <div className="text-center mb-4">
           <Title title="コースの形を描く" />
           <div className="z-10 w-full self-start mt-2">
-            <BackButton text="ホームに戻る" to="/home" />
+            <BackButton text="スタート地点設定に戻る" to="/start" />
           </div>
           <div className="w-full aspect-[1] mt-4 relative">
             <DrawingCanvas

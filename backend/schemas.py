@@ -36,6 +36,11 @@ class RouteCalculateResponse(BaseModel):
     route_points: list[LatLng]
     drawing_points: list[LatLng]
 
+
+class NoticeRequest(BaseModel):
+    start_location: LatLng
+    target_distance_km: float
+
 class CourseSummary(BaseModel):
     id: str
     total_distance_km: float
