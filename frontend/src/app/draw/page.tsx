@@ -24,26 +24,30 @@ import * as generatedShapes from '../../lib/generated-shapes';
 // 1. `src/assets/svg` にSVGファイル (例: 'crescent.svg') を置く。
 // 2. `npm run dev` を実行 (crescentShape と crescent.png が自動生成される)。
 // 3. このマップに `crescentShape: { ... }` のエントリを追加する。
-const shapeConfig: Record<string, { description: string; src: string }> = {
-  heartShape: {
+const shapeConfig: Record<string, { description: string }> = {
+  spade: {
+    description: 'スペード',
+  },
+  heart: {
     description: 'ハート',
-    src: '/images/Recommend/heart.png',
   },
-  starShape: {
+  diamond: {
+    description: 'ダイヤ',
+  },
+  club: {
+    description: 'クラブ',
+  },
+  star: {
     description: '星',
-    src: '/images/Recommend/star.png',
   },
-  circleShape: {
+  circle: {
     description: '円',
-    src: '/images/Recommend/circle.png',
   },
-  musicNoteShape: {
+  musicNote: {
     description: '音符',
-    src: '/images/Recommend/musicNote.png',
   },
-  crescentShape: {
+  crescent: {
     description: '三日月',
-    src: '/images/Recommend/crescent.png',
   },
 };
 
@@ -70,17 +74,23 @@ export default function Draw() {
 
   // ★ ステップ3: `items` 配列を `shapeConfig` と `generatedShapes` から動的に生成
   const items: CarouselClickItem[] = useMemo(() => {
-    return Object.entries(shapeConfig).map(([shapeKey, config]) => {
-      // shapeKey は 'heartShape', 'starShape' など
-      // config は { description: 'ハート', src: '...' }
+    return Object.entries(shapeConfig).map(([baseName, config]) => {
+      // baseName は 'heart', 'star' など
+      // config は { description: 'ハート' }
       
+      // ビルドスクリプトの命名規則（convert-svgs.mjs）に基づいて
+      // 変数名(shapeKey) と 画像パス(imageSrc) を動的に生成します。
+      const shapeKey = `${baseName}Shape`; // 'heart' -> 'heartShape'
+      const imageSrc = `/images/Recommend/${baseName}.png`; // 'heart' -> '/images/Recommend/heart.png'
+      
+      // 自動生成されたモジュールから、対応する点群データを取得
       const shapeData = (generatedShapes as Record<string, Point[]>)[shapeKey];
       
       const item: CarouselClickItem = {
-        src: config.src,
+        src: imageSrc,
         alt: `${config.description} Shape`,
         description: config.description,
-        shapeData: shapeData || [], // 念のためフォールバック
+        shapeData: shapeData || [], // 存在しない場合に備えてフォールバック
       };
       
       // onClickハンドラを動的に設定
@@ -90,28 +100,27 @@ export default function Draw() {
     });
   }, [handleSelectShape]); // handleSelectShape は useCallback でラップされているのでOK
 
-  // ★ ステップ4: useEffect の localStorage チェックを動的に修正
+  // ★ 変更点 4: useEffect の localStorage チェックも動的に修正
   useEffect(() => {
     console.log('初回レンダリング: localStorage を確認します');
     let needsClearLocalStorage = false;
     
     // generated-shapesからすべての図形データ(Point[])の配列を取得
-    const allShapeData = Object.values(generatedShapes) as Point[][];
-    const allShapeDataStrings = allShapeData.map(points => JSON.stringify(points));
+    // (generatedShapesオブジェクトのすべての値（Point[]配列）を取得)
+    const allShapeDataStrings = Object.values(generatedShapes as Record<string, Point[]>)
+                                      .map(points => JSON.stringify(points));
 
     try {
       const savedData = localStorage.getItem('drawingPointsData');
       if (savedData) {
-        // console.log('localStorage にデータがありました:', savedData);
         
-        // JSON.parse が失敗するケースを考慮
         let parsedPoints: Point[];
         try {
             parsedPoints = JSON.parse(savedData) as Point[];
         } catch (e) {
             console.error("localStorage データのJSONパースに失敗:", e);
-            needsClearLocalStorage = true; // 壊れたデータは削除
-            return;
+            needsClearLocalStorage = true;
+            return; // finallyブロックが実行される
         }
 
         const savedDataString = JSON.stringify(parsedPoints); // 比較用に再文字列化
@@ -145,7 +154,7 @@ export default function Draw() {
       }
     } catch (error) {
       console.error("Failed to initialize drawing points from localStorage:", error);
-      needsClearLocalStorage = true; // エラー時もlocalStorageクリアを試みる
+      needsClearLocalStorage = true; 
       setUserDrawnPoints([]);
       setSelectedShape(null);
     } finally {
@@ -161,8 +170,6 @@ export default function Draw() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // 初回マウント時のみ実行 (依存配列は空のままでOK)
 
-
-  // --- 残りのロジック (変更なし) ---
 
   const handleDrawEnd = useCallback((points: Point[]) => {
     if (points.length > 0) {
