@@ -235,6 +235,7 @@ export default function MadeRoute({
           >
             <RouteMap
               positions={positions}
+              secondaryPositions={[]}
               width={BASE}
               height={BASE}
               padding={DEFAULT_PADDING}
