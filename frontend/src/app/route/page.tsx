@@ -7,6 +7,7 @@ import Title from "@/components/Title";
 import RoutingButton from "@/components/RoutingButton";
 import Text from "../../components/Text";
 import { FaPencilAlt, FaCog, FaSave } from "react-icons/fa";
+import ActionButton from "@/components/ActionButton";
 
 const API_URL = "/api";
 
@@ -121,25 +122,35 @@ export default function CourseDetailPage() {
         </div>
 
         <div className="px-4 mt-6 space-y-4">
+          {/* 条件変更・描きなおすボタン */}
           <div className="flex gap-2">
-            <RoutingButton buttonText="条件変更" to="/condition" icon={FaCog} />
-
-            <RoutingButton
+            <ActionButton
+              onClick={() => (window.location.href = "/condition")}
+              buttonText="条件変更"
+              buttonColor="#ffffffff"
+              textColor="#000"
+              icon={<FaCog />}
+            />
+            <ActionButton
+              onClick={() => (window.location.href = "/draw")}
               buttonText="描きなおす"
-              to="/draw"
-              icon={FaPencilAlt}
+              buttonColor="#ffffffff"
+              textColor="#000"
+              icon={<FaPencilAlt />}
             />
           </div>
-          <button
-            onClick={handleSaveCourse}
-            disabled={isSaving}
-            className="w-full flex items-center justify-center gap-2 bg-blue-500 text-white py-3 text-lg font-semibold tracking-wide rounded-2xl shadow-md hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 ease-out select-none font-sans"
-          >
-            <FaSave size={22} />
-            <span>{isSaving ? "保存中..." : "保存してホームに戻る"}</span>
-          </button>
+        </div>
+        <div className="fixed bottom-4 left-0 right-0">
+          <div className="max-w-md mx-auto px-4">
+            <RoutingButton
+              buttonText={isSaving ? "保存中..." : "保存してホームに戻る"}
+              icon={FaSave}
+              to="/home"
+            />
+          </div>
         </div>
       </main>
+      {/* ✅ 下部固定の新規作成ボタン */}
     </div>
   );
 }
