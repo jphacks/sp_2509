@@ -13,24 +13,44 @@ import type { Point } from '../../types/types';
 import SelectedShapePlaceholder from '../../components/SelectedShapePlaceholder';
 import { GrConfigure } from "react-icons/gr";
 
-// --- 図形データ定義 --- (変更なし)
-const heartShape: Point[] = [
-  { x: 175, y: 100 }, { x: 205, y: 70 }, { x: 235, y: 80 }, { x: 250, y: 110 },
-  { x: 235, y: 140 }, { x: 175, y: 210 }, { x: 115, y: 140 }, { x: 100, y: 110 },
-  { x: 115, y: 80 }, { x: 145, y: 70 }, { x: 175, y: 100 }
-];
-const starShape: Point[] = [
-  { x: 175, y: 50 }, { x: 209, y: 150 }, { x: 300, y: 150 }, { x: 227, y: 209 },
-  { x: 259, y: 300 }, { x: 175, y: 250 }, { x: 91, y: 300 }, { x: 123, y: 209 },
-  { x: 50, y: 150 }, { x: 141, y: 150 }, { x: 175, y: 50 }
-];
-const circleShape: Point[] = Array.from({ length: 105 }, (_, i) => {
-  const angle = (i / 100) * 2 * Math.PI;
-  return {
-    x: 175 + 100 * Math.cos(angle),
-    y: 175 + 100 * Math.sin(angle)
-  };
-});
+// ★ ステップ1: 自動生成されたすべての図形をインポート
+import * as generatedShapes from '../../lib/generated-shapes';
+
+// ★ ステップ2: 図形の「設定マップ」を定義
+// ビルドスクリプトが生成する変数名 (例: heartShape) をキーとして、
+// UIで必要な情報 (description, src) をマッピングします。
+//
+// 新しい図形を追加する場合：
+// 1. `src/assets/svg` にSVGファイル (例: 'crescent.svg') を置く。
+// 2. `npm run dev` を実行 (crescentShape と crescent.png が自動生成される)。
+// 3. このマップに `crescentShape: { ... }` のエントリを追加する。
+const shapeConfig: Record<string, { description: string }> = {
+  spade: {
+    description: 'スペード',
+  },
+  heart: {
+    description: 'ハート',
+  },
+  diamond: {
+    description: 'ダイヤ',
+  },
+  club: {
+    description: 'クラブ',
+  },
+  star: {
+    description: '星',
+  },
+  circle: {
+    description: '円',
+  },
+  musicNote: {
+    description: '音符',
+  },
+  crescent: {
+    description: '三日月',
+  },
+};
+
 
 // --- Draw コンポーネント本体 ---
 export default function Draw() {
@@ -42,67 +62,85 @@ export default function Draw() {
   const activePoints = useMemo(() => selectedShape?.points ?? userDrawnPoints, [selectedShape, userDrawnPoints]);
   const activeDescription = useMemo(() => selectedShape?.description ?? null, [selectedShape]);
 
-// ★ 修正: localStorageへの保存処理を削除
+  // handleSelectShape は変更なし
   const handleSelectShape = useCallback((item: CarouselClickItem) => {
     if (!item.shapeData) {
       console.warn("選択されたアイテムに shapeData がありません:", item.description);
       return;
     }
-    // 状態の更新のみ行う
     setSelectedShape({ description: item.description, points: item.shapeData });
-    console.log(`選択: ${item.description}. 状態を更新しました。(localStorageには保存しません)`);
+    console.log(`選択: ${item.description}.`);
   }, []);
 
-  const items: CarouselClickItem[] = useMemo(() => [
-    {
-      src: '/images/Recommend/Heart.png',
-      alt: 'Heart Shape',
-      description: 'ハート',
-      shapeData: heartShape,
-      onClick: () => handleSelectShape({ src: '/images/Recommend/Heart.png', alt: 'Heart Shape', description: 'ハート', shapeData: heartShape }),
-    },
-    {
-      src: '/images/Recommend/Star.png',
-      alt: 'Star Shape',
-      description: '星',
-      shapeData: starShape,
-      onClick: () => handleSelectShape({ src: '/images/Recommend/Star.png', alt: 'Star Shape', description: '星', shapeData: starShape }),
-    },
-    {
-      src: '/images/Recommend/Circle.png',
-      alt: 'Circle Shape',
-      description: '円',
-      shapeData: circleShape,
-      onClick: () => handleSelectShape({ src: '/images/Recommend/Circle.png', alt: 'Circle Shape', description: '円', shapeData: circleShape }),
-    },
-  ], [handleSelectShape]);
+  // ★ ステップ3: `items` 配列を `shapeConfig` と `generatedShapes` から動的に生成
+  const items: CarouselClickItem[] = useMemo(() => {
+    return Object.entries(shapeConfig).map(([baseName, config]) => {
+      // baseName は 'heart', 'star' など
+      // config は { description: 'ハート' }
+      
+      // ビルドスクリプトの命名規則（convert-svgs.mjs）に基づいて
+      // 変数名(shapeKey) と 画像パス(imageSrc) を動的に生成します。
+      const shapeKey = `${baseName}Shape`; // 'heart' -> 'heartShape'
+      const imageSrc = `/images/Recommend/${baseName}.png`; // 'heart' -> '/images/Recommend/heart.png'
+      
+      // 自動生成されたモジュールから、対応する点群データを取得
+      const shapeData = (generatedShapes as Record<string, Point[]>)[shapeKey];
+      
+      const item: CarouselClickItem = {
+        src: imageSrc,
+        alt: `${config.description} Shape`,
+        description: config.description,
+        shapeData: shapeData || [], // 存在しない場合に備えてフォールバック
+      };
+      
+      // onClickハンドラを動的に設定
+      item.onClick = () => handleSelectShape(item);
+      
+      return item;
+    });
+  }, [handleSelectShape]); // handleSelectShape は useCallback でラップされているのでOK
 
-// ★ 修正: ページ読み込み時のlocalStorage復元ロジック
+  // ★ 変更点 4: useEffect の localStorage チェックも動的に修正
   useEffect(() => {
     console.log('初回レンダリング: localStorage を確認します');
     let needsClearLocalStorage = false;
+    
+    // generated-shapesからすべての図形データ(Point[])の配列を取得
+    // (generatedShapesオブジェクトのすべての値（Point[]配列）を取得)
+    const allShapeDataStrings = Object.values(generatedShapes as Record<string, Point[]>)
+                                      .map(points => JSON.stringify(points));
+
     try {
       const savedData = localStorage.getItem('drawingPointsData');
       if (savedData) {
-        console.log('localStorage にデータがありました:', savedData);
-        const parsedPoints = JSON.parse(savedData) as Point[];
+        
+        let parsedPoints: Point[];
+        try {
+            parsedPoints = JSON.parse(savedData) as Point[];
+        } catch (e) {
+            console.error("localStorage データのJSONパースに失敗:", e);
+            needsClearLocalStorage = true;
+            return; // finallyブロックが実行される
+        }
 
-        // 保存データがおすすめ図形と一致するかチェック
-        const isHeart = JSON.stringify(heartShape) === JSON.stringify(parsedPoints);
-        const isStar = JSON.stringify(starShape) === JSON.stringify(parsedPoints);
-        const isCircle = JSON.stringify(circleShape) === JSON.stringify(parsedPoints);
+        const savedDataString = JSON.stringify(parsedPoints); // 比較用に再文字列化
 
-        if (isHeart || isStar || isCircle) {
+        // ★ 保存されているデータが、おすすめ図形のいずれかと一致するかを some でチェック
+        const isRecommendedShape = allShapeDataStrings.some(
+          shapeString => shapeString === savedDataString
+        );
+
+        if (isRecommendedShape) {
           // おすすめ図形データだったので、選択状態は復元せず、localStorageをクリア対象にする
           console.log('保存されていたのはおすすめ図形なので、選択状態はリセットします。');
-          needsClearLocalStorage = true; // localStorageを後でクリア
-          setUserDrawnPoints([]); // 手描きデータはクリア
-          setSelectedShape(null); // 選択状態もクリア
+          needsClearLocalStorage = true;
+          setUserDrawnPoints([]);
+          setSelectedShape(null);
         } else if (parsedPoints && parsedPoints.length > 0) {
           // 手描きデータとして復元
           console.log('手描きデータとして復元します');
           setUserDrawnPoints(parsedPoints);
-          setSelectedShape(null); // おすすめ選択は解除
+          setSelectedShape(null);
         } else {
            // データが空または無効だった場合
            setUserDrawnPoints([]);
@@ -116,11 +154,10 @@ export default function Draw() {
       }
     } catch (error) {
       console.error("Failed to initialize drawing points from localStorage:", error);
-      needsClearLocalStorage = true; // エラー時もlocalStorageクリアを試みる
+      needsClearLocalStorage = true; 
       setUserDrawnPoints([]);
       setSelectedShape(null);
     } finally {
-       // おすすめ図形データがlocalStorageに残っていた場合、ここで削除
        if (needsClearLocalStorage) {
            try {
                localStorage.removeItem('drawingPointsData');
@@ -131,7 +168,8 @@ export default function Draw() {
        }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // 初回マウント時のみ実行
+  }, []); // 初回マウント時のみ実行 (依存配列は空のままでOK)
+
 
   const handleDrawEnd = useCallback((points: Point[]) => {
     if (points.length > 0) {
@@ -180,7 +218,7 @@ export default function Draw() {
 
   const navigateToCondition = useCallback(() => {
     if (activePoints.length >= 2) {
-      console.log('条件設定へ進む: データがあるので遷移します', activePoints);
+      console.log('条件設定へ進む: データがあるので遷移します');
       try {
         localStorage.setItem('drawingPointsData', JSON.stringify(activePoints));
       } catch (error) {
@@ -204,7 +242,6 @@ export default function Draw() {
   const isClearButtonDisabled = userDrawnPoints.length === 0 && selectedShape === null;
   const isNextButtonDisabled = activePoints.length < 2;
 
-  // ★ 追加: ガイドテキストを表示するかどうかのフラグ
   const shouldShowGuideText = selectedShape === null;
 
   return (
@@ -220,9 +257,9 @@ export default function Draw() {
               strokeWidth={6}
               strokeColor="#f4541fff"
               onDrawEnd={handleDrawEnd}
-              initialPoints={undefined} // initialPoints は直接は使わず、useEffect で復元するため undefined のまま
+              initialPoints={undefined}
               clearSignal={clearTrigger}
-              showGuideText={shouldShowGuideText} // ★ 修正: 計算したフラグを渡す
+              showGuideText={shouldShowGuideText}
             />
             {isCanvasDisabled && (
               <>
@@ -240,7 +277,7 @@ export default function Draw() {
             <ClearCanvasButton
               onClick={handleClearDrawing}
               buttonText="描き直す"
-              disabled={isClearButtonDisabled} // ★ やり直しボタンのdisabled条件も見直しが必要なら修正
+              disabled={isClearButtonDisabled}
             />
           </div>
 
