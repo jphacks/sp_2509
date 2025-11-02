@@ -126,28 +126,17 @@ const CourseList = ({
   onDelete,
   onToggleFavorite,
 }: CourseListProps) => {
-  const [isExpanded, setIsExpanded] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
   const totalPages = Math.ceil(courses.length / ITEMS_PER_PAGE);
 
   // 表示するコースを計算
   const coursesToShow = useMemo(() => {
-    if (!isExpanded) {
-      // 展開前: 最初のN件
-      return courses.slice(0, INITIAL_VISIBLE_COUNT);
-    }
     // 展開後: ページネーション
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
     return courses.slice(startIndex, endIndex);
-  }, [isExpanded, currentPage, courses]);
-
-  // 「すべて見る」ボタン押下時
-  const handleShowAll = () => {
-    setIsExpanded(true);
-    setCurrentPage(1); // 1ページ目に戻す
-  };
+  }, [currentPage, courses]);
 
   // ページ変更時
   const handlePageChange = (page: number) => {
@@ -157,7 +146,7 @@ const CourseList = ({
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 mb-12">
       {/* --- コースアイテム --- */}
       {coursesToShow.map((course) => {
         const positions: LatLngExpression[] = course.route_points.map(
@@ -178,20 +167,9 @@ const CourseList = ({
         );
       })}
 
-      {/* --- コントロール（すべて見る / ページネーション） --- */}
-
-      {/* 展開前: 「すべて見る」ボタン */}
-      {!isExpanded && courses.length > INITIAL_VISIBLE_COUNT && (
-        <button
-          onClick={handleShowAll}
-          className="w-full mt-2 py-2 px-4 rounded-lg bg-gray-100 text-black font-semibold hover:bg-gray-200 transition-colors"
-        >
-          すべて見る ({courses.length}件)
-        </button>
-      )}
 
       {/* 展開後: ページネーション */}
-      {isExpanded && totalPages > 1 && (
+      {totalPages > 1 && (
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

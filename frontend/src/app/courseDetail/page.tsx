@@ -54,7 +54,7 @@ function CourseDetailContent() {
     const routeData = {
         total_distance_km: courseData.course_distance,
         route_points: courseData.positions.map((p: [number, number]) => ({ lat: p[0], lng: p[1] })),
-        drawing_points: courseData.positions.map((p: [number, number]) => ({ lat: p[0], lng: p[1] })),
+        drawing_points: [],
     };
 
 

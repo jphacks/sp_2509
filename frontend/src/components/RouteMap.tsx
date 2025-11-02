@@ -11,6 +11,10 @@ const GradientPolyline = dynamic(
   () => import("./MapComponents").then((mod) => mod.GradientPolyline),
   { ssr: false }
 );
+const DashedPolyline = dynamic(
+  () => import("./MapComponents").then((mod) => mod.DashedPolyline),
+  { ssr: false }
+);
 
 type CSSSize = number | string;
 
@@ -89,14 +93,21 @@ const RouteMap = ({
         url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
       />
 
-      {/* drawing_points: 赤い線 */}
-      {secondaryPositions && secondaryPositions.length > 0 && (
-        <Polyline positions={secondaryPositions} color="red" weight={3} />
-      )}
+      
 
       {/* route_points: 緑→黒のグラデーション */}
       {positions && positions.length > 0 && (
         <GradientPolyline positions={positions as [number, number][]} />
+      )}
+
+      {/* drawing_points: アンバーカラー */}
+      {secondaryPositions && secondaryPositions.length > 0 && (
+        <DashedPolyline 
+          positions={secondaryPositions as [number, number][]} 
+          color="#f4541fff" 
+          weight={2}
+          dashArray="10, 5"
+        />
       )}
 
       {/* ゴールマーカー */}
