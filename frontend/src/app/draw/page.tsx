@@ -239,7 +239,10 @@ export default function Draw() {
   }, [userDrawnPoints, selectedShape]);
 
   const isCanvasDisabled = selectedShape !== null;
-  const isClearButtonDisabled = userDrawnPoints.length === 0 && selectedShape === null;
+  
+  // 「おすすめ選択中」または「手描きデータが空」の場合に「描き直す」を無効化
+  const isClearButtonDisabled = selectedShape !== null || userDrawnPoints.length === 0;
+  
   const isNextButtonDisabled = activePoints.length < 2;
 
   const shouldShowGuideText = selectedShape === null;
