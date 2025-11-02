@@ -32,7 +32,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
         select-none font-sans
         ${
           disabled
-            ? "cursor-not-allowed border border-gray-300 text-gray-300 hover:bg-white"
+            ? "cursor-not-allowed text-gray-300 hover:bg-white"
             : "hover:brightness-90"
         }
       `}
