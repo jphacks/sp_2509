@@ -125,16 +125,16 @@ export default function CourseDetailPage() {
           {/* 条件変更・描きなおすボタン */}
           <div className="flex gap-2">
             <ActionButton
-              onClick={() => (window.location.href = "/condition")}
+              onClick={() => router.push("/condition")}
               buttonText="条件変更"
-              buttonColor="#ffffffff"
+              buttonColor="#ffffff"
               textColor="#000"
               icon={<FaCog />}
             />
             <ActionButton
-              onClick={() => (window.location.href = "/draw")}
+              onClick={() => router.push("/draw")}
               buttonText="描きなおす"
-              buttonColor="#ffffffff"
+              buttonColor="#ffffff"
               textColor="#000"
               icon={<FaPencilAlt />}
             />
@@ -151,7 +151,6 @@ export default function CourseDetailPage() {
           </div>
         </div>
       </main>
-      {/* ✅ 下部固定の新規作成ボタン */}
     </div>
   );
 }
