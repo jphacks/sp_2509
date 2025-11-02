@@ -14,6 +14,7 @@ import Header from "@/components/Header";
 import BackButton from "@/components/BackButton";
 import RoutingButton from "../../components/RoutingButton";
 import { SlGraph } from "react-icons/sl";
+import Image from "next/image";
 
 const CenterPinMap = dynamic(() => import("../../components/CenterPinMap"), {
   ssr: false,
@@ -162,8 +163,8 @@ export default function Condition() {
           </div>
           <DrawnShapeImage
             points={loadedDrawingPoints}
-            size={160}
-            strokeColor="#ef4444"
+            size={100}
+            strokeColor="#EA580C"
             strokeWidth={3}
             padding={8}
             className="bg-gray-100 border border-gray-300"
@@ -172,10 +173,18 @@ export default function Condition() {
 
 
 
-        <section className="space-y-1">
+        <section>
           <Header headerText="おおよその走行距離" />
           <Text text="どれくらいの距離のコースを作成しますか？" />
-
+          <div className="flex justify-center mt-4">
+            <Image
+              src={distanceKm < 12 ? "/images/running.png" : "/images/cycling.png"}
+              alt={distanceKm < 12 ? "Running" : "Cycling"}
+              width={200}
+              height={200}
+              unoptimized
+            />
+          </div>
           <Slider
             value={distanceKm}
             onChange={setDistanceKm}
