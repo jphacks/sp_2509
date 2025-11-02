@@ -42,7 +42,7 @@ export default function Draw() {
   const activePoints = useMemo(() => selectedShape?.points ?? userDrawnPoints, [selectedShape, userDrawnPoints]);
   const activeDescription = useMemo(() => selectedShape?.description ?? null, [selectedShape]);
 
-// ★ 修正: localStorageへの保存処理を削除
+  // ★ 修正: localStorageへの保存処理を削除
   const handleSelectShape = useCallback((item: CarouselClickItem) => {
     if (!item.shapeData) {
       console.warn("選択されたアイテムに shapeData がありません:", item.description);
@@ -77,7 +77,7 @@ export default function Draw() {
     },
   ], [handleSelectShape]);
 
-// ★ 修正: ページ読み込み時のlocalStorage復元ロジック
+  // ★ 修正: ページ読み込み時のlocalStorage復元ロジック
   useEffect(() => {
     console.log('初回レンダリング: localStorage を確認します');
     let needsClearLocalStorage = false;
@@ -104,9 +104,9 @@ export default function Draw() {
           setUserDrawnPoints(parsedPoints);
           setSelectedShape(null); // おすすめ選択は解除
         } else {
-           // データが空または無効だった場合
-           setUserDrawnPoints([]);
-           setSelectedShape(null);
+          // データが空または無効だった場合
+          setUserDrawnPoints([]);
+          setSelectedShape(null);
         }
       } else {
         // localStorageにデータがなかった場合
@@ -120,15 +120,15 @@ export default function Draw() {
       setUserDrawnPoints([]);
       setSelectedShape(null);
     } finally {
-       // おすすめ図形データがlocalStorageに残っていた場合、ここで削除
-       if (needsClearLocalStorage) {
-           try {
-               localStorage.removeItem('drawingPointsData');
-               console.log('不要なlocalStorageデータ（おすすめ図形）をクリアしました。');
-           } catch (clearError) {
-               console.error("Failed to clear localStorage:", clearError);
-           }
-       }
+      // おすすめ図形データがlocalStorageに残っていた場合、ここで削除
+      if (needsClearLocalStorage) {
+        try {
+          localStorage.removeItem('drawingPointsData');
+          console.log('不要なlocalStorageデータ（おすすめ図形）をクリアしました。');
+        } catch (clearError) {
+          console.error("Failed to clear localStorage:", clearError);
+        }
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // 初回マウント時のみ実行
@@ -213,7 +213,7 @@ export default function Draw() {
         <div className="text-center mb-4">
           <Title title="コースの形を描く" />
           <div className="z-10 w-full self-start mt-2">
-            <BackButton text="ホームに戻る" to="/home" />
+            <BackButton text="スタート地点設定に戻る" to="/start" />
           </div>
           <div className="w-full aspect-[1] mt-4 relative">
             <DrawingCanvas

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime, timezone, timedelta
 from sqlalchemy.orm import Session
@@ -82,6 +82,34 @@ def get_all_users(db: Session = Depends(get_db)):
 # ------------------------------------------------------------
 # Routes: Calculate API
 # ------------------------------------------------------------
+@app.post("/routes/calculate-notice", status_code=202)
+def calculate_route_notice(payload: schemas.NoticeRequest, background_tasks: BackgroundTasks):
+    """
+    道路ネットワークの事前読み込みを非同期で開始する。
+    このエンドポイントはすぐに 202 ACCEPTED を返す。
+    """
+    def preload_network():
+        """バックグラウンドで実行される道路網の読み込み処理"""
+        print("バックグラウンドタスク: 道路ネットワークの事前読み込みを開始します。")
+        try:
+            # 実際に計算で使われるものと同じパラメータで読み込みを行う
+            art_generator.network_distance = 4000
+            
+            # _load_road_networkを直接呼び出す
+            art_generator._load_road_network(
+                center_lat=float(round(payload.start_location.lat, 3)),
+                center_lon=float(round(payload.start_location.lng, 3)),
+                force_reload=False # 既にキャッシュがあれば再利用
+            )
+            print("バックグラウンドタスク: 道路ネットワークの事前読み込みが完了しました。")
+        except Exception as e:
+            # エラーが発生してもサーバーは停止させず、ログに記録する
+            print(f"バックグラウンドでの道路ネットワーク読み込み中にエラーが発生しました: {e}")
+
+    background_tasks.add_task(preload_network)
+    return {"message": "Accepted: Road network preloading has started in the background."}
+
+
 @app.post("/routes/calculate", response_model=schemas.RouteCalculateResponse)
 def calculate_route(payload: schemas.RouteCalculateRequest):
     """
