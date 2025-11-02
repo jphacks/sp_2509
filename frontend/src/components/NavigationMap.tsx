@@ -354,6 +354,7 @@ export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }
         zoom={16}
         style={{ height: "100%", width: "100%" }}
         zoomControl={false}
+        attributionControl={false}
       >
         <MapEvents setIsFollowing={setIsFollowing} />
         <TileLayer
