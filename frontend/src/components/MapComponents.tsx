@@ -78,6 +78,40 @@ export function GradientPolyline({ positions }: { positions: [number, number][] 
   return null;
 }
 
+// 点線を描画するコンポーネント
+export function DashedPolyline({ 
+  positions, 
+  color = "#f59e0b", 
+  weight = 3,
+  dashArray = "10, 10"
+}: { 
+  positions: [number, number][]; 
+  color?: string;
+  weight?: number;
+  dashArray?: string;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (positions.length < 2) return;
+
+    const dashedLine = L.polyline(positions, {
+      color: color,
+      weight: weight,
+      opacity: 1,
+      dashArray: dashArray,
+      lineCap: 'round',
+      lineJoin: 'round',
+    }).addTo(map);
+
+    return () => {
+      map.removeLayer(dashedLine);
+    };
+  }, [map, positions, color, weight, dashArray]);
+
+  return null;
+}
+
 // 現在位置を追跡してマップを更新するコンポーネント
 export function LocationTracker({ currentPosition, energySaveMode, isFollowing }: {
   currentPosition: [number, number] | null;
