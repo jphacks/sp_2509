@@ -19,16 +19,21 @@ export function GradientPolyline({ positions }: { positions: [number, number][] 
       const segmentPositions = positions.slice(startIndex, endIndex + 1);
 
       const ratio = i / (segmentCount - 1);
-      const red = Math.round(32 * (1 - ratio));
-      const green = Math.round(185 * (1 - ratio));
-      const blue = Math.round(80 * (1 - ratio));
-      const darkColor = `rgb(${red}, ${green}, ${blue})`;
-      const opacity = 1 - ratio * 0.5;
+
+      // Start color (Green: #20B950)
+      const startR = 32, startG = 185, startB = 80;
+      // End color (Gray: #222222)
+      const endR = 34, endG = 34, endB = 34;
+
+      const r = Math.round(startR + (endR - startR) * ratio);
+      const g = Math.round(startG + (endG - startG) * ratio);
+      const b = Math.round(startB + (endB - startB) * ratio);
+      const darkColor = `rgb(${r}, ${g}, ${b})`;
 
       const borderPolyline = L.polyline(segmentPositions, {
         color: darkColor,
         weight: 11,
-        opacity: opacity,
+        opacity: 1, // 不透明に固定
         lineCap: 'round',
         lineJoin: 'round',
       }).addTo(map);
@@ -42,20 +47,21 @@ export function GradientPolyline({ positions }: { positions: [number, number][] 
       const segmentPositions = positions.slice(startIndex, endIndex + 1);
 
       const ratio = i / (segmentCount - 1);
-      const red = Math.round(32 * (1 - ratio));
-      const green = Math.round(185 * (1 - ratio));
-      const blue = Math.round(80 * (1 - ratio));
-      const opacity = 1 - ratio * 0.5;
 
-      const brighterRed = Math.min(255, red + 50);
-      const brighterGreen = Math.min(255, green + 50);
-      const brighterBlue = Math.min(255, blue + 50);
-      const lightColor = `rgb(${brighterRed}, ${brighterGreen}, ${brighterBlue})`;
+      // Start color (Brighter Green)
+      const startR_light = 82, startG_light = 235, startB_light = 130;
+      // End color (Brighter Gray)
+      const endR_light = 88, endG_light = 88, endB_light = 88;
+
+      const r_light = Math.round(startR_light + (endR_light - startR_light) * ratio);
+      const g_light = Math.round(startG_light + (endG_light - startG_light) * ratio);
+      const b_light = Math.round(startB_light + (endB_light - startB_light) * ratio);
+      const lightColor = `rgb(${r_light}, ${g_light}, ${b_light})`;
 
       const innerPolyline = L.polyline(segmentPositions, {
         color: lightColor,
         weight: 7,
-        opacity: opacity,
+        opacity: 1, // 不透明に固定
         lineCap: 'round',
         lineJoin: 'round',
       }).addTo(map);
@@ -73,17 +79,18 @@ export function GradientPolyline({ positions }: { positions: [number, number][] 
 }
 
 // 現在位置を追跡してマップを更新するコンポーネント
-export function LocationTracker({ currentPosition, energySaveMode }: {
+export function LocationTracker({ currentPosition, energySaveMode, isFollowing }: {
   currentPosition: [number, number] | null;
   energySaveMode: boolean;
+  isFollowing: boolean;
 }) {
   const map = useMap();
 
   useEffect(() => {
-    if (currentPosition && !energySaveMode) {
-      map.setView(currentPosition, 16, { animate: true });
+    if (currentPosition && !energySaveMode && isFollowing) {
+      map.setView(currentPosition, map.getZoom(), { animate: true });
     }
-  }, [currentPosition, map, energySaveMode]);
+  }, [currentPosition, map, energySaveMode, isFollowing]);
 
   return null;
 }

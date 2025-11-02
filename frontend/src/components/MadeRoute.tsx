@@ -116,10 +116,10 @@ export default function MadeRoute({
     Number.isFinite(toNum(v)) ? toNum(v).toFixed(1) : "—";
   const dateLabel = created_at
     ? new Date(created_at).toLocaleDateString("ja-JP", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    })
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      })
     : "—";
 
   // 地図サムネ：実描画サイズは大きめ（ズームは RouteMap に任せる）
@@ -149,10 +149,13 @@ export default function MadeRoute({
       isFavorite,
     };
 
-    sessionStorage.setItem('courseDetailData', JSON.stringify(courseDetailData));
+    sessionStorage.setItem(
+      "courseDetailData",
+      JSON.stringify(courseDetailData)
+    );
 
     // コース詳細ページに遷移（クエリパラメータなし）
-    router.push('/courseDetail');
+    router.push("/courseDetail");
   };
 
   return (

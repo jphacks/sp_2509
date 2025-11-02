@@ -149,10 +149,9 @@ const CourseList = ({
     <div className="flex flex-col gap-2">
       {/* --- コースアイテム --- */}
       {coursesToShow.map((course) => {
-        const positions: LatLngExpression[] = course.route_points.map((p) => [
-          p.lat,
-          p.lng,
-        ] as [number, number]);
+        const positions: LatLngExpression[] = course.route_points.map(
+          (p) => [p.lat, p.lng] as [number, number]
+        );
         return (
           <MadeRoute
             key={course.id}
