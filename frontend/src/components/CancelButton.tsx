@@ -1,7 +1,5 @@
-// frontend/src/components/CancelButton.tsx
 "use client";
 import React from "react";
-import { FaTimes } from "react-icons/fa";
 import { IconType } from "react-icons";
 
 type CancelButtonProps = {
@@ -21,17 +19,13 @@ export default function CancelButton({
         <button
             onClick={onClick}
             disabled={disabled}
-            className={`
-        flex items-center justify-center gap-2
-        w-full py-3 text-lg font-semibold tracking-wide
-        rounded-2xl shadow-md
-        transition-all duration-200 ease-out
-        select-none font-sans
-        ${disabled
+            className={[
+                "flex items-center justify-center gap-2 w-full py-3 text-lg font-semibold tracking-wide",
+                "rounded-2xl shadow-md transition-all duration-200 ease-out select-none font-sans",
+                disabled
                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-red-500 text-white hover:bg-red-600 active:scale-[0.97]"
-                }
-      `}
+                    : "bg-red-500 text-white hover:bg-red-600 active:scale-[0.97]",
+            ].join(" ")}
         >
             {Icon && <Icon size={22} />}
             <span>{buttonText}</span>

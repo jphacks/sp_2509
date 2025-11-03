@@ -1,6 +1,6 @@
 "use client";
 
-import { MapContainer, TileLayer, Polyline, Marker, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { LatLngBounds, type LatLngExpression } from "leaflet";
 import { useEffect, useRef } from "react";
@@ -33,7 +33,7 @@ interface RouteMapProps {
   onDrawOnMap?: (points: LatLngExpression[]) => void;
   /** 初回だけ fitBounds する（通常時はズームを維持） */
   fitOnMountOnly?: boolean;
-  /** ★ 追加：この値が変わったら「初期fitBounds」を再実行 */
+  /** ★ この値が変わったら「初期fitBounds」を再実行 */
   resetViewSignal?: number;
 }
 
@@ -150,16 +150,12 @@ export default function RouteMap({
     >
       <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
 
-      {secondaryPositions && secondaryPositions.length > 0 && (
-        <Polyline positions={secondaryPositions} color="red" weight={3} />
-      )}
-
-
+      {/* main route: gradient polyline */}
       {positions && positions.length > 0 && (
         <GradientPolyline positions={positions as [number, number][]} />
       )}
 
-      {/* drawing_points: アンバーカラー */}
+      {/* drawing_points: アンバーカラーの破線のみ（重複描画を解消） */}
       {secondaryPositions && secondaryPositions.length > 0 && (
         <DashedPolyline
           positions={secondaryPositions as [number, number][]}
@@ -169,7 +165,7 @@ export default function RouteMap({
         />
       )}
 
-      {/* ゴールマーカー */}
+      {/* markers */}
       {goalPosition && <Marker position={goalPosition} icon={goalIcon} />}
       {startPosition && <Marker position={startPosition} icon={startIcon} />}
 

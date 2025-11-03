@@ -18,7 +18,7 @@ type MadeRouteCardBigProps = {
   routeData: RouteData;
   isDrawingMode?: boolean;
   onDrawOnMap?: (points: LatLngExpression[]) => void;
-  /** ★ 追加：外部からの「初期縮尺に戻す」シグナル */
+  /** 外部から「初期縮尺に戻す」シグナル */
   resetViewSignal?: number;
 };
 
@@ -30,14 +30,11 @@ export default function MadeRouteCard_Big({
 }: MadeRouteCardBigProps) {
   const { total_distance_km, route_points, drawing_points } = routeData;
 
+  // 青線（確定ルート）
   const routePositions: LatLngExpression[] = route_points.map((p) => [p.lat, p.lng]);
-  const secondaryPositions: LatLngExpression[] = [];
 
-  // 追加: drawing_points を LatLngExpression の配列に変換（計算前の経路）
-  const drawingPositions: LatLngExpression[] = drawing_points.map((point) => [
-    point.lat,
-    point.lng,
-  ]);
+  // 赤線（描画中 or 計算前の経路）
+  const drawingPositions: LatLngExpression[] = drawing_points.map((p) => [p.lat, p.lng]);
 
   const fmtKm = (v: number) => (Number.isFinite(v) ? v.toFixed(1) : "—");
   const MAP_HEIGHT = 300;
@@ -55,8 +52,7 @@ export default function MadeRouteCard_Big({
         <div className="flex-grow rounded-2xl overflow-hidden ring-1 ring-black/5 bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.02)]">
           <RouteMap
             positions={routePositions}
-            //secondaryPositions={secondaryPositions}
-            secondaryPositions={drawingPositions} // ← この行を追加
+            secondaryPositions={drawingPositions}
             height={MAP_HEIGHT}
             width="100%"
             padding={15}
@@ -66,7 +62,6 @@ export default function MadeRouteCard_Big({
             isDrawingMode={isDrawingMode}
             onDrawOnMap={onDrawOnMap}
             fitOnMountOnly={true}
-            /** ★ 渡す：この値が変わったら初期fitBoundsを再実行 */
             resetViewSignal={resetViewSignal}
           />
         </div>
