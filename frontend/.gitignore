@@ -42,3 +42,4 @@ next-env.d.ts
 
 # generated shapes
 /src/lib/generated-shapes.ts
+certificates

@@ -9,7 +9,7 @@ import {
     useMapEvents,
     useMap,
 } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
+// import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { startIcon } from "./MapIcons"; // ★ startIcon をインポート
 

@@ -1,5 +1,8 @@
 'use client';
 
+import 'leaflet/dist/leaflet.css';
+
+
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useState, useMemo, useEffect } from 'react';
@@ -98,7 +101,7 @@ export default function StartPage() {
               <path d="M20 5c-6.5 0-12 5.5-12 12 0 8 10 18 11.5 19.5.3.3.7.3 1 0C22 35 32 25 32 17c0-6.5-5.5-12-12-12z"
                     fill="#20B950"/>
               <circle cx="20" cy="17" r="8" fill="white"/>
-              <text x="20" y="21" text-anchor="middle" fill="#20B950" font-size="12" font-weight="bold">S</text>
+              <text x="20" y="21" textAnchor="middle" fill="#20B950" fontSize="12" fontWeight="bold">S</text>
             </svg>
             <Text
               text="スタート地点"
