@@ -6,10 +6,7 @@ import dynamic from "next/dynamic";
 
 const RouteMap = dynamic(() => import("./RouteMap"), { ssr: false });
 
-type RoutePoint = {
-  lat: number;
-  lng: number;
-};
+type RoutePoint = { lat: number; lng: number };
 
 type RouteData = {
   total_distance_km: number;
@@ -18,30 +15,32 @@ type RouteData = {
 };
 
 type MadeRouteCardBigProps = {
-  /** ルートデータ */
   routeData: RouteData;
+  isDrawingMode?: boolean;
+  onDrawOnMap?: (points: LatLngExpression[]) => void;
+  /** 外部から「初期縮尺に戻す」シグナル */
+  resetViewSignal?: number;
 };
 
 export default function MadeRouteCard_Big({
   routeData,
+  isDrawingMode = false,
+  onDrawOnMap,
+  resetViewSignal = 0,
 }: MadeRouteCardBigProps) {
   const { total_distance_km, route_points, drawing_points } = routeData;
 
-  // route_points を LatLngExpression の配列に変換
-  const routePositions: LatLngExpression[] = route_points.map((point) => [
-    point.lat,
-    point.lng,
-  ]);
+  // 青線（確定ルート）
+  const routePositions: LatLngExpression[] = route_points.map((p) => [p.lat, p.lng]);
 
-  // 追加: drawing_points を LatLngExpression の配列に変換（計算前の経路）
-  const drawingPositions: LatLngExpression[] = drawing_points.map((point) => [
-    point.lat,
-    point.lng,
-  ]);
+  // 赤線（描画中 or 計算前の経路）
+  const drawingPositions: LatLngExpression[] = drawing_points.map((p) => [p.lat, p.lng]);
 
   const fmtKm = (v: number) => (Number.isFinite(v) ? v.toFixed(1) : "—");
-
   const MAP_HEIGHT = 300;
+
+  const mapInteractive = !isDrawingMode;
+  const showZoom = !isDrawingMode;
 
   return (
     <article
@@ -50,21 +49,23 @@ export default function MadeRouteCard_Big({
       aria-label="RouteCard"
     >
       <div className="h-full flex flex-col">
-        {/* 上:地図 */}
         <div className="flex-grow rounded-2xl overflow-hidden ring-1 ring-black/5 bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.02)]">
           <RouteMap
             positions={routePositions}
-            secondaryPositions={drawingPositions} // ← この行を追加
+            secondaryPositions={drawingPositions}
             height={MAP_HEIGHT}
             width="100%"
             padding={15}
             maxZoom={16}
-            interactive={true}
-            showZoomControl={false}
+            interactive={mapInteractive}
+            showZoomControl={showZoom}
+            isDrawingMode={isDrawingMode}
+            onDrawOnMap={onDrawOnMap}
+            fitOnMountOnly={true}
+            resetViewSignal={resetViewSignal}
           />
         </div>
 
-        {/* 下:テキスト */}
         <div className="shrink-0 pt-4 text-left">
           <div className="flex justify-between items-baseline">
             <div className="text-[15px] text-neutral-600">コース距離</div>
