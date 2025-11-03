@@ -1,6 +1,7 @@
 // frontend/src/app/home/page.tsx
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import Carousel from "../../components/Carousel";
 import Title from "../../components/Title";
@@ -11,7 +12,7 @@ import CourseList from "../../components/CourseList";
 import Loading from "../../components/Loading";
 import Image from "next/image"; // Image コンポーネントをインポート
 import Header from "@/components/Header";
-import { FaPlus } from "react-icons/fa";
+import { FaPencilAlt } from "react-icons/fa";
 
 const API_URL = "/api";
 
@@ -84,6 +85,7 @@ export default function Home() {
     lng: number;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const initializeUser = useCallback(async (forceNew: boolean = false) => {
     try {
@@ -372,9 +374,9 @@ export default function Home() {
         <div className="fixed bottom-4 left-0 right-0">
           <div className="max-w-md mx-auto px-4">
             <RoutingButton
-              buttonText="新しいコースを作る"
-              icon={FaPlus}
-              to={"/draw"}
+              buttonText="コースを作成する"
+              onClick={() => router.push('/start')}
+              icon={FaPencilAlt}
             />
           </div>
         </div>

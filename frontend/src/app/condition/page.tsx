@@ -6,15 +6,15 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import DrawnShapeImage from "../../components/DrawnShapeImage";
 import Slider from "../../components/Slider";
-import Loading from "../../components/Loading"; // ★ 追加
+import Loading from "../../components/Loading";
 import Text from "../../components/Text";
 import type { Point } from "../../types/types";
 import Title from "@/components/Title";
 import Header from "@/components/Header";
 import BackButton from "@/components/BackButton";
-import { FaMapMarkerAlt } from 'react-icons/fa'; // ★ アイコンを追加
 import RoutingButton from "../../components/RoutingButton";
 import { SlGraph } from "react-icons/sl";
+import Image from "next/image";
 
 const CenterPinMap = dynamic(() => import("../../components/CenterPinMap"), {
   ssr: false,
@@ -36,54 +36,63 @@ export default function Condition() {
   // localStorage から読み込む描画点
   const [loadedDrawingPoints, setLoadedDrawingPoints] = useState<Point[]>([]);
   // 地図中心（スタート地点）
-  const [center, setCenter] = useState<[number, number] | null>(null);
+  const [startLocation, setStartLocation] = useState<[number, number] | null>(null);
   // おおよその走行距離（km）
   const [distanceKm, setDistanceKm] = useState<number>(10);
   // 送信中制御
   const [submitting, setSubmitting] = useState(false);
 
-  // 初回マウント時に描画データを読み込み
+  // 初回マウント時に描画データとスタート地点を読み込み
   useEffect(() => {
     try {
-      const saved =
-        typeof window !== "undefined"
-          ? localStorage.getItem("drawingPointsData")
-          : null;
-      if (!saved) {
+      // スタート地点の読み込み
+      const savedLocation = localStorage.getItem('startLocation');
+      if (savedLocation) {
+        setStartLocation(JSON.parse(savedLocation));
+      } else {
+        alert("スタート地点が設定されていません。");
+        router.push('/start');
+        return;
+      }
+
+      // 描画データの読み込み
+      const savedDrawing = localStorage.getItem("drawingPointsData");
+      if (!savedDrawing) {
         alert(
           "描画データが見つかりません。前のページでコースを描いてください。"
         );
-        router.back();
+        router.push('/draw');
         return;
       }
-      const points = JSON.parse(saved) as Point[];
+      const points = JSON.parse(savedDrawing) as Point[];
       if (!Array.isArray(points) || points.length === 0) {
         alert("コース形状の読み込みに失敗しました。");
-        router.back();
+        router.push('/draw');
         return;
       }
       setLoadedDrawingPoints(points);
     } catch (e) {
-      console.error("Failed to parse drawing points from localStorage:", e);
-      alert("コース形状の読み込みに失敗しました。");
-      router.back();
+      console.error("Failed to parse data from localStorage:", e);
+      alert("データの読み込みに失敗しました。");
+      router.push('/home');
     }
   }, [router]);
 
   const canSubmit = useMemo(
-    () => !!center && loadedDrawingPoints.length > 0 && !submitting,
-    [center, loadedDrawingPoints.length, submitting]
+    () => !!startLocation && loadedDrawingPoints.length > 0 && !submitting,
+    [startLocation, loadedDrawingPoints.length, submitting]
   );
 
-  // 次のページへ：バックエンドに POST。失敗時は localStorage + クエリでフォールバック。
+  // 次のページへ：バックエンドに POST。
   const goNext = async () => {
-    if (!center) {
-      alert("スタート地点を地図で選択してください。");
+    if (!startLocation) {
+      alert("スタート地点が設定されていません。");
+      router.push('/start');
       return;
     }
     if (submitting) return; // 二重送信防止
 
-    const [lat, lng] = center;
+    const [lat, lng] = startLocation;
 
     // 送信用ペイロード
     const payload = {
@@ -143,7 +152,7 @@ export default function Condition() {
         <div>
           <Title title="条件設定" />
           <div className="w-full self-start mt-2">
-            <BackButton text="描き直す" />
+            <BackButton text="描き直す" to="/draw" />
           </div>
         </div>
 
@@ -154,46 +163,28 @@ export default function Condition() {
           </div>
           <DrawnShapeImage
             points={loadedDrawingPoints}
-            size={160}
-            strokeColor="#ef4444"
+            size={100}
+            strokeColor="#EA580C"
             strokeWidth={3}
             padding={8}
             className="bg-gray-100 border border-gray-300"
           />
         </section>
 
-        {/* スタート地点を選択 */}
-        <section className="space-y-1">
-          <Header headerText="スタート地点を選択" />
-
-          <Text text="どこから走り始めますか？地図を動かしてスタート地点を決めてください。" />
-
-          <CenterPinMap height={220} onCenterChange={(c) => setCenter(c)} />
-        </section>
 
 
-          <div className="flex items-center space-x-4 text-xs text-gray-500 pt-1">
-            <div className="flex items-center space-x-1">
-              <FaMapMarkerAlt className="text-sky-500" />
-              <Text
-                text="現在位置"
-                className="text-gray-500"
-               />
-            </div>
-            <div className="flex items-center space-x-1">
-              <FaMapMarkerAlt className="text-red-500" />
-              <Text
-                text="スタート地点"
-                className="text-gray-500"
-               />
-            </div>
-          </div>
-
-
-        <section className="space-y-1">
+        <section>
           <Header headerText="おおよその走行距離" />
           <Text text="どれくらいの距離のコースを作成しますか？" />
-
+          <div className="flex justify-center mt-4">
+            <Image
+              src={distanceKm < 12 ? "/images/running.png" : "/images/cycling.png"}
+              alt={distanceKm < 12 ? "Running" : "Cycling"}
+              width={200}
+              height={200}
+              unoptimized
+            />
+          </div>
           <Slider
             value={distanceKm}
             onChange={setDistanceKm}
@@ -202,14 +193,14 @@ export default function Condition() {
             step={1}
             unit="km"
           />
-      </section>
+        </section>
 
         <div className="mt-8 flex justify-center">
           <RoutingButton
             buttonText={submitting ? "送信中…" : "この内容でコースを作成"}
             onClick={goNext}
             disabled={!canSubmit}
-            icon = {SlGraph}
+            icon={SlGraph}
           />
         </div>
 
