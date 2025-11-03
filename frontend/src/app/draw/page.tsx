@@ -51,6 +51,9 @@ const shapeConfig: Record<string, { description: string }> = {
   crescent: {
     description: "三日月",
   },
+  butterfly: {
+    description: "ちょうちょ",
+  },
 };
 
 // --- Draw コンポーネント本体 ---
