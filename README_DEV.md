@@ -98,6 +98,7 @@ Windowsでは、以下の手順で手動セットアップを行ってくださ�
    npm run dev:https
    ```
    ipconfigでPCのIPアドレスを調べ、スマホから以下のサイトにアクセスします。
+   
    https://[ipアドレス]:3000
    
 
