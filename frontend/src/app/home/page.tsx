@@ -12,7 +12,7 @@ import CourseList from "../../components/CourseList";
 import Loading from "../../components/Loading";
 import Image from "next/image"; // Image コンポーネントをインポート
 import Header from "@/components/Header";
-import { FaPencilAlt } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 
 const API_URL = "/api";
 
@@ -376,7 +376,7 @@ export default function Home() {
             <RoutingButton
               buttonText="コースを作成する"
               onClick={() => router.push('/start')}
-              icon={FaPencilAlt}
+              icon={FaPlus}
             />
           </div>
         </div>
