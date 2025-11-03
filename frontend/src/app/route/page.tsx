@@ -18,6 +18,7 @@ import EditButton from "@/components/EditButton";
 import UndoButton from "@/components/UndoButton";
 import CancelButton from "@/components/CancelButton";
 import DrawButton from "@/components/DrawButton";
+import BackButton from "@/components/BackButton";
 import type { LatLngExpression, LatLng } from "leaflet";
 
 const API_URL = "/api";
@@ -207,7 +208,7 @@ export default function CourseDetailPage() {
     const newData: ResponseData = {
       total_distance_km: newDistance,
       route_points: Pnew,
-      drawing_points: Pnew,
+      drawing_points: routeData.drawing_points,
     };
     setHistory((prev) => [...prev, newData]);
     setRouteData(newData);
@@ -237,12 +238,7 @@ export default function CourseDetailPage() {
         {/* ← 条件変更（/condition） */}
         {!isEditing && (
           <div className="mb-3">
-            <Link
-              href="/condition"
-              className="text-neutral-600 hover:text-neutral-800 text-sm"
-            >
-              &lt; 条件変更
-            </Link>
+            <BackButton text="条件を変更する" to="/condition" />
           </div>
         )}
 
