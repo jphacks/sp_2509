@@ -91,7 +91,17 @@ Windowsでは、以下の手順で手動セットアップを行ってくださ�
     npm run dev
     ```
 
-3. **アプリケーションの確認:**
+    スマホでデバッグするには、httpsで実行します。
+
+   ```bash
+   cd frontend
+   npm run dev:https
+   ```
+   ipconfigでPCのIPアドレスを調べ、スマホから以下のサイトにアクセスします。
+   https://[ipアドレス]:3000
+   
+
+4. **アプリケーションの確認:**
     ブラウザで [http://localhost:3000](http://localhost:3000) にアクセスすると、アプリケーションが表示されます。
 
 注意点:
