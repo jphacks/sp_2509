@@ -6,6 +6,7 @@ from shapely.geometry import Point
 from scipy.spatial import KDTree
 from typing import List, Dict, Tuple
 from simplification.cutil import simplify_coords
+import threading
 
 class GPSArtGenerator:
     """
@@ -31,9 +32,11 @@ class GPSArtGenerator:
         self.path_length_adjustment = 0.7 # 目標距離の調整係数
         self.rotation_search_steps = 360 # 経路角度探索のステップ数
         self.rotation_search_points = 200 # 角度決定のためにリサンプリングする点の数
+        self.sampling_interval_m = 10.0 # C3コスト計算のサンプリング間隔（メートル）
         self._road_network = None
         self._road_network_latlon = None
         self._anchor_point = None
+        self._network_lock = threading.Lock()
 
     def get_road_network(self):
         """投影された道路ネットワーク(UTM)を返します。"""
@@ -72,18 +75,21 @@ class GPSArtGenerator:
         if distance is not None:
             self.network_distance = distance
 
-    def _load_road_network(self, center_lat: float, center_lon: float):
+    def _load_road_network(self, center_lat: float, center_lon: float, force_reload: bool = False):
         """
         指定された中心点の周囲の道路ネットワークを取得・投影します。
+        この処理はスレッドセーフです。
         
         Args:
             center_lat (float): 中心点の緯度
             center_lon (float): 中心点の経度
+            force_reload (bool): 既存のキャッシュを無視して強制的に再取得するか
         """
-        if (self._anchor_point is None or 
-            self._anchor_point != (center_lat, center_lon) or 
-            self._road_network is None):
-            
+        with self._network_lock:
+            if not force_reload and self._anchor_point == (center_lat, center_lon) and self._road_network is not None:
+                print("既存の道路ネットワークデータを再利用します。")
+                return
+
             print("道路ネットワークデータを取得中...")
             self._anchor_point = (center_lat, center_lon)
             
@@ -273,29 +279,35 @@ class GPSArtGenerator:
         return np.linalg.norm(node_coords - prev_coords)
 
     def _cost_c3(self, prev_coords: np.ndarray, node_coords: np.ndarray,
-                segment_start: np.ndarray, segment_end: np.ndarray, 
-                num_samples: int = 10) -> float:
+                segment_start: np.ndarray, segment_end: np.ndarray) -> float:
         """コスト関数 C3: 形状忠実性（理想形状との近さ）"""
+        segment_vec = segment_end - segment_start
+        segment_len = np.linalg.norm(segment_vec)
+        
+        if segment_len == 0:
+            return np.linalg.norm(prev_coords - segment_start)
+
+        num_samples = max(2, int(segment_len / self.sampling_interval_m) + 1)
+        
+        samples = segment_start + np.linspace(0, 1, num_samples)[:, np.newaxis] * segment_vec
+
         edge_vec = node_coords - prev_coords
         edge_len_sq = np.dot(edge_vec, edge_vec)
-        
+
         if edge_len_sq == 0:
-            return np.linalg.norm(prev_coords - segment_start) * num_samples
+            distances = np.linalg.norm(samples - prev_coords, axis=1)
+            return np.mean(distances)
+        vec_to_samples = samples - prev_coords
+        t = np.dot(vec_to_samples, edge_vec) / edge_len_sq
         
-        total_dist = 0
-        for k in range(num_samples):
-            sample_point = segment_start + (segment_end - segment_start) * (k / (num_samples - 1))
-            t = np.dot(sample_point - prev_coords, edge_vec) / edge_len_sq
-            
-            if t < 0:
-                dist = np.linalg.norm(sample_point - prev_coords)
-            elif t > 1:
-                dist = np.linalg.norm(sample_point - node_coords)
-            else:
-                projection = prev_coords + t * edge_vec
-                dist = np.linalg.norm(sample_point - projection)
-            total_dist += dist
-        return total_dist
+        # 0 <= t <= 1 の範囲内にあるサンプル点のみを対象
+        valid_indices = (t >= 0) & (t <= 1)
+        
+        if not np.any(valid_indices):
+            return 0.0 # 有効なサンプルがない場合はコスト0
+        projections = prev_coords + t[valid_indices, np.newaxis] * edge_vec
+        distances = np.linalg.norm(samples[valid_indices] - projections, axis=1)
+        return np.mean(distances)
 
     def _create_weight_function(self, segment_start: np.ndarray, segment_end: np.ndarray):
         """3つのコスト関数を統合した重み関数を作成します。"""
@@ -397,11 +409,8 @@ class GPSArtGenerator:
         raw_shape_points = [(point["x"], point["y"]) for point in drawing_display_points]
         anchor_lat = float(round(start_location["lat"], 3))
         anchor_lon = float(round(start_location["lng"], 3))
-
-        if target_distance_km <= 10:
-            self.network_distance = 3000
-        else:
-            self.network_distance = 4000
+            
+        self.network_distance = 4000
         
         self._load_road_network(anchor_lat, anchor_lon)
         

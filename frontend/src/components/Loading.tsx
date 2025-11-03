@@ -2,6 +2,7 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
 import type { Point } from '../types/types';
+import { ACCENT_AMBER } from '../lib/color';
 
 type LoadingProps = {
   loadingText: string;
@@ -52,7 +53,7 @@ export default function Loading({
   size = 64,
   strokeColor = 'gray',
   strokeWidth = 2,
-  dotColor = 'black',
+  dotColor = ACCENT_AMBER,
   dotSize = 6,
   animationDuration = 2,
   pauseDuration = 1,

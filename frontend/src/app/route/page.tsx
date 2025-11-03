@@ -323,6 +323,7 @@ import UndoButton from "@/components/UndoButton";
 import CancelButton from "@/components/CancelButton";
 import DrawButton from "@/components/DrawButton";
 import type { LatLngExpression, LatLng } from "leaflet";
+import ActionButton from "@/components/ActionButton";
 
 const API_URL = "/api";
 
@@ -539,16 +540,18 @@ export default function CourseDetailPage() {
         </div>
 
         {/* ← 条件変更（/condition） */}
-        {!isEditing && (
-          <div className="mb-3">
-            <Link
-              href="/condition"
-              className="text-neutral-600 hover:text-neutral-800 text-sm"
-            >
-              &lt; 条件変更
-            </Link>
-          </div>
-        )}
+        {
+          !isEditing && (
+            <div className="mb-3">
+              <Link
+                href="/condition"
+                className="text-neutral-600 hover:text-neutral-800 text-sm"
+              >
+                &lt; 条件変更
+              </Link>
+            </div>
+          )
+        }
 
         {/* 地図カード */}
         <div className="mb-3">
@@ -563,71 +566,76 @@ export default function CourseDetailPage() {
 
 
         {/* 初期ボタン：左=描きなおす(/draw), 右=ルートを編集する */}
-        {!isEditing && (
-          <div className="grid grid-cols-2 gap-4">
-            <Link
-              href="/draw"
-              className="w-full text-center rounded-2xl border border-neutral-200 bg-white py-3 font-semibold shadow-sm active:scale-[0.98] transition"
-            >
-              描きなおす
-            </Link>
+        {
+          !isEditing && (
+            <div className="grid grid-cols-2 gap-4">
+              <Link
+                href="/draw"
+                className="w-full text-center rounded-2xl border border-neutral-200 bg-white py-3 font-semibold shadow-sm active:scale-[0.98] transition"
+              >
+                描きなおす
+              </Link>
+              <button
+                onClick={handleEdit}
+                className="w-full rounded-2xl border border-neutral-200 bg-white py-3 font-semibold shadow-sm active:scale-[0.98] transition"
+              >
+                ルートを編集する
+              </button>
+            </div>
+          )
+        }
+
+        {/* 編集モード中のボタン（既存） */}
+        {
+          isEditing && (
+            <div className="space-y-3">
+              {isDrawingMode ? (
+                <div className="flex gap-2">
+                  <DrawButton
+                    buttonText="描画完了"
+                    onClick={handleToggleDrawMode}
+                    icon={FaPaintBrush}
+                    isActive={true}
+                  />
+                </div>
+              ) : (
+                <>
+                  <div className="flex gap-2">
+                    <EditButton buttonText="編集完了" onClick={handleEdit} icon={FaPencilAlt} />
+                  </div>
+                  <div className="flex gap-2">
+                    <DrawButton buttonText="地図に描画" onClick={handleToggleDrawMode} icon={FaPaintBrush} />
+                  </div>
+                  <div className="flex gap-2">
+                    <UndoButton
+                      buttonText="元に戻す"
+                      onClick={handleUndo}
+                      icon={FaUndo}
+                      disabled={history.length <= 1}
+                    />
+                    <CancelButton buttonText="編集を破棄" onClick={handleCancelEdit} icon={FaTimes} />
+                  </div>
+                </>
+              )}
+            </div>
+          )
+        }
+      </main >
+
+      {/* 下部固定の黒ボタン */}
+      {
+        !isEditing && (
+          <div className="fixed inset-x-0 bottom-0 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-2 bg-transparent">
             <button
-              onClick={handleEdit}
-              className="w-full rounded-2xl border border-neutral-200 bg-white py-3 font-semibold shadow-sm active:scale-[0.98] transition"
+              onClick={handleSaveCourse}
+              disabled={isSaving}
+              className="w-full flex items-center justify-center gap-2 rounded-2xl bg-black text-white py-4 text-lg font-semibold shadow-lg active:scale-[0.98] transition disabled:bg-neutral-400 disabled:cursor-not-allowed"
             >
-              ルートを編集する
+              <FaSave size={20} />
+              <span>{isSaving ? "保存中..." : "保存してホームに戻る"}</span>
             </button>
           </div>
         )}
-
-        {/* 編集モード中のボタン（既存） */}
-        {isEditing && (
-          <div className="space-y-3">
-            {isDrawingMode ? (
-              <div className="flex gap-2">
-                <DrawButton
-                  buttonText="描画完了"
-                  onClick={handleToggleDrawMode}
-                  icon={FaPaintBrush}
-                  isActive={true}
-                />
-              </div>
-            ) : (
-              <>
-                <div className="flex gap-2">
-                  <EditButton buttonText="編集完了" onClick={handleEdit} icon={FaPencilAlt} />
-                </div>
-                <div className="flex gap-2">
-                  <DrawButton buttonText="地図に描画" onClick={handleToggleDrawMode} icon={FaPaintBrush} />
-                </div>
-                <div className="flex gap-2">
-                  <UndoButton
-                    buttonText="元に戻す"
-                    onClick={handleUndo}
-                    icon={FaUndo}
-                    disabled={history.length <= 1}
-                  />
-                  <CancelButton buttonText="編集を破棄" onClick={handleCancelEdit} icon={FaTimes} />
-                </div>
-              </>
-            )}
-          </div>
-        )}
-      </main>
-
-      {/* 下部固定の黒ボタン */}
-      {!isEditing && (
-        <div className="fixed inset-x-0 bottom-0 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-2 bg-transparent">
-          <button
-            onClick={handleSaveCourse}
-            disabled={isSaving}
-            className="w-full flex items-center justify-center gap-2 rounded-2xl bg-black text-white py-4 text-lg font-semibold shadow-lg active:scale-[0.98] transition disabled:bg-neutral-400 disabled:cursor-not-allowed"
-          >
-            <FaSave size={20} />
-            <span>{isSaving ? "保存中..." : "保存してホームに戻る"}</span>
-          </button>
-        </div>
-      )}
     </div>
   );
 }

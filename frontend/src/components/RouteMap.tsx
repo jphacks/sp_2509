@@ -7,9 +7,14 @@ import { useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { startIcon, goalIcon } from "./MapIcons";
 import MapDrawingHandler from "./MapDrawingHandler";
+import { ACCENT_AMBER } from "../lib/color";
 
 const GradientPolyline = dynamic(
   () => import("./MapComponents").then((mod) => mod.GradientPolyline),
+  { ssr: false }
+);
+const DashedPolyline = dynamic(
+  () => import("./MapComponents").then((mod) => mod.DashedPolyline),
   { ssr: false }
 );
 
@@ -149,10 +154,22 @@ export default function RouteMap({
         <Polyline positions={secondaryPositions} color="red" weight={3} />
       )}
 
+
       {positions && positions.length > 0 && (
         <GradientPolyline positions={positions as [number, number][]} />
       )}
 
+      {/* drawing_points: アンバーカラー */}
+      {secondaryPositions && secondaryPositions.length > 0 && (
+        <DashedPolyline
+          positions={secondaryPositions as [number, number][]}
+          color={ACCENT_AMBER}
+          weight={2}
+          dashArray="10, 5"
+        />
+      )}
+
+      {/* ゴールマーカー */}
       {goalPosition && <Marker position={goalPosition} icon={goalIcon} />}
       {startPosition && <Marker position={startPosition} icon={startIcon} />}
 

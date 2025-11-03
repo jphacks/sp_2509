@@ -1,6 +1,6 @@
 // frontend/src/components/RoutingButton.tsx
 "use client";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { IconType } from "react-icons";
 
@@ -21,9 +21,9 @@ export default function RoutingButton({
 }: RoutingButtonProps) {
   const router = useRouter();
   const [isActive, setIsActive] = useState(false);
+  const ignoreMouseEvents = useRef(false);
 
   const handlePress = () => {
-    // ★★★ disabled なら何もしない ★★★
     if (disabled) return;
     setIsActive(true);
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
@@ -32,39 +32,63 @@ export default function RoutingButton({
   };
 
   const handleRelease = () => {
-    if (disabled) return;
+    if (disabled || !isActive) return; // 離すときにアクティブでなければ何もしない
     setIsActive(false);
     setTimeout(() => {
-      // ★★★ onClick があれば実行し、なければ to に遷移 ★★★
       if (onClick) {
         onClick();
       } else if (to) {
         router.push(to);
       }
-    }, 100); // 少し遅延させてアニメーションを見せる
+    }, 100);
   };
 
-  // ★★★ 離れたときも disabled なら何もしないように修正 ★★★
   const handleLeave = () => {
     if (disabled) return;
     setIsActive(false);
   };
 
+  // --- イベントハンドラをタッチとマウスで分離 ---
+
+  const onTouchStart = () => {
+    ignoreMouseEvents.current = true;
+    handlePress();
+  };
+
+  const onMouseDown = () => {
+    if (ignoreMouseEvents.current) return;
+    handlePress();
+  };
+
+  const onTouchEnd = () => {
+    handleRelease();
+    // マウスイベントのエミュレーションが終わるまでフラグを維持
+    setTimeout(() => {
+      ignoreMouseEvents.current = false;
+    }, 500);
+  };
+
+  const onMouseUp = () => {
+    if (ignoreMouseEvents.current) return;
+    handleRelease();
+  };
+
   return (
     <button
-      onMouseDown={handlePress}
-      onMouseUp={handleRelease}
-      onTouchStart={handlePress}
-      onTouchEnd={handleRelease}
-      onMouseLeave={handleLeave} // ★★★ handleLeave を使う ★★★
-      disabled={disabled} // ★★★ disabled 属性を追加 ★★★
+      onMouseDown={onMouseDown}
+      onMouseUp={onMouseUp}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+      onMouseLeave={handleLeave}
+      onTouchCancel={handleLeave}
+      disabled={disabled}
       className={`
         flex items-center justify-center gap-2
         w-full py-3 text-lg font-semibold tracking-wide
         rounded-2xl shadow-md
         transition-all duration-200 ease-out
         select-none font-sans
-        ${disabled // ★★★ disabled のスタイルを追加 ★★★
+        ${disabled
           ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
           : isActive
             ? 'bg-gray-500 text-black scale-[0.97]'

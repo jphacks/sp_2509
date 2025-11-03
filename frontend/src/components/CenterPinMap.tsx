@@ -28,18 +28,12 @@ type Props = {
 
 const DEFAULT_CENTER: [number, number] = [43.0621, 141.3544]; // 札幌
 
-/** 青い現在地ピン（画像不要のSVG） */
+/** 青い現在地ピン */
 const bluePinIcon = L.divIcon({
-    html: `
-    <svg width="34" height="34" viewBox="0 0 48 48" style="transform: translateY(-8px)">
-      <path d="M24 4c-7.18 0-13 5.57-13 12.44 0 9.36 10.46 19.66 12.27 21.39.42.41 1.1.41 1.52 0C26.54 36.1 37 25.8 37 16.44 37 9.57 31.18 4 24 4z"
-            fill="#0ea5e9" stroke="#0369a1" stroke-width="1.5"/>
-      <circle cx="24" cy="17" r="6.5" fill="white"/>
-    </svg>
-  `,
+    html: `<div class="w-6 h-6 bg-blue-500 rounded-full border-4 border-white shadow-md"></div>`,
     className: "",
-    iconSize: [34, 34],
-    iconAnchor: [17, 30],
+    iconSize: [24, 24], // w-6 h-6 in tailwind is 1.5rem = 24px
+    iconAnchor: [12, 12], // center of the icon
 });
 
 /** 地図中心が動くたびに親へ通知 */

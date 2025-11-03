@@ -12,6 +12,19 @@
   --font-mono: var(--font-geist-mono);
 }
 
+@layer utilities {
+  .scrollbar-hide {
+    /* IE, Edge */
+    -ms-overflow-style: none;
+    /* Firefox */
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    /* Chrome, Safari, Opera */
+    display: none;
+  }
+}
+
 /* 
 ダークモードを無効化
 @media (prefers-color-scheme: dark) {

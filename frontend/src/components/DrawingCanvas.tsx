@@ -4,6 +4,7 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { FaPencilAlt } from 'react-icons/fa';
 import type { Point } from '../types/types';
 import Text from './Text'; // ★ 追加
+import { ACCENT_AMBER } from '../lib/color'; // ★ 追加
 
 interface DrawingCanvasProps {
   strokeColor?: string;
@@ -15,7 +16,7 @@ interface DrawingCanvasProps {
 }
 
 const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
-  strokeColor = '#f4551fff',
+  strokeColor = ACCENT_AMBER,
   strokeWidth = 6,
   onDrawEnd,
   initialPoints,
