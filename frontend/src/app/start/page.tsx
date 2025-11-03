@@ -8,7 +8,7 @@ import Header from '@/components/Header';
 import BackButton from '@/components/BackButton';
 import RoutingButton from '@/components/RoutingButton';
 import Text from '@/components/Text';
-import { FaMapMarkerAlt } from 'react-icons/fa';
+// import { FaMapMarkerAlt } from 'react-icons/fa'; // ★ 不要になった
 import { FaPencilAlt } from "react-icons/fa";
 
 // CenterPinMapを動的にインポート
@@ -79,7 +79,8 @@ export default function StartPage() {
 
         <section className="space-y-1">
           <Header headerText="スタート地点を選択" />
-          <Text text="どこから走り始めますか？地図を動かして赤いピンの場所をスタート地点に設定してください。" />
+          {/* ★ テキストを修正 */}
+          <Text text="どこから走り始めますか？地図を動かして緑のピンの場所をスタート地点に設定してください。" />
           <CenterPinMap height={400} onCenterChange={setCenter} />
         </section>
 
@@ -91,8 +92,14 @@ export default function StartPage() {
               className="text-gray-500"
             />
           </div>
+          {/* ★ 凡例アイコンを startIcon に変更 */}
           <div className="flex items-center space-x-1">
-            <FaMapMarkerAlt className="text-red-500" />
+            <svg width="16" height="20" viewBox="0 0 40 50" className="inline-block -mt-1">
+              <path d="M20 5c-6.5 0-12 5.5-12 12 0 8 10 18 11.5 19.5.3.3.7.3 1 0C22 35 32 25 32 17c0-6.5-5.5-12-12-12z"
+                    fill="#20B950"/>
+              <circle cx="20" cy="17" r="8" fill="white"/>
+              <text x="20" y="21" text-anchor="middle" fill="#20B950" font-size="12" font-weight="bold">S</text>
+            </svg>
             <Text
               text="スタート地点"
               className="text-gray-500"

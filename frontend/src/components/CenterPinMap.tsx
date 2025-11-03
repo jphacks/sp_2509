@@ -11,6 +11,7 @@ import {
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { startIcon } from "./MapIcons"; // ★ startIcon をインポート
 
 type CSSSize = number | string;
 
@@ -158,24 +159,18 @@ export default function CenterPinMap({
                 <CenterReporter onChange={onCenterChange} />
             </MapContainer>
 
-            {/* 赤いピン：常に中央固定（オーバーレイ） */}
+            {/* ★ スタートピン：常に中央固定（オーバーレイ） ★ */}
             <div className="pointer-events-none absolute inset-0 z-[1000] flex items-center justify-center">
-                <svg
-                    width="38"
-                    height="38"
-                    viewBox="0 0 48 48"
-                    className="-translate-y-2 drop-shadow"
+                {/*
+                    startIcon (width 48, height 60, anchor [24, 44])
+                    ピンの先端(44px)が中心(高さ60/2 = 30px)に来るように、
+                    Y方向に (30 - 44) = -14px ずらす
+                */}
+                <div
+                    className="-translate-y-[14px] drop-shadow" // ★ translate-y を変更
                     aria-hidden
-                >
-                    <path
-                        d="M24 4c-7.18 0-13 5.57-13 12.44 0 9.36 10.46 19.66 12.27 21.39.42.41 1.1.41 1.52 0C26.54 36.1 37 25.8 37 16.44 37 9.57 31.18 4 24 4z"
-                        fill="#ef4444"
-                        stroke="#b91c1c"
-                        strokeWidth="1.5"
-                    />
-                    <circle cx="24" cy="17" r="6.5" fill="white" />
-                    <ellipse cx="24" cy="44" rx="6" ry="2.2" fill="rgba(0,0,0,0.18)" />
-                </svg>
+                    dangerouslySetInnerHTML={{ __html: startIcon.options.html || "" }} // ★ SVGを挿入
+                />
             </div>
         </div>
     );
