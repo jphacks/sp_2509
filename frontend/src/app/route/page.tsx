@@ -238,7 +238,7 @@ export default function CourseDetailPage() {
         {/* ← 条件変更（/condition） */}
         {!isEditing && (
           <div className="mb-3">
-            <BackButton text="条件を変更する" to="/condition" />
+            <BackButton text="条件変更" to="/condition" />
           </div>
         )}
 
