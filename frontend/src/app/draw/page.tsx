@@ -17,6 +17,7 @@ import { GrConfigure } from "react-icons/gr";
 
 // ★ ステップ1: 自動生成されたすべての図形をインポート
 import * as generatedShapes from "../../lib/generated-shapes";
+import { ACCENT_AMBER } from "../../lib/color";
 
 // ★ ステップ2: 図形の「設定マップ」を定義
 // ビルドスクリプトが生成する変数名 (例: heartShape) をキーとして、
@@ -290,7 +291,7 @@ export default function Draw() {
           <div className="w-full aspect-[1] mt-4 relative">
             <DrawingCanvas
               strokeWidth={6}
-              strokeColor="#f4541fff"
+              strokeColor={ACCENT_AMBER}
               onDrawEnd={handleDrawEnd}
               initialPoints={undefined}
               clearSignal={clearTrigger}
@@ -314,7 +315,7 @@ export default function Draw() {
               buttonText="描き直す"
               disabled={isClearButtonDisabled} // ★ やり直しボタンのdisabled条件も見直しが必要なら修正
               buttonColor="#ffffff"
-              textColor="#f3632aff"
+              textColor={ACCENT_AMBER}
             />
           </div>
 

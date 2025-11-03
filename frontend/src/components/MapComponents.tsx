@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useMap } from "react-leaflet";
 import L from "leaflet";
+import { ACCENT_AMBER } from "../lib/color";
 
 // グラデーション付きPolylineを描画するコンポーネント
 export function GradientPolyline({ positions }: { positions: [number, number][] }) {
@@ -81,7 +82,7 @@ export function GradientPolyline({ positions }: { positions: [number, number][] 
 // 点線を描画するコンポーネント
 export function DashedPolyline({ 
   positions, 
-  color = "#f59e0b", 
+  color = ACCENT_AMBER, 
   weight = 3,
   dashArray = "10, 10"
 }: { 
