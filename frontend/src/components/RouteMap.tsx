@@ -6,6 +6,7 @@ import { LatLngExpression, divIcon, LatLngBounds } from "leaflet";
 import { useEffect } from "react";
 import dynamic from "next/dynamic";
 import { startIcon, goalIcon } from "./MapIcons";
+import { ACCENT_AMBER } from "../lib/color";
 
 const GradientPolyline = dynamic(
   () => import("./MapComponents").then((mod) => mod.GradientPolyline),
@@ -104,7 +105,7 @@ const RouteMap = ({
       {secondaryPositions && secondaryPositions.length > 0 && (
         <DashedPolyline 
           positions={secondaryPositions as [number, number][]} 
-          color="#f4541fff" 
+          color={ACCENT_AMBER}
           weight={2}
           dashArray="10, 5"
         />

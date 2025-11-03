@@ -15,6 +15,7 @@ import BackButton from "@/components/BackButton";
 import RoutingButton from "../../components/RoutingButton";
 import { SlGraph } from "react-icons/sl";
 import Image from "next/image";
+import { ACCENT_AMBER } from "../../lib/color";
 
 const CenterPinMap = dynamic(() => import("../../components/CenterPinMap"), {
   ssr: false,
@@ -134,9 +135,9 @@ export default function Condition() {
           loadingText="コースを計算中…"
           points={loadedDrawingPoints}
           size={120}
-          strokeColor="#ef4444"
+          strokeColor={ACCENT_AMBER}
           strokeWidth={2.5}
-          dotColor="#111"
+          dotColor={ACCENT_AMBER}
           dotSize={4}
           animationDuration={2.2}
           pauseDuration={0.8}
