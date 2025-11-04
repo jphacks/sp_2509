@@ -35,7 +35,7 @@ const BackButton: React.FC<BackButtonProps> = ({
     <button
       onClick={handleClick}
       // --- スタイル設定 (Tailwind CSS) ---
-className={`
+      className={`
         flex items-center group
         text-sm text-gray-600 hover:text-black
         active:text-gray-400 // ★ 変更: 押したときに色を薄くする
