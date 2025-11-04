@@ -195,7 +195,7 @@ export default function CourseDetailPage() {
     setIsEditing(false);
   }, [originalRouteData]);
 
-  // ❌ setIsDrawingMode は廃止 ⇒ 何も定義しない・呼ばない
+  // ❌ setIsDrawingMode は廃止
 
   const handleMapDrawEnd = useCallback(
     (newPoints: LatLngExpression[]) => {
@@ -240,8 +240,6 @@ export default function CourseDetailPage() {
       };
       setHistory((prev) => [...prev, newData]);
       setRouteData(newData);
-
-      // ❌ setIsDrawingMode(false) は削除（編集モードは継続）
     },
     [routeData]
   );
@@ -321,7 +319,7 @@ export default function CourseDetailPage() {
             </div>
 
             {/* ✅ 編集完了を ActionButton に変更（画面下・最前面） */}
-            <div className="fixed bottom-4 left-0 right-0 z-20">
+            <div className="fixed inset-x-0 bottom-0 z-20 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-2">
               <div className="max-w-md mx-auto">
                 <ActionButton
                   onClick={handleEdit}
