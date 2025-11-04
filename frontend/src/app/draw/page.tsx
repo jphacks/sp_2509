@@ -337,7 +337,7 @@ export default function Draw() {
 
       {/* ★★★ 変更点: フローティングボタンを追加 ★★★ */}
       <div className="fixed bottom-4 left-0 right-0 z-20">
-        <div className="max-w-md mx-auto">
+        <div className="max-w-md mx-auto px-4">
           <RoutingButton
             buttonText="条件設定へ進む"
             onClick={navigateToCondition}
