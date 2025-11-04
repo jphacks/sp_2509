@@ -162,7 +162,7 @@ export default function MadeRoute({
     <article
       className="relative rounded-3xl border border-neutral-200/70 bg-white
                  shadow-sm hover:shadow-md transition-all duration-150 ease-out p-2 cursor-pointer
-                 active:bg-gray-100" // ★ 変更: transition-shadow を all に、duration/ease/active を追加
+                 active:bg-neutral-100"
       aria-label="コース概要カード"
       onClick={handleCardClick}
     >
