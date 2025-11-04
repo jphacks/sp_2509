@@ -21,9 +21,9 @@ const DashedPolyline = dynamic(
 type CSSSize = number | string;
 
 interface RouteMapHomeProps {
-    /** 青線：ルート */
+    /** グラデーション線：ルート */
     positions?: LatLngExpression[];
-    /** 破線：補助線（任意） */
+    /** アンバー色の破線：補助線（任意） */
     secondaryPositions?: LatLngExpression[];
     /** 表示サイズ */
     height?: CSSSize;
@@ -80,7 +80,6 @@ const FitBounds = ({
 const HardLock = () => {
     const map = useMap();
     useEffect(() => {
-        // 念のため API でも無効化（MapContainer 側でも false 指定済み）
         (map as any).dragging?.disable?.();
         (map as any).touchZoom?.disable?.();
         (map as any).scrollWheelZoom?.disable?.();
@@ -88,7 +87,6 @@ const HardLock = () => {
         (map as any).boxZoom?.disable?.();
         (map as any).keyboard?.disable?.();
 
-        // DOM レベルで完全ロック
         const c = map.getContainer();
         c.style.pointerEvents = "none";
         c.style.touchAction = "none";
@@ -119,7 +117,6 @@ export default function RouteMapHome({
             style={{ height: h, width: w }}
             attributionControl={false}
             zoomControl={false}
-            // すべての操作を無効化
             dragging={false}
             touchZoom={false}
             doubleClickZoom={false}
