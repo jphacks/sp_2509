@@ -284,7 +284,6 @@ export default function Draw() {
   const shouldShowGuideText = selectedShape === null;
 
   return (
-    // ★★★ 変更点: pb-28 を追加 ★★★
     <main className="flex min-h-screen flex-col items-center justify-start p-4 pb-28">
       <div className="z-10 w-full max-w-md items-center justify-center text-sm">
         <div className="text-center mb-4">
@@ -338,7 +337,7 @@ export default function Draw() {
 
       {/* ★★★ 変更点: フローティングボタンを追加 ★★★ */}
       <div className="fixed bottom-4 left-0 right-0 z-20">
-        <div className="max-w-md mx-auto px-4">
+        <div className="max-w-md mx-auto">
           <RoutingButton
             buttonText="条件設定へ進む"
             onClick={navigateToCondition}
