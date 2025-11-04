@@ -7,6 +7,7 @@ from scipy.spatial import KDTree
 from typing import List, Dict, Tuple
 from simplification.cutil import simplify_coords
 import threading
+from collections import deque
 
 class GPSArtGenerator:
     """
@@ -33,10 +34,15 @@ class GPSArtGenerator:
         self.rotation_search_steps = 360 # 経路角度探索のステップ数
         self.rotation_search_points = 200 # 角度決定のためにリサンプリングする点の数
         self.sampling_interval_m = 10.0 # C3コスト計算のサンプリング間隔（メートル）
+        
+        # ネットワークデータをキャッシュするためのLRUキャッシュ（最大10件）
+        self._network_cache = deque(maxlen=10)
+        self._network_lock = threading.Lock()
+        
+        # 現在アクティブなネットワークデータ
         self._road_network = None
         self._road_network_latlon = None
         self._anchor_point = None
-        self._network_lock = threading.Lock()
 
     def get_road_network(self):
         """投影された道路ネットワーク(UTM)を返します。"""
@@ -86,11 +92,25 @@ class GPSArtGenerator:
             force_reload (bool): 既存のキャッシュを無視して強制的に再取得するか
         """
         with self._network_lock:
-            if not force_reload and self._anchor_point == (center_lat, center_lon) and self._road_network is not None:
-                print("既存の道路ネットワークデータを再利用します。")
-                return
+            # force_reloadがFalseの場合、キャッシュを確認
+            if not force_reload:
+                for i, (cached_anchor, cached_network_latlon, cached_network) in enumerate(self._network_cache):
+                    # 緯度経度の差が一定以内であればキャッシュヒットとみなす
+                    CACHE_THRESHOLD = 0.01
+                    if abs(cached_anchor[0] - center_lat) < CACHE_THRESHOLD and abs(cached_anchor[1] - center_lon) < CACHE_THRESHOLD:
+                        print(f"キャッシュヒット: {cached_anchor} のデータを再利用します。")
+                        # ヒットしたアイテムをキューの先頭に移動 (LRU)
+                        item = self._network_cache[i]
+                        del self._network_cache[i]
+                        self._network_cache.appendleft(item)
+                        
+                        self._anchor_point = cached_anchor
+                        self._road_network_latlon = cached_network_latlon
+                        self._road_network = cached_network
+                        return
 
-            print("道路ネットワークデータを取得中...")
+            # キャッシュにない、またはforce_reload=Trueの場合
+            print("道路ネットワークデータを新規に取得中...")
             self._anchor_point = (center_lat, center_lon)
             
             try:
@@ -108,6 +128,11 @@ class GPSArtGenerator:
             
             for node, data in self._road_network.nodes(data=True):
                 data['coords'] = np.array([data['x'], data['y']])
+
+            # 新しいネットワークをキャッシュに追加
+            self._network_cache.appendleft(
+                (self._anchor_point, self._road_network_latlon, self._road_network)
+            )
 
     def _resample_shape(self, shape_points: List[Tuple[float, float]], num_points: int) -> List[Tuple[float, float]]:
         """
@@ -265,7 +290,6 @@ class GPSArtGenerator:
             if total_error < min_total_distance:
                 min_total_distance = total_error
                 best_angle = angle
-                print(f"  - 新しい最適角度: {angle:.1f}度 (合計距離: {total_error:.2f})")
 
         print(f"探索完了。最適な回転角度: {best_angle:.1f}度")
         return best_angle
