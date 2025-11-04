@@ -123,7 +123,7 @@ export default function Condition() {
     } catch (e) {
       console.error("Failed to parse drawing points from localStorage:", e);
     } finally {
-      setSubmitting(false);
+      //setSubmitting(false);
     }
   };
 
