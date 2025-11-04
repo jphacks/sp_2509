@@ -86,7 +86,7 @@ const FitBounds = ({
   return null;
 };
 
-/** 描画状態×タッチ本数に応じて Leaflet の挙動と CSS を切替 */
+/** 描画状態とタッチ本数に応じて Leaflet 動作と CSS を切り替えるコンポーネント */
 function InteractionPolicy({
   enabled,
   drawing,
@@ -102,7 +102,6 @@ function InteractionPolicy({
     const c = map.getContainer();
 
     if (!enabled) {
-      // 通常モード
       (map as any).dragging?.enable?.();
       (map as any).touchZoom?.enable?.();
       (map as any).scrollWheelZoom?.enable?.();
@@ -114,21 +113,18 @@ function InteractionPolicy({
       return;
     }
 
-    // 描画モード
+    // 描画モード中はホイール/ダブルクリック等の誤操作を無効化
     (map as any).scrollWheelZoom?.disable?.();
     (map as any).doubleClickZoom?.disable?.();
     (map as any).boxZoom?.disable?.();
     (map as any).keyboard?.disable?.();
 
     if (drawing && touchCount <= 1) {
-      // 1本指で描画中：地図ドラッグは無効、ブラウザジェスチャも停止
       (map as any).dragging?.disable?.();
-      // pinch は無関係なので一旦無効でOK（2本指になった瞬間に有効化）
       (map as any).touchZoom?.disable?.();
       c.style.touchAction = "none";
       c.style.cursor = "crosshair";
     } else {
-      // 2本指 or 非描画：地図操作許可
       (map as any).dragging?.enable?.();
       (map as any).touchZoom?.enable?.();
       c.style.touchAction = "pinch-zoom pan-x pan-y";
@@ -160,18 +156,14 @@ export default function RouteMap({
   const goalPosition =
     positions && positions.length > 1 ? positions[positions.length - 1] : null;
 
-  // MapDrawingHandler から通知される状態
-  const [drawingState, setDrawingState] = useState({
-    drawing: false,
-    touchCount: 0,
-  });
+  const [drawingState, setDrawingState] = useState({ drawing: false, touchCount: 0 });
 
   return (
     <MapContainer
       style={{ height: h, width: w }}
       attributionControl={false}
       zoomControl={showZoomControl && !isDrawingMode}
-      // ベースは常に有効化しておき、Policy側で動的に切替
+      // ベースは常に有効化しておき、InteractionPolicy コンポーネント側で動的に切替
       dragging={interactive}
       touchZoom={interactive}
       doubleClickZoom={interactive && !isDrawingMode}
@@ -207,7 +199,6 @@ export default function RouteMap({
         resetViewSignal={resetViewSignal}
       />
 
-      {/* 描画モードの挙動制御 */}
       <InteractionPolicy
         enabled={!!isDrawingMode}
         drawing={drawingState.drawing}
