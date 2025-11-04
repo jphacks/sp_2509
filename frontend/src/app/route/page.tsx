@@ -7,16 +7,12 @@ import { useRouter } from "next/navigation";
 import MadeRouteCard_Big from "@/components/MadeRouteCard_Big";
 import Title from "@/components/Title";
 import Text from "../../components/Text";
-import {
-  FaUndo,
-  FaTimes,
-  FaSave,
-} from "react-icons/fa";
+import { FaUndo, FaTimes, FaSave } from "react-icons/fa";
 import BackButton from "@/components/BackButton";
 import UndoButton from "@/components/UndoButton";
 import CancelButton from "@/components/CancelButton";
-import ActionButton from "@/components/ActionButton";  // ★ 追加
-import { FaCheck } from "react-icons/fa6";            // ★ アイコン
+import ActionButton from "@/components/ActionButton";
+import { FaCheck } from "react-icons/fa6";
 import type { LatLngExpression, LatLng } from "leaflet";
 
 const API_URL = "/api";
@@ -43,28 +39,46 @@ function haversineKm(a: RoutePoint, b: RoutePoint): number {
 }
 function calculateTotalDistance(points: RoutePoint[]): number {
   let total = 0;
-  for (let i = 0; i + 1 < points.length; i++) total += haversineKm(points[i], points[i + 1]);
+  for (let i = 0; i + 1 < points.length; i++)
+    total += haversineKm(points[i], points[i + 1]);
   return parseFloat(total.toFixed(1));
 }
 
 /* --- RDP簡約化アルゴリズムなど --- */
 const haversineM = (a: RoutePoint, b: RoutePoint) => haversineKm(a, b) * 1000;
-function perpendicularDistanceM(p: RoutePoint, a: RoutePoint, b: RoutePoint): number {
+function perpendicularDistanceM(
+  p: RoutePoint,
+  a: RoutePoint,
+  b: RoutePoint
+): number {
   const segLen = haversineM(a, b);
   if (segLen === 0) return haversineM(p, a);
-  const ax = a.lng, ay = a.lat, bx = b.lng, by = b.lat, px = p.lng, py = p.lat;
-  const vx = bx - ax, vy = by - ay, wx = px - ax, wy = py - ay;
+  const ax = a.lng,
+    ay = a.lat,
+    bx = b.lng,
+    by = b.lat,
+    px = p.lng,
+    py = p.lat;
+  const vx = bx - ax,
+    vy = by - ay,
+    wx = px - ax,
+    wy = py - ay;
   const t = Math.max(0, Math.min(1, (vx * wx + vy * wy) / (vx * vx + vy * vy)));
   const proj: RoutePoint = { lat: ay + t * vy, lng: ax + t * vx };
   return haversineM(p, proj);
 }
 function rdpSimplify(points: RoutePoint[], epsilonM = 10): RoutePoint[] {
   if (points.length <= 2) return points.slice();
-  const first = points[0], last = points[points.length - 1];
-  let idx = -1, maxDist = -1;
+  const first = points[0],
+    last = points[points.length - 1];
+  let idx = -1,
+    maxDist = -1;
   for (let i = 1; i < points.length - 1; i++) {
     const d = perpendicularDistanceM(points[i], first, last);
-    if (d > maxDist) { maxDist = d; idx = i; }
+    if (d > maxDist) {
+      maxDist = d;
+      idx = i;
+    }
   }
   if (maxDist > epsilonM) {
     const left = rdpSimplify(points.slice(0, idx + 1), epsilonM);
@@ -74,17 +88,22 @@ function rdpSimplify(points: RoutePoint[], epsilonM = 10): RoutePoint[] {
   return [first, last];
 }
 function nearestVertexIndex(poly: RoutePoint[], target: RoutePoint) {
-  let best = 0, bestDist = Number.POSITIVE_INFINITY;
+  let best = 0,
+    bestDist = Number.POSITIVE_INFINITY;
   for (let i = 0; i < poly.length; i++) {
     const d = haversineM(poly[i], target);
-    if (d < bestDist) { bestDist = d; best = i; }
+    if (d < bestDist) {
+      bestDist = d;
+      best = i;
+    }
   }
   return { index: best, distM: bestDist };
 }
 
 export default function CourseDetailPage() {
   const [routeData, setRouteData] = useState<ResponseData | null>(null);
-  const [originalRouteData, setOriginalRouteData] = useState<ResponseData | null>(null);
+  const [originalRouteData, setOriginalRouteData] =
+    useState<ResponseData | null>(null);
   const [history, setHistory] = useState<ResponseData[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -176,47 +195,56 @@ export default function CourseDetailPage() {
     setIsEditing(false);
   }, [originalRouteData]);
 
-  /* 描画終了時に差し替え */
-  const handleMapDrawEnd = useCallback((newPoints: LatLngExpression[]) => {
-    if (!routeData) return;
+  // ❌ setIsDrawingMode は廃止 ⇒ 何も定義しない・呼ばない
 
-    const Q: RoutePoint[] = (newPoints as LatLng[]).map((p) => ({ lat: p.lat, lng: p.lng }));
-    if (Q.length < 2) return;
+  const handleMapDrawEnd = useCallback(
+    (newPoints: LatLngExpression[]) => {
+      if (!routeData) return;
+      const Q: RoutePoint[] = (newPoints as LatLng[]).map((p) => ({
+        lat: p.lat,
+        lng: p.lng,
+      }));
+      if (Q.length < 2) return;
 
-    const P = routeData.route_points;
-    if (P.length < 2) return;
+      const P = routeData.route_points;
+      if (P.length < 2) return;
 
-    const s = nearestVertexIndex(P, Q[0]);
-    const t = nearestVertexIndex(P, Q[Q.length - 1]);
+      const s = nearestVertexIndex(P, Q[0]);
+      const t = nearestVertexIndex(P, Q[Q.length - 1]);
+      let i = s.index,
+        j = t.index;
 
-    let i = s.index, j = t.index;
-    let Qdir = Q.slice();
+      let Qdir = Q.slice();
+      if (i > j) {
+        [i, j] = [j, i];
+        Qdir = Qdir.slice().reverse();
+      }
+      if (i === j) {
+        if (i < P.length - 1) j = i + 1;
+        else if (i > 0) i = i - 1;
+        else return;
+      }
 
-    if (i > j) { [i, j] = [j, i]; Qdir = Qdir.reverse(); }
-    if (i === j) {
-      if (i < P.length - 1) j = i + 1;
-      else if (i > 0) i = i - 1;
-      else return;
-    }
+      const Qsimplified = rdpSimplify(Qdir, 10);
+      const snapped = Qsimplified.slice();
+      snapped[0] = { ...P[i] };
+      snapped[snapped.length - 1] = { ...P[j] };
 
-    const Qsimplified = rdpSimplify(Qdir, 10);
-    const snapped = Qsimplified.slice();
+      const Pnew = P.slice(0, i).concat(snapped, P.slice(j + 1));
+      const newDistance = calculateTotalDistance(Pnew);
 
-    snapped[0] = { ...P[i] };
-    snapped[snapped.length - 1] = { ...P[j] };
+      const newData: ResponseData = {
+        total_distance_km: newDistance,
+        route_points: Pnew,
+        drawing_points: routeData.drawing_points,
+      };
+      setHistory((prev) => [...prev, newData]);
+      setRouteData(newData);
 
-    const Pnew = P.slice(0, i).concat(snapped, P.slice(j + 1));
-    const newDistance = calculateTotalDistance(Pnew);
-
-    const newData: ResponseData = {
-      total_distance_km: newDistance,
-      route_points: Pnew,
-      drawing_points: routeData.drawing_points,
-    };
-
-    setHistory((prev) => [...prev, newData]);
-    setRouteData(newData);
-  }, [routeData]);
+      // ❌ setIsDrawingMode(false) は削除（編集モードは継続）
+    },
+    [routeData]
+  );
 
   if (!memoizedRouteData) {
     return (
@@ -233,7 +261,6 @@ export default function CourseDetailPage() {
   return (
     <div className="bg-gray-50 min-h-screen">
       <main className="max-w-md mx-auto px-4 pb-28 pt-4">
-
         {/* 見出し */}
         <div className="text-left mb-2 font-sans">
           <Title title="コースが完成しました" />
@@ -250,7 +277,7 @@ export default function CourseDetailPage() {
         <div className="mb-3">
           <MadeRouteCard_Big
             routeData={memoizedRouteData}
-            isDrawingMode={isEditing}    // ✅ 編集＝描画
+            isDrawingMode={isEditing} // ✅ 編集＝描画
             onDrawOnMap={handleMapDrawEnd}
             resetViewSignal={mapResetSeq}
           />
@@ -278,9 +305,6 @@ export default function CourseDetailPage() {
         {/* 編集モード中 */}
         {isEditing && (
           <div className="space-y-3">
-
-
-
             {/* 取り消し & 破棄 */}
             <div className="flex gap-2">
               <UndoButton
@@ -296,7 +320,7 @@ export default function CourseDetailPage() {
               />
             </div>
 
-            {/* ✅ 編集完了を ActionButton に変更 */}
+            {/* ✅ 編集完了を ActionButton に変更（画面下・最前面） */}
             <div className="fixed bottom-4 left-0 right-0 z-20">
               <div className="max-w-md mx-auto">
                 <ActionButton
@@ -311,21 +335,23 @@ export default function CourseDetailPage() {
             </div>
           </div>
         )}
-      </main>
 
-      {/* ─ 保存ボタン（編集中は非表示） ─ */}
-      {!isEditing && (
-        <div className="fixed inset-x-0 bottom-0 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-2 bg-transparent">
-          <button
-            onClick={handleSaveCourse}
-            disabled={isSaving}
-            className="w-full flex items-center justify-center gap-2 rounded-2xl bg-black text-white py-4 text-lg font-semibold shadow-lg active:scale-[0.98] transition disabled:bg-neutral-400 disabled:cursor-not-allowed"
-          >
-            <FaSave size={20} />
-            <span>{isSaving ? "保存中..." : "保存してホームに戻る"}</span>
-          </button>
-        </div>
-      )}
+        {/* 下部固定 保存ボタン（編集していない時だけ表示） */}
+        {!isEditing && (
+          <div className="fixed inset-x-0 bottom-0 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-2 bg-transparent">
+            <div className="max-w-md mx-auto">
+              <button
+                onClick={handleSaveCourse}
+                disabled={isSaving}
+                className="w-full flex items-center justify-center gap-2 rounded-2xl bg-black text-white py-4 text-lg font-semibold shadow-lg active:scale-[0.98] transition disabled:bg-neutral-400 disabled:cursor-not-allowed"
+              >
+                <FaSave size={20} />
+                <span>{isSaving ? "保存中..." : "保存してホームに戻る"}</span>
+              </button>
+            </div>
+          </div>
+        )}
+      </main>
     </div>
   );
 }

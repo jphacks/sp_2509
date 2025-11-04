@@ -246,7 +246,7 @@ const createCurrentLocationIcon = (heading: number | null) => {
 export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }: NavigationMapProps) {
   const router = useRouter();
   const currentPositionArray = useLocation();
-  const { heading } = useHeading();
+  const { heading, requestPermission } = useHeading();
   const initialSpeechDone = useRef(false);
   const [showModal, setShowModal] = useState(true);
 
@@ -254,12 +254,16 @@ export default function NavigationMap({ routeData, simplifiedRoute, turnPoints }
   const [ableVoiceOutput, setAbleVoiceOutput] = useState(false);
 
   const handleModalConfirm = useCallback(() => {
+    // 音声出力の許可
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.speak(new SpeechSynthesisUtterance(""));
     }
+    // コンパスの許可
+    requestPermission();
+
     setAbleVoiceOutput(true);
     setShowModal(false);
-  }, []);
+  }, [requestPermission]);
 
   useEffect(() => {
     if (ableVoiceOutput && !initialSpeechDone.current) {
