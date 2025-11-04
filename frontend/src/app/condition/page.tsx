@@ -121,9 +121,10 @@ export default function Condition() {
         router.push(`/route`);
       }
     } catch (e) {
-      console.error("Failed to parse drawing points from localStorage:", e);
-    } finally {
-      //setSubmitting(false);
+        console.error("Failed to parse drawing points from localStorage:", e);
+        setSubmitting(false); // ローディング解除
+        router.push('/home'); // ホームに戻る
+
     }
   };
 
