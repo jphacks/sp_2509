@@ -1,9 +1,8 @@
-// frontend/src/components/MapDrawingHandler.tsx
 "use client";
 
 import { useEffect, useRef, useState } from "react";
 import { Polyline, useMap } from "react-leaflet";
-import * as L from "leaflet"; // 互換性のためワイルドカード import
+import * as L from "leaflet";
 import type { LatLngExpression, LatLng } from "leaflet";
 
 interface MapDrawingHandlerProps {
@@ -15,6 +14,8 @@ interface MapDrawingHandlerProps {
     strokeColor?: string;
     /** 何 m 以上動いたら点を追加するか（負荷対策） */
     sampleMinDistM?: number;
+    /** 描画状態とタッチ本数の通知（地図側の挙動切替に使用・任意） */
+    onDrawingStateChange?: (s: { drawing: boolean; touchCount: number }) => void;
 }
 
 type Pt = { lat: number; lng: number };
@@ -36,19 +37,25 @@ export default function MapDrawingHandler({
     onDrawEnd,
     strokeColor = "#f4541f",
     sampleMinDistM = 2,
+    onDrawingStateChange,
 }: MapDrawingHandlerProps) {
     const map = useMap();
 
-    // ライブ表示用の state（Polyline 用）
     const [points, setPoints] = useState<LatLngExpression[]>([]);
-
-    // 実処理向けの参照（イベントハンドラから最新配列にアクセスするため）
     const pointsRef = useRef<LatLngExpression[]>([]);
     const drawingRef = useRef(false);
     const activePointerId = useRef<number | null>(null);
+    const activeTouchIds = useRef<Set<number>>(new Set());
 
-    // state と ref を同期
-    const setPointsSafe = (updater: (prev: LatLngExpression[]) => LatLngExpression[]) => {
+    const notify = () =>
+        onDrawingStateChange?.({
+            drawing: drawingRef.current,
+            touchCount: activeTouchIds.current.size,
+        });
+
+    const setPointsSafe = (
+        updater: (prev: LatLngExpression[]) => LatLngExpression[]
+    ) => {
         setPoints((prev) => {
             const next = updater(prev);
             pointsRef.current = next;
@@ -56,20 +63,15 @@ export default function MapDrawingHandler({
         });
     };
 
-    // 末尾点（m サンプリング用）
     const lastPt = (): Pt | undefined => {
         const p = pointsRef.current[pointsRef.current.length - 1] as LatLng | undefined;
         return p ? { lat: p.lat, lng: p.lng } : undefined;
     };
 
-    // すべてのイベントから安全に LatLng を得る
     function eventToLatLng(ev: Event): L.LatLng | null {
         const container = map.getContainer();
         const rect = container.getBoundingClientRect();
-
-        // Pointer/Mouse としてのプロパティ
         const pe = ev as PointerEvent & MouseEvent;
-        // Touch としてのプロパティ
         const te = ev as TouchEvent;
 
         let clientX: number | undefined;
@@ -85,15 +87,13 @@ export default function MapDrawingHandler({
             clientX = te.changedTouches[0].clientX;
             clientY = te.changedTouches[0].clientY;
         }
-
         if (
             clientX === undefined ||
             clientY === undefined ||
             Number.isNaN(clientX) ||
             Number.isNaN(clientY)
-        ) {
-            return null; // NaN 予防
-        }
+        )
+            return null;
 
         const x = clientX - rect.left;
         const y = clientY - rect.top;
@@ -103,87 +103,132 @@ export default function MapDrawingHandler({
     useEffect(() => {
         const container = map.getContainer();
 
-        const onPointerDown = (e: PointerEvent) => {
-            if (!isDrawingMode) return;
-            const latlng = eventToLatLng(e);
-            if (!latlng) return;
+        const getTouchCount = () => activeTouchIds.current.size;
 
+        const beginDrawing = (pid?: number, latlng?: L.LatLng) => {
+            if (pid !== undefined) activePointerId.current = pid;
             drawingRef.current = true;
-            activePointerId.current = e.pointerId;
-
-            setPointsSafe(() => [latlng]);
-
-            // スクロール/ドラッグ抑止
-            try {
-                (e.target as Element).setPointerCapture?.(e.pointerId);
-            } catch { }
-            e.preventDefault();
-            e.stopPropagation();
+            if (latlng) setPointsSafe(() => [latlng]);
+            notify();
         };
-
-        const onPointerMove = (e: PointerEvent) => {
-            if (!isDrawingMode || !drawingRef.current) return;
-            if (
-                activePointerId.current !== null &&
-                e.pointerId !== activePointerId.current
-            )
-                return;
-
-            const latlng = eventToLatLng(e);
-            if (!latlng) return;
-
-            const prev = lastPt();
-            const cur = { lat: latlng.lat, lng: latlng.lng };
-            if (!prev || haversineM(prev, cur) >= sampleMinDistM) {
-                setPointsSafe((arr) => [...arr, latlng]);
-            }
-
-            e.preventDefault();
-            e.stopPropagation();
-        };
-
-        const finish = (e?: PointerEvent | TouchEvent | MouseEvent) => {
-            if (!isDrawingMode || !drawingRef.current) return;
+        const cancelDrawing = () => {
             drawingRef.current = false;
             activePointerId.current = null;
-
+            setPointsSafe(() => []);
+            notify();
+        };
+        const finishDrawing = (e?: PointerEvent | TouchEvent | MouseEvent) => {
+            if (!drawingRef.current) return;
+            drawingRef.current = false;
             const list = pointsRef.current;
             if (list.length > 1) onDrawEnd(list);
-
-            // リセット
             setPointsSafe(() => []);
+            activePointerId.current = null;
             if (e && "pointerId" in e) {
                 try {
                     (e.target as Element).releasePointerCapture?.(e.pointerId as number);
                 } catch { }
             }
+            notify();
         };
 
-        const onPointerUp = (e: PointerEvent) => {
-            finish(e);
+        const onPointerDown = (e: PointerEvent) => {
+            if (!isDrawingMode) return;
+
+            if (e.pointerType === "touch") {
+                activeTouchIds.current.add(e.pointerId);
+                notify();
+            }
+            const touchCount = getTouchCount();
+
+            // 2本指以上 → 地図操作に譲る（描画開始しない・preventしない）
+            if (e.pointerType === "touch" && touchCount >= 2) return;
+
+            // 1本指 or マウス → 描画開始
+            const latlng = eventToLatLng(e);
+            if (!latlng) return;
+
+            beginDrawing(e.pointerId, latlng);
+
+            try {
+                (e.target as Element).setPointerCapture?.(e.pointerId);
+            } catch { }
+            // 1本指描画中のみ抑止
             e.preventDefault();
             e.stopPropagation();
         };
 
-        const onPointerCancel = (e: PointerEvent) => {
-            finish(e);
+        const onPointerMove = (e: PointerEvent) => {
+            if (!isDrawingMode) return;
+
+            const touchCount = getTouchCount();
+
+            // 描画中に2本目が来た → 中断して地図へ
+            if (drawingRef.current && e.pointerType === "touch" && touchCount >= 2) {
+                cancelDrawing(); // onDrawEndは呼ばない中断仕様
+                return; // preventしない
+            }
+
+            if (
+                drawingRef.current &&
+                (activePointerId.current === null || e.pointerId === activePointerId.current)
+            ) {
+                const latlng = eventToLatLng(e);
+                if (!latlng) return;
+                const prev = lastPt();
+                const cur = { lat: latlng.lat, lng: latlng.lng };
+                if (!prev || haversineM(prev, cur) >= sampleMinDistM) {
+                    setPointsSafe((arr) => [...arr, latlng]);
+                }
+                // 1本指描画中のみ抑止
+                e.preventDefault();
+                e.stopPropagation();
+            }
         };
 
-        // フォールバック（旧端末向け）
+        const onPointerUp = (e: PointerEvent) => {
+            if (e.pointerType === "touch") {
+                activeTouchIds.current.delete(e.pointerId);
+                notify();
+            }
+            if (activePointerId.current === e.pointerId) {
+                // 自分の描画を終了
+                finishDrawing(e);
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        };
+
+        const onPointerCancel = (e: PointerEvent) => {
+            if (e.pointerType === "touch") {
+                activeTouchIds.current.delete(e.pointerId);
+                notify();
+            }
+            if (activePointerId.current === e.pointerId) cancelDrawing();
+        };
+
+        // 旧Touch Events（保険）
         const onTouchStart = (e: TouchEvent) => {
-            if (!isDrawingMode || drawingRef.current) return;
+            if (!isDrawingMode) return;
+            if (e.touches.length >= 2) {
+                notify();
+                return;
+            }
+            if (drawingRef.current) return;
             const latlng = eventToLatLng(e);
             if (!latlng) return;
-
-            drawingRef.current = true;
-            setPointsSafe(() => [latlng]);
+            beginDrawing(undefined, latlng);
             e.preventDefault();
         };
         const onTouchMove = (e: TouchEvent) => {
-            if (!isDrawingMode || !drawingRef.current) return;
+            if (!isDrawingMode) return;
+            if (e.touches.length >= 2) {
+                cancelDrawing();
+                return;
+            }
+            if (!drawingRef.current) return;
             const latlng = eventToLatLng(e);
             if (!latlng) return;
-
             const prev = lastPt();
             const cur = { lat: latlng.lat, lng: latlng.lng };
             if (!prev || haversineM(prev, cur) >= sampleMinDistM) {
@@ -191,22 +236,20 @@ export default function MapDrawingHandler({
             }
             e.preventDefault();
         };
-        const onTouchEnd = (e: TouchEvent) => finish(e);
+        const onTouchEnd = () => finishDrawing();
 
+        // Mouse（PC）
         const onMouseDown = (e: MouseEvent) => {
             if (!isDrawingMode) return;
             const latlng = eventToLatLng(e);
             if (!latlng) return;
-
-            drawingRef.current = true;
-            setPointsSafe(() => [latlng]);
+            beginDrawing(undefined, latlng);
             e.preventDefault();
         };
         const onMouseMove = (e: MouseEvent) => {
             if (!isDrawingMode || !drawingRef.current) return;
             const latlng = eventToLatLng(e);
             if (!latlng) return;
-
             const prev = lastPt();
             const cur = { lat: latlng.lat, lng: latlng.lng };
             if (!prev || haversineM(prev, cur) >= sampleMinDistM) {
@@ -214,9 +257,8 @@ export default function MapDrawingHandler({
             }
             e.preventDefault();
         };
-        const onMouseUp = (e: MouseEvent) => finish(e);
+        const onMouseUp = () => finishDrawing();
 
-        // Pointer を主、他は保険。passive:false で preventDefault を有効化
         container.addEventListener("pointerdown", onPointerDown, { passive: false });
         container.addEventListener("pointermove", onPointerMove, { passive: false });
         container.addEventListener("pointerup", onPointerUp, { passive: false });
@@ -244,9 +286,8 @@ export default function MapDrawingHandler({
             container.removeEventListener("mousemove", onMouseMove as any);
             container.removeEventListener("mouseup", onMouseUp as any);
         };
-    }, [isDrawingMode, map, onDrawEnd, sampleMinDistM]);
+    }, [isDrawingMode, map, onDrawEnd, sampleMinDistM, onDrawingStateChange]);
 
-    // ライブ描画（描画中のみ表示）
     return points.length > 0 ? (
         <Polyline positions={points} color={strokeColor} weight={5} opacity={0.7} />
     ) : null;
