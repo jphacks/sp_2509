@@ -1,36 +1,40 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 export const useHeading = () => {
   const [heading, setHeading] = useState<number | null>(null);
   const [permissionGranted, setPermissionGranted] = useState(false);
 
-  useEffect(() => {
-    const requestAndStart = async () => {
-      let isPermissionGranted = false;
-      if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
-        try {
-          const permissionState = await (DeviceOrientationEvent as any).requestPermission();
-          if (permissionState === 'granted') {
-            isPermissionGranted = true;
-          } else {
-            console.error("Permission for DeviceOrientationEvent not granted.");
-          }
-        } catch (error) {
-          console.error("Error requesting DeviceOrientationEvent permission:", error);
+  const requestPermission = useCallback(async () => {
+    if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
+      try {
+        const permissionState = await (DeviceOrientationEvent as any).requestPermission();
+        if (permissionState === 'granted') {
+          setPermissionGranted(true);
+          return true;
+        } else {
+          console.error("Permission for DeviceOrientationEvent not granted.");
+          setPermissionGranted(false);
+          return false;
         }
-      } else {
-        // For non-iOS 13+ devices, permission is not required
-        isPermissionGranted = true;
+      } catch (error) {
+        console.error("Error requesting DeviceOrientationEvent permission:", error);
+        setPermissionGranted(false);
+        return false;
       }
+    } else {
+      // For non-iOS 13+ devices, permission is not required or granted by default
+      setPermissionGranted(true);
+      return true;
+    }
+  }, []);
 
-      if (isPermissionGranted) {
-        setPermissionGranted(true);
-      }
-    };
-
-    requestAndStart();
+  useEffect(() => {
+    // For non-iOS 13+ devices that don't require explicit permission
+    if (typeof (DeviceOrientationEvent as any).requestPermission !== 'function') {
+      setPermissionGranted(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -50,5 +54,5 @@ export const useHeading = () => {
     };
   }, [permissionGranted]);
 
-  return { heading };
+  return { heading, permissionGranted, requestPermission };
 };
