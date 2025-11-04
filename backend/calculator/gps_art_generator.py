@@ -7,7 +7,7 @@ from scipy.spatial import KDTree
 from typing import List, Dict, Tuple
 from simplification.cutil import simplify_coords
 import threading
-from collections import deque
+from collections import OrderedDict
 
 class GPSArtGenerator:
     """
@@ -36,7 +36,9 @@ class GPSArtGenerator:
         self.sampling_interval_m = 10.0 # C3コスト計算のサンプリング間隔（メートル）
         
         # ネットワークデータをキャッシュするためのLRUキャッシュ（最大10件）
-        self._network_cache = deque(maxlen=10)
+        self.cache_threshold = 0.01 # キャッシュの有効範囲(緯度経度)
+        self.max_cache_size = 10
+        self._network_cache = OrderedDict()
         self._network_lock = threading.Lock()
         
         # 現在アクティブなネットワークデータ
@@ -92,17 +94,13 @@ class GPSArtGenerator:
             force_reload (bool): 既存のキャッシュを無視して強制的に再取得するか
         """
         with self._network_lock:
-            # force_reloadがFalseの場合、キャッシュを確認
             if not force_reload:
-                for i, (cached_anchor, cached_network_latlon, cached_network) in enumerate(self._network_cache):
-                    # 緯度経度の差が一定以内であればキャッシュヒットとみなす
-                    CACHE_THRESHOLD = 0.01
-                    if abs(cached_anchor[0] - center_lat) < CACHE_THRESHOLD and abs(cached_anchor[1] - center_lon) < CACHE_THRESHOLD:
+                for cached_anchor in reversed(list(self._network_cache.keys())):
+                    if abs(cached_anchor[0] - center_lat) < self.cache_threshold and abs(cached_anchor[1] - center_lon) < self.cache_threshold:
                         print(f"キャッシュヒット: {cached_anchor} のデータを再利用します。")
-                        # ヒットしたアイテムをキューの先頭に移動 (LRU)
-                        item = self._network_cache[i]
-                        del self._network_cache[i]
-                        self._network_cache.appendleft(item)
+                        # ヒットしたアイテムを辞書の末尾に移動 (LRU)
+                        cached_network_latlon, cached_network = self._network_cache[cached_anchor]
+                        self._network_cache.move_to_end(cached_anchor)
                         
                         self._anchor_point = cached_anchor
                         self._road_network_latlon = cached_network_latlon
@@ -111,11 +109,11 @@ class GPSArtGenerator:
 
             # キャッシュにない、またはforce_reload=Trueの場合
             print("道路ネットワークデータを新規に取得中...")
-            self._anchor_point = (center_lat, center_lon)
+            current_anchor = (center_lat, center_lon)
             
             try:
-                self._road_network_latlon = ox.graph_from_point(
-                    self._anchor_point, 
+                road_network_latlon = ox.graph_from_point(
+                    current_anchor, 
                     dist=self.network_distance, 
                     network_type=self.network_type
                 )
@@ -124,15 +122,20 @@ class GPSArtGenerator:
                 raise ValueError("指定された場所の近くに道路が見つかりませんでした。") from e
 
             print("グラフを投影中...")
-            self._road_network = ox.project_graph(self._road_network_latlon)
+            road_network = ox.project_graph(road_network_latlon)
             
-            for node, data in self._road_network.nodes(data=True):
+            for node, data in road_network.nodes(data=True):
                 data['coords'] = np.array([data['x'], data['y']])
 
+            self._anchor_point = current_anchor
+            self._road_network_latlon = road_network_latlon
+            self._road_network = road_network
+
+            if len(self._network_cache) >= self.max_cache_size:
+                self._network_cache.popitem(last=False)
+            
             # 新しいネットワークをキャッシュに追加
-            self._network_cache.appendleft(
-                (self._anchor_point, self._road_network_latlon, self._road_network)
-            )
+            self._network_cache[current_anchor] = (road_network_latlon, road_network)
 
     def _resample_shape(self, shape_points: List[Tuple[float, float]], num_points: int) -> List[Tuple[float, float]]:
         """
