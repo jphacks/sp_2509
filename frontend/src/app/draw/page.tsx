@@ -293,7 +293,7 @@ export default function Draw() {
               strokeWidth={6}
               strokeColor={ACCENT_AMBER}
               onDrawEnd={handleDrawEnd}
-              initialPoints={undefined}
+              initialPoints={userDrawnPoints}
               clearSignal={clearTrigger}
               showGuideText={shouldShowGuideText}
             />
