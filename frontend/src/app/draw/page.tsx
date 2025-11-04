@@ -55,6 +55,9 @@ const shapeConfig: Record<string, { description: string }> = {
   butterfly: {
     description: "ちょうちょ",
   },
+  umbrella: {
+    description: "傘",
+  },
 };
 
 // --- Draw コンポーネント本体 ---
@@ -281,7 +284,7 @@ export default function Draw() {
   const shouldShowGuideText = selectedShape === null;
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-start p-4">
+    <main className="flex min-h-screen flex-col items-center justify-start p-4 pb-28">
       <div className="z-10 w-full max-w-md items-center justify-center text-sm">
         <div className="text-center mb-4">
           <Title title="コースの形を描く" />
@@ -329,14 +332,18 @@ export default function Draw() {
             />
           </div>
 
-          <div className="mt-8 flex justify-center">
-            <RoutingButton
-              buttonText="条件設定へ進む"
-              onClick={navigateToCondition}
-              disabled={isNextButtonDisabled}
-              icon={GrConfigure}
-            />
-          </div>
+        </div>
+      </div>
+
+      {/* ★★★ 変更点: フローティングボタンを追加 ★★★ */}
+      <div className="fixed bottom-4 left-0 right-0 z-20">
+        <div className="max-w-md mx-auto">
+          <RoutingButton
+            buttonText="条件設定へ進む"
+            onClick={navigateToCondition}
+            disabled={isNextButtonDisabled}
+            icon={GrConfigure}
+          />
         </div>
       </div>
     </main>

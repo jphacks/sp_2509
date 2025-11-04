@@ -20,8 +20,8 @@ type CarouselWithClickProps = {
   selectedDescription?: string | null;
 };
 
-const imageWidth = 125;
-const imageHeight = 125;
+const imageWidth = 140; // ★ 125 から 140 に変更
+const imageHeight = 140; // ★ 125 から 140 に変更
 const gap = 16;
 
 export default function CarouselWithClick({
