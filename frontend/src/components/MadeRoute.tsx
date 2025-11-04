@@ -5,12 +5,11 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { LatLngExpression } from "leaflet";
 import dynamic from "next/dynamic";
 import { AiFillStar, AiOutlineStar } from "react-icons/ai";
-import { BiDotsVertical } from "react-icons/bi";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 
-// ★ SSRでreact-leafletが評価されないようにする（window is not defined対策）
-const RouteMap = dynamic(() => import("./RouteMap"), { ssr: false });
+// ★ 完全操作不可版の地図（SSR回避）
+const RouteMapHome = dynamic(() => import("./RouteMapHome"), { ssr: false });
 
 type MadeRouteProps = {
   /** 固有ID。削除・お気に入り更新で使用 */
@@ -116,13 +115,13 @@ export default function MadeRoute({
     Number.isFinite(toNum(v)) ? toNum(v).toFixed(1) : "—";
   const dateLabel = created_at
     ? new Date(created_at).toLocaleDateString("ja-JP", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      })
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    })
     : "—";
 
-  // 地図サムネ：実描画サイズは大きめ（ズームは RouteMap に任せる）
+  // 地図サムネ：実描画サイズは大きめ（ズームは RouteMapHome に任せる）
   const BASE = 480;
   const THUMB = 144;
   const SCALE = THUMB / BASE;
@@ -202,7 +201,7 @@ export default function MadeRoute({
               width: 160,
             }}
             className="z-[1000] rounded-lg border border-neutral-200/70 bg-white shadow-lg overflow-hidden"
-            // ★ 追加：メニュー内クリックが外部判定に伝播しないようにする（削除クリック無効化の根本原因対策）
+            // メニュー内クリックが外部判定に伝播しないようにする
             onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
           >
@@ -230,18 +229,17 @@ export default function MadeRoute({
               height: BASE,
               transform: `scale(${SCALE})`,
               transformOrigin: "top left",
-              pointerEvents: "none",
+              pointerEvents: "none", // 念のため
             }}
           >
-            <RouteMap
+            <RouteMapHome
               positions={positions}
               secondaryPositions={[]}
               width={BASE}
               height={BASE}
               padding={DEFAULT_PADDING}
               maxZoom={DEFAULT_MAX_ZOOM}
-              interactive={false}
-              showZoomControl={false}
+              fitOnMountOnly
             />
           </div>
         </div>
