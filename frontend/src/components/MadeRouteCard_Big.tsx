@@ -37,7 +37,7 @@ export default function MadeRouteCard_Big({
   const drawingPositions: LatLngExpression[] = drawing_points.map((p) => [p.lat, p.lng]);
 
   const fmtKm = (v: number) => (Number.isFinite(v) ? v.toFixed(1) : "—");
-  const MAP_HEIGHT = 300;
+  const MAP_HEIGHT = 400;
 
   const mapInteractive = !isDrawingMode;
   const showZoom = !isDrawingMode;
@@ -45,7 +45,6 @@ export default function MadeRouteCard_Big({
   return (
     <article
       className="relative rounded-3xl border border-neutral-200/70 bg-white shadow-sm transition-shadow p-2 pb-4 font-sans"
-      style={{ height: "361px" }}
       aria-label="RouteCard"
     >
       <div className="h-full flex flex-col">
