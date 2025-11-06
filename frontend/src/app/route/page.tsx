@@ -127,11 +127,11 @@ export default function CourseDetailPage() {
     if (typeof window === "undefined") return;
     try {
       const seen = localStorage.getItem("route_info_seen");
-      // if (seen === "1") {
-      //   setShowModal(false);
-      // } else {
-      //   setShowModal(true);
-      // }
+      if (seen === "1") {
+        setShowModal(false);
+      } else {
+        setShowModal(true);
+      }
     } catch (e) {
       // ignore localStorage errors and default to showing modal
       setShowModal(true);
@@ -206,15 +206,18 @@ export default function CourseDetailPage() {
       setHistory([routeData!]);
       setIsEditing(false);
     } else {
-      // 編集開始：
-      try {
-        const seen = localStorage.getItem("route_info_seen");
-        if (seen !== "1") {
-          setShowModal(true);
-        }
-      } catch (e) {
-        setShowModal(true);
-      }
+      // 編集開始：デモ用にモーダルを必ず表示
+      setShowModal(true);
+
+      // 初回のみ表示するロジック：コメントアウトして残す
+      // try {
+      //   const seen = localStorage.getItem("route_info_seen");
+      //   if (seen !== "1") {
+      //     setShowModal(true);
+      //   }
+      // } catch (e) {
+      //   setShowModal(true);
+      // }
 
       setIsEditing(true);
     }
@@ -293,7 +296,7 @@ export default function CourseDetailPage() {
 
   return (
     <div className="bg-gray-50">
-      <main className="max-w-md mx-auto px-4 pb-28 pt-4 relative">
+      <main className="max-w-md mx-auto px-4 pb-28 pt-4">
         {/* 見出し */}
         <div className="text-left mb-2 font-sans">
           <Title title="コースが完成しました" />
@@ -344,9 +347,7 @@ export default function CourseDetailPage() {
               </div>
               <div className="flex gap-3 items-start">
                 <div>
-                  <p className="font-bold">
-                    3.指を離すして編集完了ボタンを押す
-                  </p>
+                  <p className="font-bold">3.指を離して編集完了ボタンを押す</p>
                   <img
                     src="/images/example3.png"
                     alt="指を離して編集ができている例"
@@ -418,7 +419,7 @@ export default function CourseDetailPage() {
 
         {/* 下部固定 保存ボタン（編集していない時だけ表示） */}
         {!isEditing && (
-          <div className="fixed inset-x-0 bottom-0 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-2 bg-transparent">
+          <div className="fixed inset-x-0 bottom-0 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-2 bg-gray-50">
             <div className="max-w-md mx-auto">
               <button
                 onClick={handleSaveCourse}
