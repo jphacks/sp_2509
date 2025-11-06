@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import MadeRouteCard_Big from "@/components/MadeRouteCard_Big";
 import Title from "@/components/Title";
 import Text from "../../components/Text";
+import Image from "next/image";
 import { FaUndo, FaTimes, FaSave, FaQuestion } from "react-icons/fa";
 import BackButton from "@/components/BackButton";
 import ActionButton from "@/components/ActionButton";
@@ -332,25 +333,37 @@ export default function CourseDetailPage() {
               <div className="flex gap-3 items-start">
                 <div>
                   <p className="font-bold">1.違和感のあるコースを見つける</p>
-                  <img src="/images/example1.png" alt="違和感のあるコース例" />
+                  <Image
+                    src="/images/example1.png"
+                    alt="違和感のあるコース例"
+                    width={800}
+                    height={400}
+                    className="w-full rounded-md object-cover"
+                  />
                 </div>
               </div>
 
               <div className="flex gap-3 items-start">
                 <div>
                   <p className="font-bold">2.イメージするコースを指でなぞる</p>
-                  <img
+                  <Image
                     src="/images/example2.png"
                     alt="イメージするコースを指でなぞる例"
+                    width={800}
+                    height={400}
+                    className="w-full rounded-md object-cover"
                   />
                 </div>
               </div>
               <div className="flex gap-3 items-start">
                 <div>
                   <p className="font-bold">3.指を離して編集完了ボタンを押す</p>
-                  <img
+                  <Image
                     src="/images/example3.png"
                     alt="指を離して編集ができている例"
+                    width={800}
+                    height={400}
+                    className="w-full rounded-md object-cover"
                   />
                 </div>
               </div>
