@@ -14,6 +14,7 @@ import CancelButton from "@/components/CancelButton";
 import ActionButton from "@/components/ActionButton";
 import { FaCheck } from "react-icons/fa6";
 import type { LatLngExpression, LatLng } from "leaflet";
+import RoutingButton from "@/components/RoutingButton";
 
 const API_URL = "/api";
 
@@ -319,8 +320,8 @@ export default function CourseDetailPage() {
             </div>
 
             {/* ✅ 編集完了を ActionButton に変更（画面下・最前面） */}
-            <div className="fixed inset-x-0 bottom-0 z-20 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-2">
-              <div className="max-w-md mx-auto">
+            <div className="fixed bottom-4 left-0 right-0 z-20">
+              <div className="max-w-md mx-auto px-4">
                 <ActionButton
                   onClick={handleEdit}
                   buttonText="編集完了"
@@ -335,17 +336,16 @@ export default function CourseDetailPage() {
         )}
 
         {/* 下部固定 保存ボタン（編集していない時だけ表示） */}
+
         {!isEditing && (
-          <div className="fixed inset-x-0 bottom-0 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-2 bg-transparent">
-            <div className="max-w-md mx-auto">
-              <button
+          <div className="fixed bottom-4 left-0 right-0 z-20">
+            <div className="max-w-md mx-auto px-4">
+              <RoutingButton
+                buttonText={isSaving ? "保存中..." : "保存してホームに戻る"}
                 onClick={handleSaveCourse}
                 disabled={isSaving}
-                className="w-full flex items-center justify-center gap-2 rounded-2xl bg-black text-white py-4 text-lg font-semibold shadow-lg active:scale-[0.98] transition disabled:bg-neutral-400 disabled:cursor-not-allowed"
-              >
-                <FaSave size={20} />
-                <span>{isSaving ? "保存中..." : "保存してホームに戻る"}</span>
-              </button>
+                icon={FaSave}
+              />
             </div>
           </div>
         )}
