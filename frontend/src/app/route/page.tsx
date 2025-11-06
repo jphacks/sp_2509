@@ -295,7 +295,7 @@ export default function CourseDetailPage() {
   }
 
   return (
-    <div className="bg-gray-50">
+    <div className="bg-gray">
       <main className="max-w-md mx-auto px-4 pb-28 pt-4">
         {/* 見出し */}
         <div className="text-left mb-2 font-sans">
