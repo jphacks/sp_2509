@@ -1,4 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, {
+  useState,
+  useEffect,
+  isValidElement,
+  cloneElement,
+} from "react";
 
 type InfoModalProps = {
   show: boolean;
@@ -8,7 +13,13 @@ type InfoModalProps = {
   children: React.ReactNode;
 };
 
-const InfoModal: React.FC<InfoModalProps> = ({ show, title, buttonLabel, onConfirm, children }) => {
+const InfoModal: React.FC<InfoModalProps> = ({
+  show,
+  title,
+  buttonLabel,
+  onConfirm,
+  children,
+}) => {
   const [isAnimatingIn, setIsAnimatingIn] = useState(false);
 
   useEffect(() => {
@@ -33,18 +44,40 @@ const InfoModal: React.FC<InfoModalProps> = ({ show, title, buttonLabel, onConfi
   const backdropAnimation = isAnimatingIn ? "opacity-100" : "opacity-0";
   const modalAnimation = isAnimatingIn ? "translate-y-0" : "translate-y-full";
 
+  const processedChildren = React.Children.map(children, (child) => {
+    if (
+      isValidElement(child) &&
+      (child.type === "img" || (child as any).props?.src)
+    ) {
+      const existing = (child as any).props.className || "";
+      const extra = "w-full rounded-md object-cover";
+      return cloneElement(
+        child as React.ReactElement<any>,
+        {
+          className: `${existing} ${extra}`.trim(),
+        } as any
+      );
+    }
+    return child;
+  });
+
   return (
     <div
       className={`fixed inset-0 z-[2000] flex justify-center items-end p-4 transition-opacity duration-500 ease-[cubic-bezier(0.68,-0.55,0.27,1.55)] ${backdropAnimation}`}
     >
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" onClick={handleConfirm} />
+      <div
+        className="absolute inset-0 bg-black/30 backdrop-blur-[2px]"
+        onClick={handleConfirm}
+      />
       <div
         className={`bg-white rounded-3xl shadow-xl w-full max-w-md transform transition-transform duration-500 ease-[cubic-bezier(0.68,-0.55,0.27,1.55)] ${modalAnimation}`}
       >
         <div className="p-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">{title}</h2>
-          <div className="text-gray-600 space-y-4">
-            {children}
+          <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+            {title}
+          </h2>
+          <div className="text-gray-600 space-y-4 max-h-[50vh] overflow-auto">
+            {processedChildren}
           </div>
         </div>
         <div className="p-4 pt-0">
