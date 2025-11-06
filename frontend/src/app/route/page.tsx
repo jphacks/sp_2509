@@ -246,7 +246,7 @@ export default function CourseDetailPage() {
 
   if (!memoizedRouteData) {
     return (
-      <div className="bg-gray-50 min-h-screen">
+      <div className="bg-gray-50">
         <main className="max-w-md mx-auto p-4">
           <div className="text-center py-8">
             <Text text="データを読み込んでいます..." />
@@ -257,7 +257,7 @@ export default function CourseDetailPage() {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gray-50">
       <main className="max-w-md mx-auto px-4 pb-28 pt-4">
         {/* 見出し */}
         <div className="text-left mb-2 font-sans">
