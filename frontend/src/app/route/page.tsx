@@ -325,6 +325,7 @@ export default function CourseDetailPage() {
             title="使い方"
             buttonLabel="OK"
             onConfirm={handleModalConfirm}
+            modalBgClass="bg-gray-50"
           >
             <div className="space-y-4">
               <div className="flex gap-3 items-start">

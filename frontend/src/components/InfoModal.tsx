@@ -11,6 +11,7 @@ type InfoModalProps = {
   buttonLabel: string;
   onConfirm: () => void;
   children: React.ReactNode;
+  modalBgClass?: string;
 };
 
 const InfoModal: React.FC<InfoModalProps> = ({
@@ -19,6 +20,7 @@ const InfoModal: React.FC<InfoModalProps> = ({
   buttonLabel,
   onConfirm,
   children,
+  modalBgClass = "bg-white",
 }) => {
   const [isAnimatingIn, setIsAnimatingIn] = useState(false);
 
@@ -70,7 +72,7 @@ const InfoModal: React.FC<InfoModalProps> = ({
         onClick={handleConfirm}
       />
       <div
-        className={`bg-white rounded-3xl shadow-xl w-full max-w-md transform transition-transform duration-500 ease-[cubic-bezier(0.68,-0.55,0.27,1.55)] ${modalAnimation}`}
+        className={`${modalBgClass} rounded-3xl shadow-xl w-full max-w-md transform transition-transform duration-500 ease-[cubic-bezier(0.68,-0.55,0.27,1.55)] ${modalAnimation}`}
       >
         <div className="p-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">
