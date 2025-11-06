@@ -91,7 +91,7 @@ export default function RoutingButton({
         ${disabled
           ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
           : isActive
-            ? 'bg-gray-500 text-black scale-[0.97]'
+          ? 'bg-gray-500 text-white scale-[0.97]'
             : 'bg-black text-white hover:brightness-105 hover:shadow-lg active:scale-[0.97]'
         }
       `}
