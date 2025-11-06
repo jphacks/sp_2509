@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import MadeRouteCard_Big from "@/components/MadeRouteCard_Big";
 import Title from "@/components/Title";
 import Text from "../../components/Text";
-import Image from "next/image";
 import { FaUndo, FaTimes, FaSave, FaQuestion } from "react-icons/fa";
 import BackButton from "@/components/BackButton";
 import ActionButton from "@/components/ActionButton";
