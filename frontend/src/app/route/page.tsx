@@ -191,7 +191,7 @@ export default function CourseDetailPage() {
       setIsEditing(false);
     } else {
       // 編集開始：
-      // デモ用に「編集ボタンを押すたびにモーダルを開く」挙動をデフォルトにする。
+      // デモ用に「編集ボタンを押すたびにモーダルを表示する」挙動にする。
       // もし「初回のみ表示」に切り替えたい場合は下のコメントを外してこちらをコメントアウトしてください。
       setShowModal(true);
 
