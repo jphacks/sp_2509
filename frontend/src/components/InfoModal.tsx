@@ -52,19 +52,23 @@ const InfoModal: React.FC<InfoModalProps> = ({
   const processedChildren = React.Children.map(children, (child) => {
     if (!isValidElement(child)) return child;
 
-    const type: any = (child as any).type;
+    const element = child as React.ReactElement;
+    const type = element.type;
 
     const isNativeImg = type === "img";
     const isNextImage =
       type === NextImage ||
-      (typeof type === "function" && (type as any).name === "Image") ||
-      (typeof type === "object" && (type as any).displayName === "Image");
+      (typeof type === "function" &&
+        (type as { name?: string }).name === "Image") ||
+      (typeof type === "object" &&
+        (type as { displayName?: string }).displayName === "Image");
 
     if (isNativeImg || isNextImage) {
-      const existing = (child as any).props.className || "";
+      const existing =
+        (element.props as { className?: string }).className || "";
       const extra = "w-full rounded-md object-cover";
       return cloneElement(
-        child as React.ReactElement<any>,
+        element as React.ReactElement<any>,
         {
           className: `${existing} ${extra}`.trim(),
         } as any
