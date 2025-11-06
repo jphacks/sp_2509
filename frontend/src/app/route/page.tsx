@@ -122,22 +122,6 @@ export default function CourseDetailPage() {
     }
   }, []);
 
-  //初回のみモーダルを開くロジック
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      const seen = localStorage.getItem("route_info_seen");
-      if (seen === "1") {
-        setShowModal(false);
-      } else {
-        setShowModal(true);
-      }
-    } catch (e) {
-      // ignore localStorage errors and default to showing modal
-      setShowModal(true);
-    }
-  }, []);
-
   /* --- localStorageからロード --- */
   useEffect(() => {
     const responsePointsData = localStorage.getItem("responsePointsData");
@@ -206,18 +190,21 @@ export default function CourseDetailPage() {
       setHistory([routeData!]);
       setIsEditing(false);
     } else {
-      // 編集開始：デモ用にモーダルを必ず表示
+      // 編集開始：
+      // デモ用に「編集ボタンを押すたびにモーダルを表示する」挙動にする。
+      // もし「初回のみ表示」に切り替えたい場合は下のコメントを外してこちらをコメントアウトしてください。
       setShowModal(true);
 
-      // 初回のみ表示するロジック：コメントアウトして残す
-      // try {
-      //   const seen = localStorage.getItem("route_info_seen");
-      //   if (seen !== "1") {
-      //     setShowModal(true);
-      //   }
-      // } catch (e) {
-      //   setShowModal(true);
-      // }
+      // 初回のみモーダルを表示するロジック（本番想定）
+      /*try {
+        const seen = localStorage.getItem("route_info_seen");
+        if (seen !== "1") {
+          setShowModal(true);
+        }
+      } catch (e) {
+        // localStorage にアクセスできない環境ではモーダルを表示しておく
+        setShowModal(true);
+      }*/
 
       setIsEditing(true);
     }
