@@ -122,16 +122,16 @@ export default function CourseDetailPage() {
     }
   }, []);
 
-  // 初回のみモーダルを開くロジック
+  //初回のみモーダルを開くロジック
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
       const seen = localStorage.getItem("route_info_seen");
-      if (seen === "1") {
-        setShowModal(false);
-      } else {
-        setShowModal(true);
-      }
+      // if (seen === "1") {
+      //   setShowModal(false);
+      // } else {
+      //   setShowModal(true);
+      // }
     } catch (e) {
       // ignore localStorage errors and default to showing modal
       setShowModal(true);
@@ -234,8 +234,6 @@ export default function CourseDetailPage() {
     setIsEditing(false);
   }, [originalRouteData]);
 
-  // ❌ setIsDrawingMode は廃止
-
   const handleMapDrawEnd = useCallback(
     (newPoints: LatLngExpression[]) => {
       if (!routeData) return;
@@ -283,7 +281,7 @@ export default function CourseDetailPage() {
 
   if (!memoizedRouteData) {
     return (
-      <div className="bg-gray-50 min-h-screen">
+      <div className="bg-gray-50">
         <main className="max-w-md mx-auto p-4">
           <div className="text-center py-8">
             <Text text="データを読み込んでいます..." />
@@ -294,7 +292,7 @@ export default function CourseDetailPage() {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gray-50">
       <main className="max-w-md mx-auto px-4 pb-28 pt-4 relative">
         {/* 見出し */}
         <div className="text-left mb-2 font-sans">
@@ -331,20 +329,28 @@ export default function CourseDetailPage() {
               <div className="flex gap-3 items-start">
                 <div>
                   <p className="font-bold">1.違和感のあるコースを見つける</p>
-                  <img src="/images/example1.png" />
+                  <img src="/images/example1.png" alt="違和感のあるコース例" />
                 </div>
               </div>
 
               <div className="flex gap-3 items-start">
                 <div>
                   <p className="font-bold">2.イメージするコースを指でなぞる</p>
-                  <img src="/images/example2.png" />
+                  <img
+                    src="/images/example2.png"
+                    alt="イメージするコースを指でなぞる例"
+                  />
                 </div>
               </div>
               <div className="flex gap-3 items-start">
                 <div>
-                  <p className="font-bold">3.指を離すと修正完了</p>
-                  <img src="/images/example3.png" />
+                  <p className="font-bold">
+                    3.指を離すして編集完了ボタンを押す
+                  </p>
+                  <img
+                    src="/images/example3.png"
+                    alt="指を離して編集ができている例"
+                  />
                 </div>
               </div>
             </div>
@@ -417,7 +423,7 @@ export default function CourseDetailPage() {
               <button
                 onClick={handleSaveCourse}
                 disabled={isSaving}
-                className="w-full flex items-center justify-center gap-2 rounded-2xl bg-black text-white py-4 text-lg font-semibold shadow-lg active:scale-[0.98] transition disabled:bg-neutral-400 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 rounded-2xl bg-black text-white py-4 text-lg font-semibold shadow-lg active:scale-[0.98] transition disabled:bg-neutral-400 disabled:cursor-not-allowed "
               >
                 <FaSave size={20} />
                 <span>{isSaving ? "保存中..." : "保存してホームに戻る"}</span>
@@ -430,7 +436,7 @@ export default function CourseDetailPage() {
           <button
             onClick={() => setShowModal(true)}
             aria-label="使い方を表示"
-            className="absolute top-4 right-4 z-50 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center"
+            className="absolute top-4 right-4 z-50 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-100 active:scale-95 transition"
           >
             <FaQuestion className="text-black" />
           </button>

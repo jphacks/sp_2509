@@ -4,6 +4,7 @@ import React, {
   isValidElement,
   cloneElement,
 } from "react";
+import NextImage from "next/image";
 
 type InfoModalProps = {
   show: boolean;
@@ -47,10 +48,17 @@ const InfoModal: React.FC<InfoModalProps> = ({
   const modalAnimation = isAnimatingIn ? "translate-y-0" : "translate-y-full";
 
   const processedChildren = React.Children.map(children, (child) => {
-    if (
-      isValidElement(child) &&
-      (child.type === "img" || (child as any).props?.src)
-    ) {
+    if (!isValidElement(child)) return child;
+
+    const type: any = (child as any).type;
+
+    const isNativeImg = type === "img";
+    const isNextImage =
+      type === NextImage ||
+      (typeof type === "function" && (type as any).name === "Image") ||
+      (typeof type === "object" && (type as any).displayName === "Image");
+
+    if (isNativeImg || isNextImage) {
       const existing = (child as any).props.className || "";
       const extra = "w-full rounded-md object-cover";
       return cloneElement(
@@ -60,12 +68,13 @@ const InfoModal: React.FC<InfoModalProps> = ({
         } as any
       );
     }
+
     return child;
   });
 
   return (
     <div
-      className={`fixed inset-0 z-[2000] flex justify-center items-end p-4 transition-opacity duration-500 ease-[cubic-bezier(0.68,-0.55,0.27,1.55)] ${backdropAnimation}`}
+      className={`fixed inset-0 z-[2000] flex justify-center items-end px-4 transition-opacity duration-500 ease-[cubic-bezier(0.68,-0.55,0.27,1.55)] ${backdropAnimation}`}
     >
       <div
         className="absolute inset-0 bg-black/30 backdrop-blur-[2px]"
