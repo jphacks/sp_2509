@@ -7,13 +7,12 @@ import { useRouter } from "next/navigation";
 import MadeRouteCard_Big from "@/components/MadeRouteCard_Big";
 import Title from "@/components/Title";
 import Text from "../../components/Text";
-import { FaUndo, FaTimes, FaSave } from "react-icons/fa";
+import { FaUndo, FaTimes, FaSave, FaQuestion } from "react-icons/fa";
 import BackButton from "@/components/BackButton";
-import UndoButton from "@/components/UndoButton";
-import CancelButton from "@/components/CancelButton";
 import ActionButton from "@/components/ActionButton";
 import { FaCheck } from "react-icons/fa6";
 import type { LatLngExpression, LatLng } from "leaflet";
+import InfoModal from "../../components/InfoModal";
 
 const API_URL = "/api";
 
@@ -111,6 +110,33 @@ export default function CourseDetailPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [mapResetSeq, setMapResetSeq] = useState(0);
   const router = useRouter();
+  const [showModal, setShowModal] = useState(false);
+
+  const handleModalConfirm = useCallback(() => {
+    setShowModal(false);
+
+    try {
+      localStorage.setItem("route_info_seen", "1");
+    } catch (e) {
+      console.error("localStorage への保存に失敗:", e);
+    }
+  }, []);
+
+  //初回のみモーダルを開くロジック
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const seen = localStorage.getItem("route_info_seen");
+      if (seen === "1") {
+        setShowModal(false);
+      } else {
+        setShowModal(true);
+      }
+    } catch (e) {
+      // ignore localStorage errors and default to showing modal
+      setShowModal(true);
+    }
+  }, []);
 
   /* --- localStorageからロード --- */
   useEffect(() => {
@@ -174,11 +200,27 @@ export default function CourseDetailPage() {
   /* ✅ 編集モード切替（ = 描画モード ON/OFF ） */
   const handleEdit = () => {
     if (isEditing) {
+      // 編集完了：状態をリセット（地図リセット・オリジナルデータ保存・履歴初期化）
       setMapResetSeq((n) => n + 1);
       setOriginalRouteData(routeData);
       setHistory([routeData!]);
+      setIsEditing(false);
+    } else {
+      // 編集開始：デモ用にモーダルを必ず表示
+      setShowModal(true);
+
+      // 初回のみ表示するロジック：コメントアウトして残す
+      // try {
+      //   const seen = localStorage.getItem("route_info_seen");
+      //   if (seen !== "1") {
+      //     setShowModal(true);
+      //   }
+      // } catch (e) {
+      //   setShowModal(true);
+      // }
+
+      setIsEditing(true);
     }
-    setIsEditing(!isEditing);
   };
 
   const handleUndo = useCallback(() => {
@@ -194,8 +236,6 @@ export default function CourseDetailPage() {
     setRouteData(originalRouteData);
     setIsEditing(false);
   }, [originalRouteData]);
-
-  // ❌ setIsDrawingMode は廃止
 
   const handleMapDrawEnd = useCallback(
     (newPoints: LatLngExpression[]) => {
@@ -213,7 +253,6 @@ export default function CourseDetailPage() {
       const t = nearestVertexIndex(P, Q[Q.length - 1]);
       let i = s.index,
         j = t.index;
-
       let Qdir = Q.slice();
       if (i > j) {
         [i, j] = [j, i];
@@ -224,7 +263,6 @@ export default function CourseDetailPage() {
         else if (i > 0) i = i - 1;
         else return;
       }
-
       const Qsimplified = rdpSimplify(Qdir, 10);
       const snapped = Qsimplified.slice();
       snapped[0] = { ...P[i] };
@@ -257,7 +295,7 @@ export default function CourseDetailPage() {
   }
 
   return (
-    <div className="bg-gray-50">
+    <div className="bg-gray">
       <main className="max-w-md mx-auto px-4 pb-28 pt-4">
         {/* 見出し */}
         <div className="text-left mb-2 font-sans">
@@ -280,6 +318,45 @@ export default function CourseDetailPage() {
             resetViewSignal={mapResetSeq}
           />
         </div>
+
+        {/* 編集開始時に表示する案内モーダル */}
+        {showModal && (
+          <InfoModal
+            show={showModal}
+            title="使い方"
+            buttonLabel="OK"
+            onConfirm={handleModalConfirm}
+            modalBgClass="bg-gray-50"
+          >
+            <div className="space-y-4">
+              <div className="flex gap-3 items-start">
+                <div>
+                  <p className="font-bold">1.違和感のあるコースを見つける</p>
+                  <img src="/images/example1.png" alt="違和感のあるコース例" />
+                </div>
+              </div>
+
+              <div className="flex gap-3 items-start">
+                <div>
+                  <p className="font-bold">2.イメージするコースを指でなぞる</p>
+                  <img
+                    src="/images/example2.png"
+                    alt="イメージするコースを指でなぞる例"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 items-start">
+                <div>
+                  <p className="font-bold">3.指を離して編集完了ボタンを押す</p>
+                  <img
+                    src="/images/example3.png"
+                    alt="指を離して編集ができている例"
+                  />
+                </div>
+              </div>
+            </div>
+          </InfoModal>
+        )}
 
         {/* 初期状態 → ボタン2つ */}
         {!isEditing && (
@@ -305,16 +382,22 @@ export default function CourseDetailPage() {
           <div className="space-y-3">
             {/* 取り消し & 破棄 */}
             <div className="flex gap-2">
-              <UndoButton
-                buttonText="元に戻す"
+              <ActionButton
                 onClick={handleUndo}
-                icon={FaUndo}
+                buttonText="元に戻す"
+                buttonColor="#F59E0B"
+                textColor="#ffffff"
+                icon={<FaUndo size={22} />}
                 disabled={history.length <= 1}
+                isfull={true}
               />
-              <CancelButton
-                buttonText="編集を破棄"
+              <ActionButton
                 onClick={handleCancelEdit}
-                icon={FaTimes}
+                buttonText="編集を破棄"
+                buttonColor="#EF4444"
+                textColor="#ffffff"
+                icon={<FaTimes size={22} />}
+                isfull={true}
               />
             </div>
 
@@ -336,7 +419,7 @@ export default function CourseDetailPage() {
 
         {/* 下部固定 保存ボタン（編集していない時だけ表示） */}
         {!isEditing && (
-          <div className="fixed inset-x-0 bottom-0 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-2 bg-transparent">
+          <div className="fixed inset-x-0 bottom-0 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-2 bg-gray-50">
             <div className="max-w-md mx-auto">
               <button
                 onClick={handleSaveCourse}
@@ -348,6 +431,16 @@ export default function CourseDetailPage() {
               </button>
             </div>
           </div>
+        )}
+        {/* ヘルプ（?）ボタン: 編集モード中に表示。*/}
+        {isEditing && (
+          <button
+            onClick={() => setShowModal(true)}
+            aria-label="使い方を表示"
+            className="absolute top-4 right-4 z-50 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-100 active:scale-95 transition"
+          >
+            <FaQuestion className="text-black" />
+          </button>
         )}
       </main>
     </div>
