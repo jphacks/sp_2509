@@ -424,7 +424,7 @@ export default function CourseDetailPage() {
               <button
                 onClick={handleSaveCourse}
                 disabled={isSaving}
-                className="w-full flex items-center justify-center gap-2 rounded-2xl bg-black text-white py-4 text-lg font-semibold shadow-lg active:scale-[0.98] transition disabled:bg-neutral-400 disabled:cursor-not-allowed "
+                className="w-full flex items-center justify-center gap-2 rounded-2xl bg-black text-white py-4 text-lg font-semibold shadow-lg active:scale-[0.98] transition disabled:bg-neutral-400 disabled:cursor-not-allowed"
               >
                 <FaSave size={20} />
                 <span>{isSaving ? "保存中..." : "保存してホームに戻る"}</span>
