@@ -29,7 +29,7 @@ def calculate_distance_km(
 models.Base.metadata.create_all(bind=engine)
 
 # GPSArtGeneratorのインスタンスを生成
-art_generator = GPSArtGenerator(cache_enabled=True)
+art_generator = GPSArtGenerator()
 
 app = FastAPI()
 
