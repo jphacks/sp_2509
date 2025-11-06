@@ -117,7 +117,10 @@ class GPSArtGenerator:
                                     return
                                 except (pickle.UnpicklingError, EOFError, KeyError) as e:
                                     print(f"キャッシュファイルの読み込みに失敗しました: {e}。ファイルを削除します。")
-                                    os.remove(cache_filepath)
+                                    try:
+                                        os.remove(cache_filepath)
+                                    except Exception as remove_error:
+                                        print(f"キャッシュファイルの削除に失敗しました: {remove_error}")
                                     continue # 次のキャッシュファイルを試す
                         except (ValueError, IndexError):
                             # ファイル名が期待したフォーマットでない場合は無視
