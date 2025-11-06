@@ -200,7 +200,7 @@ export default function CourseDetailPage() {
   /* ✅ 編集モード切替（ = 描画モード ON/OFF ） */
   const handleEdit = () => {
     if (isEditing) {
-      // 編集完了：地図を初期縮尺へ戻す
+      // 編集完了：状態をリセット（地図リセット・オリジナルデータ保存・履歴初期化）
       setMapResetSeq((n) => n + 1);
       setOriginalRouteData(routeData);
       setHistory([routeData!]);
