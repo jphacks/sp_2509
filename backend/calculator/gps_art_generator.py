@@ -6,8 +6,9 @@ from shapely.geometry import Point
 from scipy.spatial import KDTree
 from typing import List, Dict, Tuple
 from simplification.cutil import simplify_coords
+import pickle
+import os
 import threading
-from collections import OrderedDict
 
 class GPSArtGenerator:
     """
@@ -16,14 +17,12 @@ class GPSArtGenerator:
     手書きの描画データから実際の道路網を使った最適なランニング/ウォーキングコースを生成
     """
     
-    def __init__(self, cache_enabled: bool = True):
+    def __init__(self):
         """
         GPSArtGeneratorを初期化します。
-        
-        Args:
-            cache_enabled (bool): OpenStreetMapデータのキャッシュを使用するか
         """
-        ox.settings.use_cache = cache_enabled
+        # 独自キャッシュ(グラフオブジェクト)を使用するため、osmnxのキャッシュ(HTTPレスポンス)は無効化
+        ox.settings.use_cache = False
         
         self.alpha = 1 # 方向性の重み
         self.beta = 100 # 効率性の重み
@@ -35,12 +34,13 @@ class GPSArtGenerator:
         self.rotation_search_points = 200 # 角度決定のためにリサンプリングする点の数
         self.sampling_interval_m = 10.0 # C3コスト計算のサンプリング間隔（メートル）
         
-        # ネットワークデータをキャッシュするためのLRUキャッシュ（最大10件）
         self.cache_threshold = 0.01 # キャッシュの有効範囲(緯度経度)
-        self.max_cache_size = 10
-        self._network_cache = OrderedDict()
+        self.cache_dir = "backend/calculator/cache"
         self._network_lock = threading.Lock()
         
+        # キャッシュディレクトリが存在しない場合は作成
+        os.makedirs(self.cache_dir, exist_ok=True)
+
         # 現在アクティブなネットワークデータ
         self._road_network = None
         self._road_network_latlon = None
@@ -95,20 +95,46 @@ class GPSArtGenerator:
         """
         with self._network_lock:
             if not force_reload:
-                for cached_anchor in reversed(list(self._network_cache.keys())):
-                    if abs(cached_anchor[0] - center_lat) < self.cache_threshold and abs(cached_anchor[1] - center_lon) < self.cache_threshold:
-                        print(f"キャッシュヒット: {cached_anchor} のデータを再利用します。")
-                        # ヒットしたアイテムを辞書の末尾に移動 (LRU)
-                        cached_network_latlon, cached_network = self._network_cache[cached_anchor]
-                        self._network_cache.move_to_end(cached_anchor)
-                        
-                        self._anchor_point = cached_anchor
-                        self._road_network_latlon = cached_network_latlon
-                        self._road_network = cached_network
-                        return
+                # 既存のキャッシュファイルを検索
+                for filename in os.listdir(self.cache_dir):
+                    if filename.startswith("network_") and filename.endswith(".pkl"):
+                        try:
+                            parts = filename.replace("network_", "").replace(".pkl", "").split('_')
+                            cached_lat, cached_lon = float(parts[0]), float(parts[1])
+                            
+                            if abs(cached_lat - center_lat) < self.cache_threshold and \
+                               abs(cached_lon - center_lon) < self.cache_threshold:
+                                
+                                cache_filepath = os.path.join(self.cache_dir, filename)
+                                print(f"キャッシュヒット: {cache_filepath} のデータを読み込みます。")
+                                try:
+                                    with open(cache_filepath, 'rb') as f:
+                                        cached_data = pickle.load(f)
+                                    
+                                    self._anchor_point = cached_data['anchor_point']
+                                    self._road_network_latlon = cached_data['road_network_latlon']
+                                    self._road_network = cached_data['road_network']
+                                    return
+                                except (pickle.UnpicklingError, EOFError, KeyError) as e:
+                                    print(f"キャッシュファイルの読み込みに失敗しました: {e}。ファイルを削除します。")
+                                    try:
+                                        os.remove(cache_filepath)
+                                    except Exception as remove_error:
+                                        print(f"キャッシュファイルの削除に失敗しました: {remove_error}")
+                                    continue # 次のキャッシュファイルを試す
+                        except (ValueError, IndexError):
+                            # ファイル名が期待したフォーマットでない場合は無視
+                            continue
 
             # キャッシュにない、またはforce_reload=Trueの場合
             print("道路ネットワークデータを新規に取得中...")
+            
+            # ファイル名用に緯度経度をフォーマット
+            lat_str = f"{center_lat:.4f}"
+            lon_str = f"{center_lon:.4f}"
+            cache_filename = f"network_{lat_str}_{lon_str}.pkl"
+            cache_filepath = os.path.join(self.cache_dir, cache_filename)
+            
             current_anchor = (center_lat, center_lon)
             
             try:
@@ -131,11 +157,18 @@ class GPSArtGenerator:
             self._road_network_latlon = road_network_latlon
             self._road_network = road_network
 
-            if len(self._network_cache) >= self.max_cache_size:
-                self._network_cache.popitem(last=False)
-            
-            # 新しいネットワークをキャッシュに追加
-            self._network_cache[current_anchor] = (road_network_latlon, road_network)
+            # 新しいネットワークをキャッシュに保存
+            cache_data = {
+                'anchor_point': current_anchor,
+                'road_network_latlon': road_network_latlon,
+                'road_network': road_network
+            }
+            try:
+                with open(cache_filepath, 'wb') as f:
+                    pickle.dump(cache_data, f)
+                print(f"新しいキャッシュを保存しました: {cache_filepath}")
+            except Exception as e:
+                print(f"キャッシュファイルの保存に失敗しました: {e}")
 
     def _resample_shape(self, shape_points: List[Tuple[float, float]], num_points: int) -> List[Tuple[float, float]]:
         """
