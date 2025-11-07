@@ -58,8 +58,11 @@ const shapeConfig: Record<string, { description: string }> = {
   umbrella: {
     description: "傘",
   },
-  coffee:{
+  coffee: {
     description: "コーヒーカップ",
+  },
+  jpHacks: {
+    description: "JPHacksロゴ",
   }
 };
 
