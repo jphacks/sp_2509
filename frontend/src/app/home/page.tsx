@@ -259,21 +259,26 @@ export default function Home() {
 
   const carouselItems = [
     {
-      src: "/images/pic1.png",
+      src: "/images/sample_start.png",
       alt: "Slide 1",
+      description: "走り始める場所を決める",
+    },
+    {
+      src: "/images/sample_draw.png",
+      alt: "Slide 2",
       description: "走りたいコースの形を書く",
     },
     {
-      src: "/images/sample2.png",
-      alt: "Slide 2",
-      description: "走り始める場所とおおよその長さを決める",
+      src: "/images/sample_distance.png",
+      alt: "Slide 3",
+      description: "形を確認し、おおよその長さを決める",
     },
     {
-      src: "/images/sample3.png",
-      alt: "Slide 3",
+      src: "/images/sample_route.png",
+      alt: "Slide 4",
       description: "AshiArtがコースを生成",
     },
-    { src: "/images/sample4.png", alt: "Slide 4", description: "走る！" },
+    { src: "/images/sample4.png", alt: "Slide 5", description: "走る！" },
   ];
 
   const paddingX = "px-4";
@@ -375,7 +380,7 @@ export default function Home() {
           <div className="max-w-md mx-auto px-4">
             <RoutingButton
               buttonText="コースを作成する"
-              onClick={() => router.push('/start')}
+              onClick={() => router.push("/start")}
               icon={FaPlus}
             />
           </div>
