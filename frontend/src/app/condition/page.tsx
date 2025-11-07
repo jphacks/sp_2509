@@ -143,7 +143,7 @@ export default function Condition() {
           animationDuration={2.2}
           pauseDuration={0.8}
         />
-        <Text text="この処理は30秒程度かかる可能性があります。" />
+        <Text text="新しいエリアの場合、30秒程度かかる可能性があります。" />
       </main>
     );
   }

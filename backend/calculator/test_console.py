@@ -35,7 +35,7 @@ def test_api_format():
     }
     
     # ジェネレーターの初期化
-    generator = GPSArtGenerator(cache_enabled=True)
+    generator = GPSArtGenerator()
     
     # コスト関数パラメータを元のスクリプトと同じに設定
     generator.set_cost_parameters(alpha=1, beta=100, gamma=10)
@@ -67,7 +67,7 @@ def test_original_compatibility():
     print("\n=== 元のスクリプトとの互換性テスト ===")
     
     # ジェネレーターの初期化
-    generator = GPSArtGenerator(cache_enabled=True)
+    generator = GPSArtGenerator()
     
     # 元のパラメータと同じ設定
     generator.set_cost_parameters(alpha=1.0, beta=5.0, gamma=5.0)
