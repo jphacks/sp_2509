@@ -58,6 +58,9 @@ const shapeConfig: Record<string, { description: string }> = {
   umbrella: {
     description: "傘",
   },
+  coffee:{
+    description: "コーヒーカップ",
+  }
 };
 
 // --- Draw コンポーネント本体 ---
