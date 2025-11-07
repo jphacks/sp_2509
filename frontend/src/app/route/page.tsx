@@ -1,4 +1,3 @@
-// frontend/src/app/route/page.tsx
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
@@ -7,19 +6,13 @@ import { useRouter } from "next/navigation";
 import MadeRouteCard_Big from "@/components/MadeRouteCard_Big";
 import Title from "@/components/Title";
 import Text from "../../components/Text";
-import {
-  FaPencilAlt,
-  FaSave,
-  FaUndo,
-  FaTimes,
-  FaPaintBrush,
-} from "react-icons/fa";
-import EditButton from "@/components/EditButton";
-import UndoButton from "@/components/UndoButton";
-import CancelButton from "@/components/CancelButton";
-import DrawButton from "@/components/DrawButton";
+import { FaUndo, FaTimes, FaSave, FaQuestion } from "react-icons/fa";
 import BackButton from "@/components/BackButton";
+import ActionButton from "@/components/ActionButton";
+import { FaCheck } from "react-icons/fa6";
 import type { LatLngExpression, LatLng } from "leaflet";
+import RoutingButton from "@/components/RoutingButton";
+import InfoModal from "../../components/InfoModal";
 
 const API_URL = "/api";
 
@@ -31,6 +24,7 @@ type ResponseData = {
   drawing_points: RoutePoint[];
 };
 
+/* --- Utility Functions (距離計算など) --- */
 function haversineKm(a: RoutePoint, b: RoutePoint): number {
   const R = 6371;
   const dLat = (b.lat - a.lat) * (Math.PI / 180);
@@ -49,7 +43,7 @@ function calculateTotalDistance(points: RoutePoint[]): number {
   return parseFloat(total.toFixed(1));
 }
 
-/* --- アルゴリズム・ヘルパー --- */
+/* --- RDP簡約化アルゴリズムなど --- */
 const haversineM = (a: RoutePoint, b: RoutePoint) => haversineKm(a, b) * 1000;
 function perpendicularDistanceM(
   p: RoutePoint,
@@ -111,11 +105,24 @@ export default function CourseDetailPage() {
     useState<ResponseData | null>(null);
   const [history, setHistory] = useState<ResponseData[]>([]);
   const [isSaving, setIsSaving] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isDrawingMode, setIsDrawingMode] = useState(false);
-  const [mapResetSeq, setMapResetSeq] = useState(0); // 地図リセット用
-  const router = useRouter();
 
+  // ✅ 編集＝描画モード（描画ボタン廃止）
+  const [isEditing, setIsEditing] = useState(false);
+  const [mapResetSeq, setMapResetSeq] = useState(0);
+  const router = useRouter();
+  const [showModal, setShowModal] = useState(false);
+
+  const handleModalConfirm = useCallback(() => {
+    setShowModal(false);
+
+    try {
+      localStorage.setItem("route_info_seen", "1");
+    } catch (e) {
+      console.error("localStorage への保存に失敗:", e);
+    }
+  }, []);
+
+  /* --- localStorageからロード --- */
   useEffect(() => {
     const responsePointsData = localStorage.getItem("responsePointsData");
     if (!responsePointsData) return;
@@ -134,18 +141,12 @@ export default function CourseDetailPage() {
     }
   }, []);
 
-  const memoizedRouteData = useMemo(() => {
-    if (!routeData) return null;
-    return {
-      total_distance_km: routeData.total_distance_km,
-      route_points: routeData.route_points,
-      drawing_points: routeData.drawing_points,
-    };
-  }, [routeData]);
+  const memoizedRouteData = useMemo(() => routeData, [routeData]);
 
   const handleSaveCourse = async () => {
     if (!routeData || isSaving) return;
     setIsSaving(true);
+
     try {
       const userId = localStorage.getItem("uuid");
       if (!userId) {
@@ -153,6 +154,7 @@ export default function CourseDetailPage() {
         setIsSaving(false);
         return;
       }
+
       const res = await fetch(`${API_URL}/users/${userId}/courses`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -163,13 +165,13 @@ export default function CourseDetailPage() {
           is_favorite: false,
         }),
       });
+
       if (res.ok) {
         localStorage.removeItem("responsePointsData");
         localStorage.removeItem("drawingPointsData");
         router.push("/home");
       } else {
-        const err = await res.json();
-        alert(`保存に失敗しました: ${err.detail || "不明なエラー"}`);
+        alert("保存に失敗しました");
         setIsSaving(false);
       }
     } catch (e) {
@@ -179,15 +181,32 @@ export default function CourseDetailPage() {
     }
   };
 
+  /* ✅ 編集モード切替（ = 描画モード ON/OFF ） */
   const handleEdit = () => {
     if (isEditing) {
-      // 編集完了：地図を初期縮尺へ戻す
+      // 編集完了：状態をリセット（地図リセット・オリジナルデータ保存・履歴初期化）
       setMapResetSeq((n) => n + 1);
       setOriginalRouteData(routeData);
       setHistory([routeData!]);
+      setIsEditing(false);
+    } else {
+      // 編集開始：
+      // ★ 常に true に設定していたのをコメントアウト
+      // setShowModal(true);
+
+      // ★ 初回のみモーダルを表示するロジック（本番想定）
+      try {
+        const seen = localStorage.getItem("route_info_seen");
+        if (seen !== "1") {
+          setShowModal(true);
+        }
+      } catch (e) {
+        // localStorage にアクセスできない環境ではモーダルを表示しておく
+        setShowModal(true);
+      }
+
+      setIsEditing(true);
     }
-    setIsEditing(!isEditing);
-    setIsDrawingMode(false);
   };
 
   const handleUndo = useCallback(() => {
@@ -202,10 +221,7 @@ export default function CourseDetailPage() {
   const handleCancelEdit = useCallback(() => {
     setRouteData(originalRouteData);
     setIsEditing(false);
-    setIsDrawingMode(false);
   }, [originalRouteData]);
-
-  const handleToggleDrawMode = () => setIsDrawingMode((v) => !v);
 
   const handleMapDrawEnd = useCallback(
     (newPoints: LatLngExpression[]) => {
@@ -215,6 +231,7 @@ export default function CourseDetailPage() {
         lng: p.lng,
       }));
       if (Q.length < 2) return;
+
       const P = routeData.route_points;
       if (P.length < 2) return;
 
@@ -236,8 +253,10 @@ export default function CourseDetailPage() {
       const snapped = Qsimplified.slice();
       snapped[0] = { ...P[i] };
       snapped[snapped.length - 1] = { ...P[j] };
+
       const Pnew = P.slice(0, i).concat(snapped, P.slice(j + 1));
       const newDistance = calculateTotalDistance(Pnew);
+
       const newData: ResponseData = {
         total_distance_km: newDistance,
         route_points: Pnew,
@@ -245,14 +264,13 @@ export default function CourseDetailPage() {
       };
       setHistory((prev) => [...prev, newData]);
       setRouteData(newData);
-      setIsDrawingMode(false);
     },
     [routeData]
   );
 
   if (!memoizedRouteData) {
     return (
-      <div className="bg-gray-50 min-h-screen">
+      <div className="bg-gray-50">
         <main className="max-w-md mx-auto p-4">
           <div className="text-center py-8">
             <Text text="データを読み込んでいます..." />
@@ -263,31 +281,70 @@ export default function CourseDetailPage() {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gray">
       <main className="max-w-md mx-auto px-4 pb-28 pt-4">
-        {/* 見出し（用語を“コース”で統一） */}
+        {/* 見出し */}
         <div className="text-left mb-2 font-sans">
           <Title title="コースが完成しました" />
         </div>
 
-        {/* ← 条件変更（/condition） */}
+        {/* ← 条件変更 */}
         {!isEditing && (
           <div className="mb-3">
             <BackButton text="条件変更" to="/condition" />
           </div>
         )}
 
-        {/* 地図カード */}
+        {/* ─ 地図カード ─ */}
         <div className="mb-3">
           <MadeRouteCard_Big
             routeData={memoizedRouteData}
-            isDrawingMode={isDrawingMode}
+            isDrawingMode={isEditing} // ✅ 編集＝描画
             onDrawOnMap={handleMapDrawEnd}
             resetViewSignal={mapResetSeq}
           />
         </div>
 
-        {/* 初期ボタン：左=描きなおす(/draw), 右=ルートを編集する */}
+        {/* 編集開始時に表示する案内モーダル */}
+        {showModal && (
+          <InfoModal
+            show={showModal}
+            title="使い方"
+            buttonLabel="OK"
+            onConfirm={handleModalConfirm}
+            modalBgClass="bg-gray-50"
+          >
+            <div className="space-y-4">
+              <div className="flex gap-3 items-start">
+                <div>
+                  <p className="font-bold">1.違和感のあるコースを見つける</p>
+                  <img src="/images/example1.png" alt="違和感のあるコース例" />
+                </div>
+              </div>
+
+              <div className="flex gap-3 items-start">
+                <div>
+                  <p className="font-bold">2.イメージするコースを指でなぞる</p>
+                  <img
+                    src="/images/example2.png"
+                    alt="イメージするコースを指でなぞる例"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 items-start">
+                <div>
+                  <p className="font-bold">3.指を離して編集完了ボタンを押す</p>
+                  <img
+                    src="/images/example3.png"
+                    alt="指を離して編集ができている例"
+                  />
+                </div>
+              </div>
+            </div>
+          </InfoModal>
+        )}
+
+        {/* 初期状態 → ボタン2つ */}
         {!isEditing && (
           <div className="grid grid-cols-2 gap-4">
             <Link
@@ -296,6 +353,7 @@ export default function CourseDetailPage() {
             >
               描きなおす
             </Link>
+
             <button
               onClick={handleEdit}
               className="w-full rounded-2xl border border-neutral-200 bg-white py-3 font-semibold shadow-sm active:scale-[0.98] transition"
@@ -305,65 +363,69 @@ export default function CourseDetailPage() {
           </div>
         )}
 
-        {/* 編集モード中のボタン */}
+        {/* 編集モード中 */}
         {isEditing && (
           <div className="space-y-3">
-            {isDrawingMode ? (
-              <div className="flex gap-2">
-                <DrawButton
-                  buttonText="描画完了"
-                  onClick={handleToggleDrawMode}
-                  icon={FaPaintBrush}
-                  isActive={true}
+            {/* 取り消し & 破棄 */}
+            <div className="flex gap-2">
+              <ActionButton
+                onClick={handleUndo}
+                buttonText="元に戻す"
+                buttonColor="#F59E0B"
+                textColor="#ffffff"
+                icon={<FaUndo size={22} />}
+                disabled={history.length <= 1}
+                isfull={true}
+              />
+              <ActionButton
+                onClick={handleCancelEdit}
+                buttonText="編集を破棄"
+                buttonColor="#EF4444"
+                textColor="#ffffff"
+                icon={<FaTimes size={22} />}
+                isfull={true}
+              />
+            </div>
+
+            {/* ✅ 編集完了を ActionButton に変更（画面下・最前面） */}
+            <div className="fixed bottom-4 left-0 right-0 z-20">
+              <div className="max-w-md mx-auto px-4">
+                <ActionButton
+                  onClick={handleEdit}
+                  buttonText="編集完了"
+                  buttonColor="black"
+                  textColor="white"
+                  icon={<FaCheck size={18} />}
+                  isfull={true}
                 />
               </div>
-            ) : (
-              <>
-                <div className="flex gap-2">
-                  <EditButton
-                    buttonText="編集完了"
-                    onClick={handleEdit}
-                    icon={FaPencilAlt}
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <DrawButton
-                    buttonText="地図に描画"
-                    onClick={handleToggleDrawMode}
-                    icon={FaPaintBrush}
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <UndoButton
-                    buttonText="元に戻す"
-                    onClick={handleUndo}
-                    icon={FaUndo}
-                    disabled={history.length <= 1}
-                  />
-                  <CancelButton
-                    buttonText="編集を破棄"
-                    onClick={handleCancelEdit}
-                    icon={FaTimes}
-                  />
-                </div>
-              </>
-            )}
-          </div>
-        )}
-        {/* 下部固定 保存ボタン */}
-        {!isEditing && (
-          <div className="fixed inset-x-0 bottom-0 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-2 bg-transparent">
-            <div className="max-w-md mx-auto">
-              <button
-                onClick={handleSaveCourse}
-                disabled={isSaving}
-                className="w-full flex items-center justify-center gap-2 rounded-2xl bg-black text-white py-4 text-lg font-semibold shadow-lg active:scale-[0.98] transition disabled:bg-neutral-400 disabled:cursor-not-allowed"
-              >
-                <FaSave size={20} />
-                <span>{isSaving ? "保存中..." : "保存してホームに戻る"}</span>
-              </button>
             </div>
           </div>
+        )}
+
+        {/* 下部固定 保存ボタン（編集していない時だけ表示） */}
+
+        {!isEditing && (
+          <div className="fixed bottom-4 left-0 right-0 z-20">
+            <div className="max-w-md mx-auto px-4">
+              <RoutingButton
+                buttonText={isSaving ? "保存中..." : "保存してホームに戻る"}
+                onClick={handleSaveCourse}
+                disabled={isSaving}
+                icon={FaSave}
+              />
+            </div>
+          </div>
+        )}
+        {/* ヘルプ（?）ボタン: 編集モード中に表示。*/}
+        {isEditing && (
+          <button
+            onClick={() => setShowModal(true)}
+            aria-label="使い方を表示"
+            className="absolute top-4 right-4 z-50 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-100 active:scale-95 transition"
+          >
+            <FaQuestion className="text-black" />
+          </button>
         )}
       </main>
     </div>
