@@ -1,4 +1,3 @@
-// frontend/src/app/route/page.tsx
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
@@ -192,12 +191,11 @@ export default function CourseDetailPage() {
       setIsEditing(false);
     } else {
       // 編集開始：
-      // デモ用に「編集ボタンを押すたびにモーダルを表示する」挙動にする。
-      // もし「初回のみ表示」に切り替えたい場合は下のコメントを外してこちらをコメントアウトしてください。
-      setShowModal(true);
+      // ★ 常に true に設定していたのをコメントアウト
+      // setShowModal(true);
 
-      // 初回のみモーダルを表示するロジック（本番想定）
-      /*try {
+      // ★ 初回のみモーダルを表示するロジック（本番想定）
+      try {
         const seen = localStorage.getItem("route_info_seen");
         if (seen !== "1") {
           setShowModal(true);
@@ -205,7 +203,7 @@ export default function CourseDetailPage() {
       } catch (e) {
         // localStorage にアクセスできない環境ではモーダルを表示しておく
         setShowModal(true);
-      }*/
+      }
 
       setIsEditing(true);
     }
