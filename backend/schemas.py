@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
+import uuid
 
 class UserResponse(BaseModel):
     user_id: str
@@ -60,3 +61,17 @@ class CourseCreateRequest(BaseModel):
 class ToggleFavoriteResponse(BaseModel):
     id: str
     is_favorite: bool
+
+
+class HandwritingBase(BaseModel):
+    drawing_points: list[DisplayPoint]
+
+class HandwritingCreate(HandwritingBase):
+    pass
+
+class Handwriting(HandwritingBase):
+    id: uuid.UUID
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

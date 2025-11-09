@@ -59,3 +59,9 @@ class Course(Base):
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     route_points = Column(JSON, nullable=False)
     drawing_points = Column(JSON, nullable=False)
+
+class Handwriting(Base):
+    __tablename__ = 'handwritings'
+    id = Column(UUID, primary_key=True, default=uuid.uuid4)
+    drawing_points = Column(JSON, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
