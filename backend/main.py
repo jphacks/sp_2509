@@ -111,7 +111,7 @@ def calculate_route_notice(payload: schemas.NoticeRequest, background_tasks: Bac
 
 
 @app.post("/routes/calculate", response_model=schemas.RouteCalculateResponse)
-def calculate_route(payload: schemas.RouteCalculateRequest):
+def calculate_route(payload: schemas.RouteCalculateRequest, db: Session = Depends(get_db)):
     """
     手書きの描画データ、開始地点、目標距離から最適なGPSアートコースを生成。
 
@@ -131,6 +131,13 @@ def calculate_route(payload: schemas.RouteCalculateRequest):
             - `drawing_points`: 手書き経路の緯度経度のリスト
     """
     drawing_display_points = [point.dict() for point in payload.drawing_display_points]
+
+    # 手書きデータをDBに保存
+    handwriting_record = models.Handwriting(
+        drawing_points=drawing_display_points
+    )
+    db.add(handwriting_record)
+    db.commit()
     
     try:
         result = art_generator.calculate_route(
@@ -146,6 +153,18 @@ def calculate_route(payload: schemas.RouteCalculateRequest):
         route_points=[schemas.LatLng(**point) for point in result["route_points"]],
         drawing_points=[schemas.LatLng(**point) for point in result["drawing_points"]],
     )
+
+@app.get("/handwritings", response_model=list[schemas.Handwriting])
+def get_handwritings(since: Optional[datetime] = None, db: Session = Depends(get_db)):
+    """
+    指定された日時以降の手書きデータを取得する。
+    """
+    query = db.query(models.Handwriting)
+    if since:
+        query = query.filter(models.Handwriting.created_at >= since)
+    
+    return query.order_by(models.Handwriting.created_at.desc()).all()
+
 
 @app.get("/users/{user_id}/courses", response_model=list[schemas.CourseSummary])
 def list_user_courses(
