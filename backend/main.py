@@ -163,7 +163,15 @@ def get_handwritings(since: Optional[datetime] = None, db: Session = Depends(get
     if since:
         query = query.filter(models.Handwriting.created_at >= since)
     
-    return query.order_by(models.Handwriting.created_at.desc()).all()
+    handwritings = query.order_by(models.Handwriting.created_at.desc()).all()
+
+    # DBから取得したdatetimeがタイムゾーン情報を持たない場合(naive)でもUTCとして扱うようにする
+    # これにより、フロントエンド側で正しくJSTに変換できるようになる
+    for hw in handwritings:
+        if hw.created_at.tzinfo is None:
+            hw.created_at = hw.created_at.replace(tzinfo=timezone.utc)
+
+    return handwritings
 
 
 @app.get("/users/{user_id}/courses", response_model=list[schemas.CourseSummary])

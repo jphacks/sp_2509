@@ -45,7 +45,13 @@ const ExpoPage: React.FC = () => {
   }, [since]);
 
   const handleSinceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSince(e.target.value);
+    if (e.target.value) {
+      // JSTで入力された日時を、タイムゾーン付きのISO文字列(UTC)に変換してAPIに送信します
+      const jstDate = new Date(e.target.value);
+      setSince(jstDate.toISOString());
+    } else {
+      setSince(null);
+    }
   };
 
   return (
@@ -69,7 +75,7 @@ const ExpoPage: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {handwritings.map((hw) => (
             <div key={hw.id} className="bg-white rounded-2xl shadow-md overflow-hidden transform hover:scale-105 transition-transform duration-300">
-              <DrawingPreview drawingPoints={hw.drawing_points} />
+              <DrawingPreview drawingPoints={hw.drawing_points} createdAt={hw.created_at} />
             </div>
           ))}
         </div>
@@ -78,7 +84,7 @@ const ExpoPage: React.FC = () => {
   );
 };
 
-const DrawingPreview: React.FC<{ drawingPoints: DisplayPoint[] }> = ({ drawingPoints }) => {
+const DrawingPreview: React.FC<{ drawingPoints: DisplayPoint[], createdAt: string }> = ({ drawingPoints, createdAt }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -131,7 +137,14 @@ const DrawingPreview: React.FC<{ drawingPoints: DisplayPoint[] }> = ({ drawingPo
 
   }, [drawingPoints]);
 
-  return <canvas ref={canvasRef} className="w-full h-48" />;
+  return (
+    <div className="relative">
+      <canvas ref={canvasRef} className="w-full h-48" />
+      <p className="absolute bottom-1 right-2 text-xs text-gray-400">
+        {new Date(createdAt).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}
+      </p>
+    </div>
+  );
 };
 
 export default ExpoPage;
