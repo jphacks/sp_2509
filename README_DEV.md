@@ -91,7 +91,7 @@ Windowsでは、以下の手順で手動セットアップを行ってくださ�
     npm run dev
     ```
 
-    スマホでデバッグするには、httpsで実行します。
+    スマホでデバッグするにはhttpsで実行します。
 
    ```bash
    cd frontend
